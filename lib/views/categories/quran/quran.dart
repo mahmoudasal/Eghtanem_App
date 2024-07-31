@@ -1,4 +1,4 @@
-import 'package:egtanem_application/widgets/telwah_card.dart';
+import 'package:egtanem_application/widgets/quran_reading_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -45,10 +45,10 @@ class QuranSubCat extends StatelessWidget {
               ],
             ),
           ],
-          bottom: TabBar(
-            indicatorColor: const Color(0xFFFAFAFA),
-            labelColor: const Color(0xFFFAFAFA),
-            unselectedLabelColor: const Color(0xFF888888),
+          bottom: const TabBar(
+            indicatorColor: Color(0xFFFAFAFA),
+            labelColor: Color(0xFFFAFAFA),
+            unselectedLabelColor: Color(0xFF888888),
             tabs: [
               Tab(text: 'الاستماع'),
               Tab(text: 'القراءه'),
@@ -72,7 +72,7 @@ class QuranSubCat extends StatelessWidget {
         SizedBox(
           height: 0.05.sh,
         ),
-        TelawhCard(title: 'الفاتحة', surahId: '1'),
+        const TelawhCard(title: 'الفاتحة', surahId: '1'),
       ],
     );
   }
