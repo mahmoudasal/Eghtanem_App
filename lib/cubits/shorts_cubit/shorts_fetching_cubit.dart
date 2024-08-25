@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element, unused_field, prefer_final_fields
+
 import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -99,8 +101,9 @@ class ShortsCubit extends Cubit<ShortsState> {
   Future<List<Map<String, dynamic>>> _fetchShortsData(
       String accessToken, int page) async {
     final response = await _retryHttpRequest(() => http.get(
+          // edit channel id to work!!
           Uri.parse(
-              'https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=UCWjCSGhmSGu0VLf2mPFS0Kg&maxResults=10&pageToken=$page&type=video'),
+              'https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=MISSING#FORTESTING&maxResults=10&pageToken=$page&type=video'),
           headers: {
             'Authorization': 'Bearer $accessToken',
           },

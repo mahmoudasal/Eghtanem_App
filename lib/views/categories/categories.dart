@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../widgets/categories_card.dart';
 
-import 'Supplications_&_remembrances.dart';
+import 'supplications_&_remembrances.dart';
 import 'islamic _ethics.dart';
 
-import 'faith.dart';
+import 'interpretation/interpretation.dart';
 import 'prophet_speech.dart';
 import 'prophetic_biography.dart';
 import 'quran/quran.dart';
@@ -58,7 +58,7 @@ class CategoriesPage extends StatelessWidget {
           ),
           CustomCard(
             imagePath: 'assets/عقيده.webp',
-            cardName: 'العقيدة',
+            cardName: 'التفسير',
             pageBuilder: () => const Faith(),
           ),
           CustomCard(

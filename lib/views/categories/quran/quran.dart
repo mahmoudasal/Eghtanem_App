@@ -1,9 +1,98 @@
+import 'dart:convert';
+
+import 'package:egtanem_application/data/qra2at_json_parse.dart';
 import 'package:egtanem_application/data/surah_json_parse.dart' as surah_data;
-import 'package:egtanem_application/widgets/quran_reading_card.dart';
+import 'package:egtanem_application/widgets/surah_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../widgets/custom_card_quran.dart';
+import '../../../widgets/reciter_audio.dart';
+import 'package:http/http.dart' as http;
+
+Future<List<Reciter>> fetchReciters() async {
+  final response =
+      await http.get(Uri.parse('https://mp3quran.net/api/v3/reciters'));
+
+  if (response.statusCode == 200) {
+    final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+    final recitersJson = jsonResponse['reciters'] as List<dynamic>;
+
+    // List of reciter names and their corresponding server URLs you want to include
+    final Map<String, String> desiredReciters = {
+      "مشاري العفاسي": "https://server8.mp3quran.net/afs/",
+      "سعد الغامدي": "https://server7.mp3quran.net/s_gmd/",
+      "عبدالباسط عبدالصمد":
+          "https://server7.mp3quran.net/basit/Almusshaf-Al-Mojawwad/",
+      "عبدالرحمن السديس": "https://server11.mp3quran.net/sds/",
+      "عبدالعزيز الزهراني": "https://server9.mp3quran.net/zahrani/",
+      "عبدالله عواد الجهني": "https://server13.mp3quran.net/jhn/",
+      "عبدالله غيلان": "https://server8.mp3quran.net/gulan/",
+      "علي جابر": "https://server11.mp3quran.net/a_jbr/",
+      "ماهر المعيقلي": "https://server12.mp3quran.net/maher/",
+      "محمد ايوب": "https://server8.mp3quran.net/ayyub/",
+      "محمد صديق المنشاوي": "https://server10.mp3quran.net/minsh/",
+      "محمود علي البنا": "https://server8.mp3quran.net/bna/",
+      "منصور السالمي": "https://server14.mp3quran.net/mansor/",
+      "ناصر القطامي": "https://server6.mp3quran.net/qtm/",
+      "ياسر الدوسري": "https://server11.mp3quran.net/yasser/",
+    };
+
+    // Filter reciters based on the desiredReciters list
+    final filteredReciters = recitersJson
+        .where((reciterJson) {
+          final reciter = Reciter.fromJson(reciterJson);
+          return desiredReciters.containsKey(reciter.name) &&
+              reciter.serverUrl.startsWith(desiredReciters[reciter.name]!);
+        })
+        .map((json) => Reciter.fromJson(json))
+        .toList();
+
+    return filteredReciters;
+  } else {
+    throw Exception('Failed to load reciters');
+  }
+}
+
+Future<List<String>> fetchReciterSurahs(int reciterId) async {
+  try {
+    final response = await http.get(
+      Uri.parse(
+          'https://mp3quran.net/api/v3/reciters?language=eng&rewaya=1&reciter=$reciterId'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      if (data['reciters'] == null || data['reciters'].isEmpty) {
+        throw StateError("No reciters found in the API response");
+      }
+
+      final reciterData = data['reciters'].firstWhere(
+        (reciter) => reciter['id'] == reciterId,
+        orElse: () {
+          throw StateError("No reciter found with id $reciterId");
+        },
+      );
+
+      if (reciterData['moshaf'] == null || reciterData['moshaf'].isEmpty) {
+        throw StateError("No moshaf found for the reciter with id $reciterId");
+      }
+
+      final List<String> surahList =
+          (reciterData['moshaf'][0]['surah_list'] as String)
+              .split(',')
+              .map((e) => 'Surah $e')
+              .toList();
+
+      return surahList;
+    } else {
+      throw Exception('Failed to load surahs: ${response.reasonPhrase}');
+    }
+  } catch (e) {
+    print("Error fetching reciter surahs: $e");
+    rethrow;
+  }
+}
 
 class QuranSubCat extends StatelessWidget {
   final String title;
@@ -47,9 +136,16 @@ class QuranSubCat extends StatelessWidget {
             ),
           ],
           bottom: const TabBar(
-            indicatorColor: Color(0xFFFAFAFA),
+            dividerColor: Colors.transparent,
+            indicatorColor: Color.fromARGB(255, 192, 158, 119),
             labelColor: Color(0xFFFAFAFA),
             unselectedLabelColor: Color(0xFF888888),
+            labelStyle: TextStyle(
+              fontFamily: 'Almarai',
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
+              color: Color(0xFFFAFAFA),
+            ),
             tabs: [
               Tab(text: 'القراءه'),
               Tab(text: 'الاستماع'),
@@ -83,8 +179,8 @@ class QuranSubCat extends StatelessWidget {
               final surah = surahDetails[index];
               return Column(
                 children: [
-                  SizedBox(height: 0.05.sh),
-                  TelawhCard(
+                  SizedBox(height: 0.02.sh),
+                  SurahCard(
                     title: surah.titleAr,
                     surahId: surah.index,
                     page: surah.page, // Pass the page number
@@ -99,49 +195,37 @@ class QuranSubCat extends StatelessWidget {
   }
 
   Widget buildListeningTab() {
-    return ListView(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 130.h),
-      children: [
-        buildSectionHeader('استماع 1'),
-        buildQuranCardList(),
-        buildSectionHeader('استماع 2'),
-        buildQuranCardList(),
-      ],
+    return FutureBuilder<List<Reciter>>(
+      future: fetchReciters(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          List<Reciter> reciters = snapshot.data ?? [];
+          return ListView(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 130.h),
+            children: [
+              SizedBox(height: 0.02.sh),
+              buildQuranCardList(reciters),
+            ],
+          );
+        }
+      },
     );
   }
 
-  Widget buildSectionHeader(String text) {
-    return Row(
-      textDirection: TextDirection.rtl,
-      children: [
-        Image.asset(
-          'assets/photo3.png',
-          width: 0.21.sw,
-          height: 0.1.sh,
-          colorBlendMode: BlendMode.plus,
-        ),
-        Text(
-          text,
-          style: TextStyle(
-            fontFamily: 'Almarai',
-            fontWeight: FontWeight.w700,
-            fontSize: 25.sp,
-            color: const Color(0xFFFAFAFA),
-          ),
-        )
-      ],
-    );
-  }
-
-  Widget buildQuranCardList() {
+  Widget buildQuranCardList(List<Reciter> reciters) {
     return Column(
       children: List.generate(
-        5,
+        reciters.length,
         (index) => Padding(
           padding: EdgeInsets.symmetric(vertical: 0.01.sh),
-          child: const QuranCard(
-            imagePath: 'images/عبد الباسط profile pic.jpg',
-            title: 'عبد الباسط عبد الصمد',
+          child: ReciterSurahs(
+            title: reciters[index].name,
+            reciterId: reciters[index].id,
+            serverUrl: reciters[index].serverUrl, // Pass the serverUrl here
           ),
         ),
       ),

@@ -1,8 +1,7 @@
-// ignore_for_file: file_names
-
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
+import '../../data/azkar_json.dart';
 
 class SupplicationsRemembrances extends StatelessWidget {
   const SupplicationsRemembrances({super.key});
@@ -29,9 +28,7 @@ class SupplicationsRemembrances extends StatelessWidget {
             color: const Color(0xFFFAFAFA),
           ),
         ),
-        // No leading widget (empty space)
         leading: const SizedBox(width: 0.0),
-        // Custom back button on the right using actions
         actions: [
           Row(
             children: [
@@ -46,11 +43,52 @@ class SupplicationsRemembrances extends StatelessWidget {
           ),
         ],
       ),
-      body: Center(
-        child: Text(
-          'الادعية و الاذكار',
-          style: TextStyle(color: Colors.white, fontSize: 24.sp),
-        ),
+      body: FutureBuilder<List<Category>>(
+        future: AdhkarService().loadAdhkar(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (snapshot.hasData) {
+            final categories = snapshot.data!;
+            return ListView.builder(
+              itemCount: categories.length,
+              itemBuilder: (context, index) {
+                final category = categories[index];
+                return ExpansionTile(
+                  title: Text(
+                    category.category,
+                    style: TextStyle(
+                      fontSize: 20.sp,
+                      color: Colors.white,
+                    ),
+                  ),
+                  children: category.array.map((dhikr) {
+                    return ListTile(
+                      title: Text(
+                        dhikr.text,
+                        style: TextStyle(color: Colors.white, fontSize: 18.sp),
+                      ),
+                      subtitle: Text(
+                        'Count: ${dhikr.count}',
+                        style: TextStyle(color: Colors.grey, fontSize: 14.sp),
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.play_arrow, color: Colors.white),
+                        onPressed: () {
+                          // Play audio functionality
+                        },
+                      ),
+                    );
+                  }).toList(),
+                );
+              },
+            );
+          } else {
+            return const Center(child: const Text('No data found'));
+          }
+        },
       ),
     );
   }

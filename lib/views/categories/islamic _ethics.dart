@@ -48,7 +48,7 @@ class IslamicEthics extends StatelessWidget {
       ),
       body: Center(
         child: Text(
-          'الاخلاق الاسلامية',
+          ' ... سيتم الاضافه قريبا',
           style: TextStyle(color: Colors.white, fontSize: 24.sp),
         ),
       ),

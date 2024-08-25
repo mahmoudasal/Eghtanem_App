@@ -2,71 +2,36 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 
 class Surah {
-  final String place;
-  final String type;
   final int count;
   final int revelationOrder;
-  final int rukus;
   final String title;
   final String titleAr;
-  final String titleEn;
   final String index;
   final String pages;
   final String page;
   final int start;
-  final List<Juz> juz;
 
   Surah({
-    required this.place,
-    required this.type,
     required this.count,
     required this.revelationOrder,
-    required this.rukus,
     required this.title,
     required this.titleAr,
-    required this.titleEn,
     required this.index,
     required this.pages,
     required this.page,
     required this.start,
-    required this.juz,
   });
 
   factory Surah.fromJson(Map<String, dynamic> json) {
-    var juzList = json['juz'] as List;
-    List<Juz> juz = juzList.map((i) => Juz.fromJson(i)).toList();
-
     return Surah(
-      place: json['place'],
-      type: json['type'],
       count: json['count'],
       revelationOrder: json['revelationOrder'],
-      rukus: json['rukus'],
       title: json['title'],
       titleAr: json['titleAr'],
-      titleEn: json['titleEn'],
       index: json['index'],
       pages: json['pages'],
       page: json['page'],
       start: json['start'],
-      juz: juz,
-    );
-  }
-}
-
-class Juz {
-  final String index;
-  final Verse verse;
-
-  Juz({
-    required this.index,
-    required this.verse,
-  });
-
-  factory Juz.fromJson(Map<String, dynamic> json) {
-    return Juz(
-      index: json['index'],
-      verse: Verse.fromJson(json['verse']),
     );
   }
 }

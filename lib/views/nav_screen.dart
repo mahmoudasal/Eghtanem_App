@@ -1,5 +1,5 @@
 import 'package:egtanem_application/cubits/shorts_cubit/shorts_fetching_cubit.dart';
-import 'package:egtanem_application/cubits/video_player_cubit/video_player_cubit.dart';
+import 'package:egtanem_application/views/more_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -20,10 +20,12 @@ class NaviagionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
+      const NotificationPageMore(),
       ProfilePage(youtubeData: youtubeData),
       const HomeScreen(),
       const CategoriesPage(),
       ShortsListPage(youtubeData: youtubeData),
+      // Add your fifth page here
     ];
 
     return BlocProvider(
@@ -50,17 +52,27 @@ class NaviagionScreen extends StatelessWidget {
                 },
                 selectedLabelStyle:
                     const TextStyle(fontWeight: FontWeight.w700),
-                backgroundColor:
-                    currentIndex == 0 || currentIndex == 2 || currentIndex == 1
-                        ? const Color(0xff1D1D1B)
-                        : const Color.fromARGB(255, 0, 0, 0),
+                backgroundColor: currentIndex == 4
+                    ? const Color.fromARGB(255, 0, 0, 0)
+                    : const Color(0xff1D1D1B),
                 type: BottomNavigationBarType.fixed,
                 items: [
                   BottomNavigationBarItem(
                     icon: SizedBox(
                       height: 30.h,
-                      child: SvgPicture.asset(
+                      child: Icon(
                         currentIndex == 0
+                            ? Icons.home_repair_service_rounded
+                            : Icons.insert_comment_sharp,
+                      ),
+                    ),
+                    label: 'المزيد',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: SizedBox(
+                      height: 30.h,
+                      child: SvgPicture.asset(
+                        currentIndex == 1
                             ? "assets/ui icons/profile_selected.svg"
                             : "assets/ui icons/profile.svg",
                       ),
@@ -71,18 +83,18 @@ class NaviagionScreen extends StatelessWidget {
                     icon: SizedBox(
                       height: 30.h,
                       child: SvgPicture.asset(
-                        currentIndex == 1
+                        currentIndex == 2
                             ? "assets/ui icons/video-play_selected.svg"
                             : "assets/ui icons/video-play.svg",
                       ),
                     ),
-                    label: 'فيديوهات طويلة',
+                    label: ' طويلة',
                   ),
                   BottomNavigationBarItem(
                     icon: SizedBox(
                       height: 30.h,
                       child: SvgPicture.asset(
-                        currentIndex == 2
+                        currentIndex == 3
                             ? "assets/ui icons/category_selected.svg"
                             : "assets/ui icons/category.svg",
                       ),
@@ -93,7 +105,7 @@ class NaviagionScreen extends StatelessWidget {
                     icon: SizedBox(
                       height: 30.h,
                       child: SvgPicture.asset(
-                        currentIndex == 3
+                        currentIndex == 4
                             ? "assets/ui icons/home.svg"
                             : "assets/ui icons/home_unselected.svg",
                       ),

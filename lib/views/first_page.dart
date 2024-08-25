@@ -1,5 +1,3 @@
-// ignore_for_file: unused_element
-
 import 'dart:ui' as ui;
 
 import 'package:egtanem_application/views/profile.dart';

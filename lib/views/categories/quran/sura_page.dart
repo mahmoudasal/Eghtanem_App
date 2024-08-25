@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:egtanem_application/data/surah_json_parse.dart'
-    as surah_data; // Alias the import
+import '../../../cubits/quran_page_slider/cubit/quran_cubit.dart';
+import '../../../cubits/quran_page_slider/cubit/quran_state.dart';
 
 class SurahPage extends StatelessWidget {
   final String initialPage;
@@ -10,60 +11,80 @@ class SurahPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<surah_data.QuranPage>>(
-      future: surah_data.loadPageInfo(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else {
-          List<surah_data.QuranPage> pageDetails = snapshot.data ?? [];
+    return BlocProvider(
+      create: (context) => SurahPageCubit(initialPage),
+      child: BlocBuilder<SurahPageCubit, SurahPageState>(
+        builder: (context, state) {
+          final cubit = context.read<SurahPageCubit>();
 
-          // Find the initial page index
-          int initialPageIndex = pageDetails
-              .indexWhere((pageDetail) => pageDetail.index == initialPage);
-
-          return Scaffold(
-            appBar: AppBar(
-              title: Text(
-                'Page $initialPage',
-                style: TextStyle(
-                  fontFamily: 'Almarai',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 25.sp,
-                  color: const Color(0xFFFAFAFA),
+          if (state is SurahPageError) {
+            return Scaffold(
+              body: Center(
+                child: Text(
+                  state.errorMessage,
+                  style: TextStyle(color: Colors.red, fontSize: 18.sp),
                 ),
               ),
-              backgroundColor: const Color(0xff1D1D1B),
-            ),
-            body: PageView.builder(
-              reverse: true,
-              controller: PageController(
-                  initialPage: initialPageIndex, viewportFraction: 1.1),
-              itemCount: pageDetails.length,
-              itemBuilder: (context, index) {
-                final pageIndex = int.parse(pageDetails[index].index);
+            );
+          }
 
-                return Padding(
-                  padding: const EdgeInsets.all(.0),
-                  child: Image.asset(
-                    "assets/quran_images/$pageIndex.png",
-                    errorBuilder: (context, error, stackTrace) {
-                      return Center(
-                        child: Text(
-                          'Image not found',
-                          style: TextStyle(color: Colors.red, fontSize: 18.sp),
+          if (state is SurahPageLoaded) {
+            return Scaffold(
+              body: Stack(
+                children: [
+                  PageView.builder(
+                    reverse: true,
+                    controller: cubit.pageController,
+                    itemCount: 604, // Fixed count for Quran pages
+                    onPageChanged: cubit.onPageChanged,
+                    itemBuilder: (context, index) {
+                      final int pageIndex = index + 1;
+
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 35, 0, 25),
+                        child: Image.asset(
+                          "assets/quran_images/$pageIndex.png",
+                          fit: BoxFit.fill,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Center(
+                              child: Text(
+                                'Image not found for page $pageIndex',
+                                style: TextStyle(
+                                    color: Colors.red, fontSize: 18.sp),
+                              ),
+                            );
+                          },
                         ),
                       );
                     },
                   ),
-                );
-              },
-            ),
+                  Positioned(
+                    bottom: 8,
+                    left: 20,
+                    right: 20,
+                    child: Container(
+                      color: Colors.transparent,
+                      child: Slider(
+                        activeColor: const Color.fromARGB(255, 192, 158, 119),
+                        value: state.currentPage.toDouble(),
+                        min: 0,
+                        max: 603, // Maximum value corresponds to page 604
+                        divisions: 603, // Divisions for each page
+                        label: '${state.currentPage + 1}', // 1-based number
+                        onChanged: cubit.onSliderChanged,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
           );
-        }
-      },
+        },
+      ),
     );
   }
 }
