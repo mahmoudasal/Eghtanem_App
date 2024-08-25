@@ -1,19 +1,24 @@
+import 'package:egtanem_application/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:video_player/video_player.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../widgets/build_icon_text.dart';
-import '../widgets/comment_bottom_sheet.dart';
-import '../widgets/share_bottom_sheet.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
-class ShortsList extends StatefulWidget {
+import '../cubits/video_player_cubit/video_player_cubit.dart';
+import '../cubits/video_player_cubit/video_player_state.dart';
+import '../cubits/interaction_button_cubit/interaction_cubit.dart';
+import '../widgets/build_icon_text.dart';
+
+class ShortsList extends StatelessWidget {
   final String name;
   final String profilePic;
   final String vid;
   final String caption;
   final String likes;
   final String comments;
-  final String hashtags;
+  final Future<void> Function() onLikePressed;
+  final Map<String, dynamic> youtubeData; // Add youtubeData as a parameter
 
   const ShortsList({
     super.key,
@@ -23,106 +28,65 @@ class ShortsList extends StatefulWidget {
     required this.likes,
     required this.vid,
     required this.profilePic,
-    required this.hashtags,
+    required this.onLikePressed,
+    required this.youtubeData, // Include youtubeData in the constructor
   });
 
   @override
-  ShortsListState createState() => ShortsListState();
-}
-
-class ShortsListState extends State<ShortsList> {
-  late VideoPlayerController _controller;
-  bool isLike = false;
-  bool isCommentLike = false;
-  bool isBookmarked = false;
-  bool _isPlaying = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = VideoPlayerController.asset(widget.vid)
-      ..initialize().then((_) {
-        setState(() {
-          _controller.play();
-        });
-      });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Center(
-          child: GestureDetector(
-            onTap: () {
-              setState(() {
-                if (_controller.value.isPlaying) {
-                  _controller.pause();
-                } else {
-                  _controller.play();
-                }
-                _isPlaying = !_isPlaying;
-              });
-            },
-            child: Stack(
-              children: [
-                _controller.value.isInitialized
-                    ? Center(
-                        child: AspectRatio(
-                          aspectRatio: _controller.value.aspectRatio * 0.5,
-                          child: VideoPlayer(_controller),
-                        ),
-                      )
-                    : Container(
-                        color: Colors.black,
-                        child: const Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                if (!_controller.value.isPlaying)
-                  const Center(
-                    child: Icon(
-                      Icons.play_arrow,
-                      size: 100,
-                      color: Colors.white54,
-                    ),
-                  )
-                else
-                  const Center(
-                    child: Icon(
-                      Icons.pause,
-                      size: 100,
-                      color: Colors.transparent,
-                    ),
-                  ),
-              ],
-            ),
-          ),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => VideoPlayerCubit()..loadVideo(vid),
         ),
-        if (_controller.value.isInitialized)
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: VideoProgressIndicator(
-              _controller,
-              allowScrubbing: true,
-              colors: const VideoProgressColors(
-                playedColor: Color.fromARGB(255, 163, 140, 113),
-                backgroundColor: Colors.grey,
-                bufferedColor: Color.fromARGB(255, 246, 234, 225),
-              ),
-            ),
-          ),
-        buildOverlayContent(context),
-        buildProfileSection(),
-        buildInteractionButtons(),
-        buildTextContent(),
+        BlocProvider(
+          create: (context) =>
+              InteractionCubit(youtubeData: youtubeData, videoId: vid),
+        ),
       ],
+      child: BlocBuilder<VideoPlayerCubit, VideoPlayerState>(
+        builder: (context, state) {
+          if (state is VideoPlayerLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is VideoPlayerLoaded) {
+            return GestureDetector(
+              onTap: () {
+                context
+                    .read<VideoPlayerCubit>()
+                    .playPauseVideo(!state.isPlaying);
+              },
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(0, 0.025.sh, 0, 0),
+                child: Stack(
+                  children: [
+                    Container(
+                      color: Colors.black,
+                      width: deviceWidth,
+                      height: deviceHeight * 0.1,
+                    ),
+                    YoutubePlayerBuilder(
+                      player: YoutubePlayer(
+                        controller: state.videoController,
+                      ),
+                      builder: (context, player) {
+                        return SizedBox.expand(child: player);
+                      },
+                    ),
+                    buildOverlayContent(context),
+                    buildProfileSection(),
+                    buildInteractionButtons(context),
+                    buildTextContent(),
+                  ],
+                ),
+              ),
+            );
+          } else if (state is VideoPlayerError) {
+            return Center(child: Text(state.errorMessage));
+          } else {
+            return const Center(child: Text('Unknown error'));
+          }
+        },
+      ),
     );
   }
 
@@ -133,7 +97,7 @@ class ShortsListState extends State<ShortsList> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 0.385.sh),
+          SizedBox(height: 0.450.sh),
           Stack(
             alignment: Alignment.bottomCenter,
             children: [
@@ -142,7 +106,7 @@ class ShortsListState extends State<ShortsList> {
                 radius: 30.w,
                 child: CircleAvatar(
                   radius: 23.w,
-                  backgroundImage: AssetImage(widget.profilePic),
+                  backgroundImage: NetworkImage(profilePic),
                 ),
               ),
               Positioned(
@@ -170,20 +134,12 @@ class ShortsListState extends State<ShortsList> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                ),
-                onPressed: () {},
-                child: SvgPicture.asset("assets/ui icons/Frame متابعه.svg"),
-              ),
               Text(
-                widget.name,
+                name,
                 style: TextStyle(
                   fontFamily: 'Almarai',
                   fontWeight: FontWeight.w700,
-                  fontSize: 18.sp,
+                  fontSize: 13.sp,
                   color: const Color(0xFFFAFAFA),
                 ),
               ),
@@ -194,56 +150,54 @@ class ShortsListState extends State<ShortsList> {
     );
   }
 
-  Widget buildInteractionButtons() {
+  String formatNumber(int number) {
+    if (number >= 1000000) {
+      return '${(number / 1000000).toStringAsFixed(1)}M';
+    } else if (number >= 1000) {
+      return '${(number / 1000).toStringAsFixed(1)}k';
+    } else {
+      return number.toString();
+    }
+  }
+
+  Widget buildInteractionButtons(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
         top: 0,
         left: 24.w,
         right: 0,
-        bottom: 30.h,
+        bottom: 35.h,
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          buildIconWithText(
-            icon: isLike
-                ? 'assets/ui icons/like on.svg'
-                : 'assets/ui icons/Like off.svg',
-            text: widget.likes,
-            onTap: () {
-              setState(() {
-                isLike = !isLike;
-              });
+          BlocBuilder<InteractionCubit, InteractionState>(
+            builder: (context, state) {
+              bool isLiked = false;
+              if (state is LikeToggledState) {
+                isLiked = state.isLiked;
+              }
+              return buildIconWithText(
+                icon: isLiked
+                    ? 'assets/ui icons/like on.svg'
+                    : 'assets/ui icons/Like off.svg',
+                text: formatNumber(int.parse(likes)),
+                onTap: () => context.read<InteractionCubit>().toggleLike(),
+              );
             },
           ),
           SizedBox(height: 15.h),
           buildIconWithText(
             icon: 'assets/ui icons/Comment.svg',
-            text: widget.comments,
-            onTap: () {
-              showCommentBottomSheet(context, widget.profilePic);
-            },
-          ),
-          SizedBox(height: 15.h),
-          buildIconWithText(
-            icon: isBookmarked
-                ? 'assets/ui icons/bookmark on.svg'
-                : 'assets/ui icons/bookmark off.svg',
-            text: widget.comments,
-            onTap: () {
-              setState(() {
-                isBookmarked = !isBookmarked;
-              });
-            },
+            text: formatNumber(int.parse(comments)),
+            onTap: () {},
           ),
           SizedBox(height: 15.h),
           buildIconWithText(
             icon: 'assets/ui icons/Share.svg',
-            text: widget.comments,
-            onTap: () {
-              showShareBottomSheet(context);
-            },
+            onTap: () {},
+            text: 'Share',
           ),
         ],
       ),
@@ -252,35 +206,20 @@ class ShortsListState extends State<ShortsList> {
 
   Widget buildTextContent() {
     return Padding(
-      padding: EdgeInsets.only(top: 0.8.sh, left: 0.04.sh),
+      padding: EdgeInsets.only(top: 0.78.sh, left: 0.09.sh),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Directionality(
             textDirection: TextDirection.rtl,
             child: SizedBox(
-              width: 0.9.sw,
+              width: 0.79.sw,
               child: Text(
-                widget.caption,
+                caption,
                 style: TextStyle(
                   fontFamily: 'Almarai',
                   fontWeight: FontWeight.w700,
                   fontSize: 12.sp,
-                  color: const Color(0xFFFAFAFA),
-                ),
-              ),
-            ),
-          ),
-          Directionality(
-            textDirection: TextDirection.rtl,
-            child: SizedBox(
-              width: 0.8.sw,
-              child: Text(
-                widget.hashtags,
-                style: TextStyle(
-                  fontFamily: 'Almarai',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15.sp,
                   color: const Color(0xFFFAFAFA),
                 ),
               ),

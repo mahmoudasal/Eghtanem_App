@@ -1,7 +1,8 @@
 import 'package:egtanem_application/views/longvids.dart';
+import 'package:egtanem_application/widgets/custom_page_transition.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:get/get.dart';
+
 import 'package:video_player/video_player.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -321,18 +322,21 @@ class VideoDetailPageState extends State<VideoDetailScreen> {
       children: List.generate(ytData.vidList.length, (index) {
         return GestureDetector(
           onTap: () {
-            Get.to(VideoDetailScreen(
-              thumbnail: ytData.vidList.values.elementAt(index).elementAt(1),
-              title: ytData.vidList.values.elementAt(index).elementAt(0),
-              viewCount: ytData.vidList.values.elementAt(index).elementAt(3),
-              dayAgo: ytData.vidList.values.elementAt(index).elementAt(4),
-              username: ytData.vidList.values.elementAt(index).elementAt(2),
-              profile: ytData.vidList.values.elementAt(index).elementAt(5),
-              subscribeCount: "1M", // Placeholder, replace with actual data
-              likeCount: "1K", // Placeholder, replace with actual data
-              unlikeCount: "100", // Placeholder, replace with actual data
-              videoUrl: ytData.vidList.values.elementAt(index).elementAt(6),
-            ));
+            Navigator.push(
+              context,
+              createRoute(VideoDetailScreen(
+                thumbnail: ytData.vidList.values.elementAt(index).elementAt(1),
+                title: ytData.vidList.values.elementAt(index).elementAt(0),
+                viewCount: ytData.vidList.values.elementAt(index).elementAt(3),
+                dayAgo: ytData.vidList.values.elementAt(index).elementAt(4),
+                username: ytData.vidList.values.elementAt(index).elementAt(2),
+                profile: ytData.vidList.values.elementAt(index).elementAt(5),
+                subscribeCount: "1M", // Placeholder, replace with actual data
+                likeCount: "1K", // Placeholder, replace with actual data
+                unlikeCount: "100", // Placeholder, replace with actual data
+                videoUrl: ytData.vidList.values.elementAt(index).elementAt(6),
+              )),
+            );
           },
           child: Column(
             children: [

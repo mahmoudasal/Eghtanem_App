@@ -1,3 +1,4 @@
+import 'package:egtanem_application/data/surah_json_parse.dart' as surah_data;
 import 'package:egtanem_application/widgets/quran_reading_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -50,30 +51,50 @@ class QuranSubCat extends StatelessWidget {
             labelColor: Color(0xFFFAFAFA),
             unselectedLabelColor: Color(0xFF888888),
             tabs: [
-              Tab(text: 'الاستماع'),
               Tab(text: 'القراءه'),
+              Tab(text: 'الاستماع'),
             ],
           ),
         ),
         body: TabBarView(
           children: [
+            buildReadingTab(context),
             buildListeningTab(),
-            buildReadingTab(),
           ],
         ),
       ),
     );
   }
 
-  Widget buildReadingTab() {
-    return ListView(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 130.h),
-      children: [
-        SizedBox(
-          height: 0.05.sh,
-        ),
-        const TelawhCard(title: 'الفاتحة', surahId: '1'),
-      ],
+  Widget buildReadingTab(BuildContext context) {
+    return FutureBuilder<List<surah_data.Surah>>(
+      future: surah_data.loadSurahInfo(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          List<surah_data.Surah> surahDetails = snapshot.data ?? [];
+          return ListView.builder(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 130.h),
+            itemCount: surahDetails.length,
+            itemBuilder: (context, index) {
+              final surah = surahDetails[index];
+              return Column(
+                children: [
+                  SizedBox(height: 0.05.sh),
+                  TelawhCard(
+                    title: surah.titleAr,
+                    surahId: surah.index,
+                    page: surah.page, // Pass the page number
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      },
     );
   }
 

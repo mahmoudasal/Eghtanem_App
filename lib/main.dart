@@ -1,15 +1,22 @@
+import 'package:egtanem_application/cubits/video_player_cubit/video_player_cubit.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
+import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'views/login_page.dart';
 import 'views/first_page.dart';
-import 'views/main_screen.dart';
+import 'views/nav_screen.dart';
 import 'views/sec_page.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  ); // Initialize Firebase
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
   );
@@ -19,6 +26,11 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  Future<bool> _isLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('isLoggedIn') ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
@@ -26,23 +38,32 @@ class MyApp extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
-        return GetMaterialApp(
-          debugShowCheckedModeBanner: false,
-          home: Builder(
-            builder: (context) {
-              precacheImage(const AssetImage('assets/profileBG.png'), context);
-              precacheImage(
-                  const AssetImage('assets/bilal profile photo.png'), context);
-
-              return const Onboarding();
+        return BlocProvider(
+          create: (context) => VideoPlayerCubit(),
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            home: FutureBuilder<bool>(
+              future: _isLoggedIn(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasData && snapshot.data == true) {
+                  return const NaviagionScreen(
+                      youtubeData: {}); // User is logged in, skip to Shorts page
+                } else {
+                  return const FirstPage(); // User is not logged in, show onboarding
+                }
+              },
+            ),
+            routes: {
+              "/page_one": (context) => const FirstPage(),
+              "/page_two": (context) => const SecondPage(),
+              "/page_three": (context) => LoginPage(),
+              "/page_4": (context) => const NaviagionScreen(
+                    youtubeData: {},
+                  ),
             },
           ),
-          getPages: [
-            GetPage(name: "/page_one", page: (() => const Onboarding())),
-            GetPage(name: "/page_two", page: (() => const Onboarding2())),
-            GetPage(name: "/page_three", page: (() => const LoginPage())),
-            GetPage(name: "/page_4", page: (() => const ShortsScreen())),
-          ],
         );
       },
     );

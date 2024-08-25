@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/get_navigation.dart';
+
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../views/categories/quran/telawah.dart';
@@ -28,10 +27,15 @@ class QuranCard extends StatelessWidget {
           child: InkWell(
             splashColor: Colors.transparent,
             onTap: () {
-              Get.to(() => Telawah(
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Telawah(
                     title: title,
                     imagePath: imagePath,
-                  ));
+                  ),
+                ),
+              );
             },
             child: Card(
               color: const Color(0XFF171715),

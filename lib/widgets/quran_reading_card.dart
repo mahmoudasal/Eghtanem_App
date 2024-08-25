@@ -1,16 +1,18 @@
-import 'package:egtanem_application/views/categories/quran/quran.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:egtanem_application/views/categories/quran/sura_page.dart';
 
 class TelawhCard extends StatelessWidget {
   final String title;
-  final String surahId; // Add a surahId parameter
+  final String surahId;
+  final String page;
 
   const TelawhCard({
     super.key,
     required this.title,
     required this.surahId,
+    required this.page,
   });
 
   @override
@@ -41,7 +43,8 @@ class TelawhCard extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => QuranSubCat(title: "heh"),
+                builder: (context) =>
+                    SurahPage(initialPage: page), // Pass the initial page
               ),
             );
           },

@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "642493579594",
+    "project_id": "eghtanem-app",
+    "storage_bucket": "eghtanem-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:642493579594:android:9722d4d06bd0af2dd0c1b3",
+        "android_client_info": {
+          "package_name": "com.example.egtanem_application"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "642493579594-7vu4bp0li8jcn13liona1qaqe2oj2obb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.egtanem_application",
+            "certificate_hash": "e7859bfb688b1bb3fb8fd80f944a803ea75197fe"
+          }
+        },
+        {
+          "client_id": "642493579594-vqap5gml17ifsspmuik7128kei5svugv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8l-E85rvBrN-gZGypqEypHlLstf6Yhc0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "642493579594-vqap5gml17ifsspmuik7128kei5svugv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "642493579594-k67a5crrmpqi09tojojtmu902n8dief5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.egtanemApplication"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

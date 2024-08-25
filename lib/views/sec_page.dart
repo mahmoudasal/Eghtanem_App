@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element
+
 import 'dart:ui' as ui;
 
 import 'package:egtanem_application/views/profile.dart';
@@ -8,8 +10,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../widgets/custom_page_transition.dart';
 import 'login_page.dart';
 
-class Onboarding2 extends StatelessWidget {
-  const Onboarding2({super.key});
+class SecondPage extends StatelessWidget {
+  const SecondPage({super.key});
   Future<ui.Image> _loadImage(String path) async {
     try {
       return await imageAssets.load(path);
@@ -26,13 +28,47 @@ class Onboarding2 extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/photo2.jpeg'),
-                fit: BoxFit.cover,
-              ),
-            ),
+          FutureBuilder<ui.Image>(
+            future: _loadImage("assets/photo2.webp"),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  color: Colors.grey[200],
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              } else if (snapshot.hasError) {
+                return Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  color: const Color.fromARGB(255, 192, 158, 119),
+                  child: const Center(
+                    child: Icon(Icons.error),
+                  ),
+                );
+              } else if (snapshot.hasData) {
+                return Container(
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage("assets/photo2.webp"),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                );
+              } else {
+                return Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  color: Colors.grey[200],
+                  child: const Center(
+                    child: Icon(Icons.error),
+                  ),
+                );
+              }
+            },
           ),
           Positioned.fill(
             child: Container(
@@ -85,7 +121,7 @@ class Onboarding2 extends StatelessWidget {
                 height: 40.h,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.of(context).push(createRoute(const LoginPage()));
+                    Navigator.of(context).push(createRoute(LoginPage()));
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF94795B),

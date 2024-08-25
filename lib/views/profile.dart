@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:ui' as ui;
@@ -7,21 +6,25 @@ import 'package:asset_cache/asset_cache.dart';
 final imageAssets = ImageAssetCache(basePath: '');
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+  final Map<String, dynamic> youtubeData;
+
+  const ProfilePage({super.key, required this.youtubeData});
 
   Future<ui.Image> _loadImage(String path) async {
     try {
       return await imageAssets.load(path);
     } catch (e) {
-      if (kDebugMode) {
-        print("Error loading image: $e");
-      }
       rethrow;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final String channelName = youtubeData['snippet']['title'];
+    final String channelPhotoUrl =
+        youtubeData['snippet']['thumbnails']['default']['url'];
+    final String subscriberCount = youtubeData['statistics']['subscriberCount'];
+
     return Scaffold(
       backgroundColor: const Color(0xff1D1D1B),
       body: SingleChildScrollView(
@@ -31,9 +34,9 @@ class ProfilePage extends StatelessWidget {
             Column(
               children: [
                 SizedBox(height: 0.173.sh, width: 1.sw),
-                buildProfilePicture(),
-                buildProfileName(),
-                buildProfileStats(),
+                buildProfilePicture(channelPhotoUrl),
+                buildProfileName(channelName),
+                buildProfileStats(subscriberCount),
                 buildEditProfileButton(),
                 buildPreferencesHeader(),
                 buildPreferencesDivider(),
@@ -57,25 +60,13 @@ class ProfilePage extends StatelessWidget {
             child: FutureBuilder<ui.Image>(
               future: _loadImage('assets/profileBG.webp'),
               builder: (context, snapshot) {
+                // Handle loading and error states
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Container(
-                    color: Colors.grey[200],
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
+                  return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return Container(
-                    color: Colors.grey[200],
-                    child: const Center(
-                      child: Icon(Icons.error),
-                    ),
-                  );
+                  return const Center(child: Icon(Icons.error));
                 } else {
-                  return RawImage(
-                    image: snapshot.data,
-                    fit: BoxFit.cover,
-                  );
+                  return RawImage(image: snapshot.data, fit: BoxFit.cover);
                 }
               },
             ),
@@ -99,252 +90,197 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget buildProfilePicture() {
-    return FutureBuilder<ui.Image>(
-      future: _loadImage('assets/bilal profile photo.png'),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Container(
-            width: 100.w,
-            height: 100.w,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xffFFFFFF),
-                  Color(0x79583233),
-                ],
-                end: Alignment.bottomRight,
-                begin: Alignment.topLeft,
+  Widget buildProfilePicture(String photoUrl) {
+    return Container(
+      width: 100.w,
+      height: 100.w,
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: [
+            Color(0xffFFFFFF),
+            Color(0x79583233),
+          ],
+          end: Alignment.bottomRight,
+          begin: Alignment.topLeft,
+        ),
+      ),
+      child: CircleAvatar(
+        backgroundColor: Colors.transparent,
+        radius: 47.r,
+        backgroundImage: NetworkImage(photoUrl),
+      ),
+    );
+  }
+
+  Widget buildProfileName(String name) {
+    return Column(
+      children: [
+        SizedBox(height: 0.01.sh),
+        Text(
+          name,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Almarai',
+            fontWeight: FontWeight.w700,
+            fontSize: 24.sp,
+            color: const Color(0xFFF2EEEB),
+          ),
+        ),
+        SizedBox(height: 0.02.sh),
+      ],
+    );
+  }
+
+  Widget buildProfileStats(String subscriberCount) {
+    return Column(
+      children: [
+        buildStatsRow(subscriberCount),
+        SizedBox(height: 0.03.sh),
+      ],
+    );
+  }
+
+  Widget buildStatsRow(String subscriberCount) {
+    return Column(
+      children: [
+        SizedBox(
+          width: 0.48.sw,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              buildStatItem("85"),
+              buildStatItem(subscriberCount),
+            ],
+          ),
+        ),
+        SizedBox(
+          width: 0.48.sw,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              buildStatLabel("إعجاب"),
+              buildStatLabel("متابعون"),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildStatItem(String value) {
+    return Text(
+      value,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontFamily: 'Almarai',
+        fontWeight: FontWeight.w700,
+        fontSize: 20.sp,
+        color: const Color(0xFFF2EEEB),
+      ),
+    );
+  }
+
+  Widget buildStatLabel(String label) {
+    return Text(
+      label,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontFamily: 'Almarai',
+        fontWeight: FontWeight.w400,
+        fontSize: 20.sp,
+        color: const Color(0xFFF2EEEB),
+      ),
+    );
+  }
+
+  Widget buildEditProfileButton() {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(164, 143, 136, 118),
+                shadowColor: const Color.fromARGB(0, 255, 255, 255),
               ),
-            ),
-            child: const Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        } else if (snapshot.hasError) {
-          return Container(
-            width: 100.w,
-            height: 100.w,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xffFFFFFF),
-                  Color(0x79583233),
-                ],
-                end: Alignment.bottomRight,
-                begin: Alignment.topLeft,
-              ),
-            ),
-            child: const Center(
-              child: Icon(Icons.error),
-            ),
-          );
-        } else {
-          return Container(
-            width: 100.w,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xffFFFFFF),
-                  Color(0x79583233),
-                ],
-                end: Alignment.bottomRight,
-                begin: Alignment.topLeft,
-              ),
-            ),
-            child: CircleAvatar(
-              backgroundColor: Colors.transparent,
-              radius: 47.r,
-              child: CircleAvatar(
-                backgroundColor: const Color(0xff1D1D1B),
-                radius: 45.r,
-                child: CircleAvatar(
-                  radius: 40.r,
-                  backgroundColor: Colors.transparent,
-                  child: RawImage(
-                    image: snapshot.data,
-                    fit: BoxFit.cover,
-                  ),
+              child: Text(
+                "تعديل الملف الشخصي",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Almarai',
+                  fontWeight: FontWeight.w400,
+                  fontSize: 19.sp,
+                  color: const Color(0xFFF2EEEB),
                 ),
               ),
             ),
-          );
-        }
-      },
+          ],
+        ),
+        SizedBox(height: 0.05.sh),
+      ],
     );
   }
-}
 
-Widget buildProfileName() {
-  return Column(
-    children: [
-      SizedBox(height: 0.01.sh),
-      Text(
-        "بلال بخيت",
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontFamily: 'Almarai',
-          fontWeight: FontWeight.w700,
-          fontSize: 24.sp,
-          color: const Color(0xFFF2EEEB),
+  Widget buildPreferencesHeader() {
+    return Row(
+      textDirection: TextDirection.rtl,
+      children: [
+        SizedBox(width: 0.04.sw),
+        Text(
+          "تفضيلات",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Almarai',
+            fontWeight: FontWeight.w700,
+            fontSize: 20.sp,
+            color: const Color(0xFFF2EEEB),
+          ),
         ),
-      ),
-      SizedBox(height: 0.02.sh),
-    ],
-  );
-}
+      ],
+    );
+  }
 
-Widget buildProfileStats() {
-  return Column(
-    children: [
-      buildStatsRow(),
-      SizedBox(height: 0.03.sh),
-    ],
-  );
-}
-
-Widget buildStatsRow() {
-  return Column(
-    children: [
-      SizedBox(
-        width: 0.48.sw,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            buildStatItem("85"),
-            buildStatItem("90"),
-          ],
+  Widget buildPreferencesDivider() {
+    return Column(
+      children: [
+        SizedBox(height: 0.012.sh),
+        Container(
+          width: 1.sw,
+          height: 0.0015.sh,
+          color: const Color(0x9d9d9b80),
         ),
-      ),
-      SizedBox(
-        width: 0.48.sw,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            buildStatLabel("إعجاب"),
-            buildStatLabel("متابعون"),
-          ],
+      ],
+    );
+  }
+
+  Widget buildPreferencesGrid() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 4.0,
+          crossAxisSpacing: 4.0,
         ),
-      ),
-    ],
-  );
-}
-
-Widget buildStatItem(String value) {
-  return Text(
-    value,
-    textAlign: TextAlign.center,
-    style: TextStyle(
-      fontFamily: 'Almarai',
-      fontWeight: FontWeight.w700,
-      fontSize: 20.sp,
-      color: const Color(0xFFF2EEEB),
-    ),
-  );
-}
-
-Widget buildStatLabel(String label) {
-  return Text(
-    label,
-    textAlign: TextAlign.center,
-    style: TextStyle(
-      fontFamily: 'Almarai',
-      fontWeight: FontWeight.w400,
-      fontSize: 20.sp,
-      color: const Color(0xFFF2EEEB),
-    ),
-  );
-}
-
-Widget buildEditProfileButton() {
-  return Column(
-    children: [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromARGB(164, 143, 136, 118),
-              shadowColor: const Color.fromARGB(0, 255, 255, 255),
-            ),
-            child: Text(
-              "تعديل الملف الشخصي",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Almarai',
-                fontWeight: FontWeight.w400,
-                fontSize: 19.sp,
-                color: const Color(0xFFF2EEEB),
+        itemCount: 10,
+        itemBuilder: (BuildContext context, int index) {
+          return Card(
+            child: Center(
+              child: Text(
+                '${index + 1}',
+                style: const TextStyle(fontSize: 24),
               ),
             ),
-          ),
-        ],
+          );
+        },
       ),
-      SizedBox(height: 0.05.sh),
-    ],
-  );
-}
-
-Widget buildPreferencesHeader() {
-  return Row(
-    textDirection: TextDirection.rtl,
-    children: [
-      SizedBox(width: 0.04.sw),
-      Text(
-        "تفضيلات",
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontFamily: 'Almarai',
-          fontWeight: FontWeight.w700,
-          fontSize: 20.sp,
-          color: const Color(0xFFF2EEEB),
-        ),
-      ),
-    ],
-  );
-}
-
-Widget buildPreferencesDivider() {
-  return Column(
-    children: [
-      SizedBox(height: 0.012.sh),
-      Container(
-        width: 1.sw,
-        height: 0.0015.sh,
-        color: const Color(0x9d9d9b80),
-      ),
-    ],
-  );
-}
-
-Widget buildPreferencesGrid() {
-  return Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 4.0,
-        crossAxisSpacing: 4.0,
-      ),
-      itemCount: 10,
-      itemBuilder: (BuildContext context, int index) {
-        return Card(
-          child: Center(
-            child: Text(
-              '${index + 1}',
-              style: const TextStyle(fontSize: 24),
-            ),
-          ),
-        );
-      },
-    ),
-  );
+    );
+  }
 }
 
 class CurveUpClipper extends CustomClipper<Path> {
