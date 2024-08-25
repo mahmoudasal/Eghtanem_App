@@ -1,6 +1,6 @@
 # Eghtanem App
 
-![Flutter](https://img.shields.io/badge/Flutter-2.0-blue.svg) 
+![Flutter](https://img.shields.io/badge/Flutter-3.24-blue.svg) 
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
 A mobile application developed using Flutter that provides users with daily Islamic supplications and remembrances, designed with an intuitive user interface and localized content. The app supports Arabic language (RTL) and includes features such as categorized supplications, associated audio playback, and more.
