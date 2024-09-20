@@ -58,6 +58,7 @@ class SupplicationsRemembrances extends StatelessWidget {
                 final category = categories[index];
                 return ExpansionTile(
                   title: Text(
+                    textDirection: TextDirection.rtl,
                     category.category,
                     style: TextStyle(
                       fontSize: 20.sp,
@@ -71,14 +72,8 @@ class SupplicationsRemembrances extends StatelessWidget {
                         style: TextStyle(color: Colors.white, fontSize: 18.sp),
                       ),
                       subtitle: Text(
-                        'Count: ${dhikr.count}',
+                        'عدد المرات: ${dhikr.count}',
                         style: TextStyle(color: Colors.grey, fontSize: 14.sp),
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.play_arrow, color: Colors.white),
-                        onPressed: () {
-                          // Play audio functionality
-                        },
                       ),
                     );
                   }).toList(),
@@ -86,7 +81,7 @@ class SupplicationsRemembrances extends StatelessWidget {
               },
             );
           } else {
-            return const Center(child: const Text('No data found'));
+            return const Center(child: Text('No data found'));
           }
         },
       ),

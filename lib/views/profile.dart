@@ -1,29 +1,128 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'dart:convert';
+import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:asset_cache/asset_cache.dart';
+import 'package:flutter/services.dart'
+    show Clipboard, ClipboardData, rootBundle;
+import 'package:social_share/social_share.dart';
 
 final imageAssets = ImageAssetCache(basePath: '');
 
-class ProfilePage extends StatelessWidget {
+class Hadith {
+  final int number;
+  final String hadith;
+  final String description;
+
+  Hadith({
+    required this.number,
+    required this.hadith,
+    required this.description,
+  });
+
+  factory Hadith.fromJson(Map<String, dynamic> json) {
+    return Hadith(
+      number: json['number'],
+      hadith: json['hadith'],
+      description: json['description'],
+    );
+  }
+}
+
+class ProfilePage extends StatefulWidget {
   final Map<String, dynamic> youtubeData;
 
   const ProfilePage({super.key, required this.youtubeData});
+
+  @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  late Future<Hadith?> futureRandomHadith;
+
+  @override
+  void initState() {
+    super.initState();
+    futureRandomHadith = _loadRandomHadith();
+  }
+
+  Future<Hadith?> _loadRandomHadith() async {
+    try {
+      final String response =
+          await rootBundle.loadString('assets/quran_metadata/ibn_maja.json');
+      final List<dynamic> data = json.decode(response);
+
+      List<Hadith> hadiths = data.map((json) => Hadith.fromJson(json)).toList();
+
+      if (hadiths.isNotEmpty) {
+        final random = Random();
+        return hadiths[random.nextInt(hadiths.length)];
+      }
+      return null;
+    } catch (e, stacktrace) {
+      // Log error and stacktrace for further analysis
+      print('Error loading Hadith: $e');
+      print(stacktrace);
+      // Optionally, notify the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading Hadith: $e')),
+      );
+      return null;
+    }
+  }
 
   Future<ui.Image> _loadImage(String path) async {
     try {
       return await imageAssets.load(path);
     } catch (e) {
+      // Log the error for the image loading issue
+      print('Error loading image: $e');
       rethrow;
     }
   }
 
+  void _copyToClipboard(String text) {
+    try {
+      Clipboard.setData(ClipboardData(text: text));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Hadith copied to clipboard')),
+      );
+    } catch (e) {
+      // Handle clipboard errors and notify the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to copy to clipboard: $e')),
+      );
+    }
+  }
+
+  void _shareHadith(String hadithText) async {
+    try {
+      await SocialShare.shareOptions(hadithText);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Hadith shared successfully')),
+      );
+    } catch (e) {
+      // Handle sharing errors and notify the user
+
+      print('Error sharing Hadith: $e');
+    }
+  }
+
+  void _supportApp() {
+    // Implement the functionality to support the app here
+    // You can navigate to a donation page or integrate with a payment gateway like PayPal, Stripe, etc.
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('شكراً لدعمك التطبيق')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final String channelName = youtubeData['snippet']['title'];
+    final String channelName = widget.youtubeData['snippet']['title'];
     final String channelPhotoUrl =
-        youtubeData['snippet']['thumbnails']['default']['url'];
-    final String subscriberCount = youtubeData['statistics']['subscriberCount'];
+        widget.youtubeData['snippet']['thumbnails']['default']['url'];
 
     return Scaffold(
       backgroundColor: const Color(0xff1D1D1B),
@@ -36,11 +135,8 @@ class ProfilePage extends StatelessWidget {
                 SizedBox(height: 0.173.sh, width: 1.sw),
                 buildProfilePicture(channelPhotoUrl),
                 buildProfileName(channelName),
-                buildProfileStats(subscriberCount),
-                buildEditProfileButton(),
-                buildPreferencesHeader(),
-                buildPreferencesDivider(),
-                buildPreferencesGrid(),
+                SizedBox(height: 0.02.sh),
+                _buildRandomHadithSection(),
               ],
             ),
           ],
@@ -48,6 +144,127 @@ class ProfilePage extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildRandomHadithSection() {
+    return FutureBuilder<Hadith?>(
+      future: futureRandomHadith,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'Error loading Hadith: ${snapshot.error}',
+              style: const TextStyle(color: Colors.red),
+            ),
+          );
+        } else if (!snapshot.hasData || snapshot.data == null) {
+          return const Center(
+            child: Text(
+              'No Hadith available.',
+              style: TextStyle(color: Colors.white),
+            ),
+          );
+        } else {
+          final hadith = snapshot.data!;
+          return Padding(
+            padding: EdgeInsets.all(16.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'التذكير اليومي',
+                  style: TextStyle(
+                    fontFamily: 'Almarai',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 24.sp,
+                    color: const Color(0xFFF2EEEB),
+                  ),
+                ),
+                SizedBox(height: 10.h),
+                Text(
+                  textDirection: TextDirection.rtl,
+                  hadith.hadith,
+                  style: TextStyle(
+                    fontFamily: 'ScheherazadeNew',
+                    fontSize: 20.sp,
+                    color: const Color(0xFFFAFAFA),
+                  ),
+                ),
+                SizedBox(height: 20.h),
+                _buildShareButtons(hadith),
+              ],
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  Widget _buildShareButtons(Hadith hadith) {
+    final String hadithText = "${hadith.hadith}\n\n${hadith.description}";
+
+    return Column(
+      children: [
+        // Wide button to share Hadith
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF94795B),
+              padding: EdgeInsets.symmetric(vertical: 10.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            onPressed: () => _shareHadith(hadithText),
+            child: Text(
+              'شارك الحديث',
+              style: TextStyle(
+                fontFamily: 'Almarai',
+                fontWeight: FontWeight.w700,
+                fontSize: 20.sp,
+                color: const Color(0xFFF2EEEB),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 10.h),
+
+        // Add Support button
+        SizedBox(
+          width: 120.w,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF94795B),
+              padding: EdgeInsets.symmetric(vertical: 10.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            onPressed: () {
+              _supportApp();
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 25),
+              child: Text(
+                textDirection: TextDirection.rtl,
+                'ادعم التطبيق',
+                style: TextStyle(
+                  fontFamily: 'Almarai',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 20.sp,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+// Function to handle app support (you can customize it to open a payment page, etc.)
 
   Widget buildBackground() {
     return ClipPath(
@@ -60,7 +277,6 @@ class ProfilePage extends StatelessWidget {
             child: FutureBuilder<ui.Image>(
               future: _loadImage('assets/profileBG.webp'),
               builder: (context, snapshot) {
-                // Handle loading and error states
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
@@ -116,7 +332,7 @@ class ProfilePage extends StatelessWidget {
   Widget buildProfileName(String name) {
     return Column(
       children: [
-        SizedBox(height: 0.01.sh),
+        SizedBox(height: 0.005.sh),
         Text(
           name,
           textAlign: TextAlign.center,
@@ -127,158 +343,7 @@ class ProfilePage extends StatelessWidget {
             color: const Color(0xFFF2EEEB),
           ),
         ),
-        SizedBox(height: 0.02.sh),
       ],
-    );
-  }
-
-  Widget buildProfileStats(String subscriberCount) {
-    return Column(
-      children: [
-        buildStatsRow(subscriberCount),
-        SizedBox(height: 0.03.sh),
-      ],
-    );
-  }
-
-  Widget buildStatsRow(String subscriberCount) {
-    return Column(
-      children: [
-        SizedBox(
-          width: 0.48.sw,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              buildStatItem("85"),
-              buildStatItem(subscriberCount),
-            ],
-          ),
-        ),
-        SizedBox(
-          width: 0.48.sw,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              buildStatLabel("إعجاب"),
-              buildStatLabel("متابعون"),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget buildStatItem(String value) {
-    return Text(
-      value,
-      textAlign: TextAlign.center,
-      style: TextStyle(
-        fontFamily: 'Almarai',
-        fontWeight: FontWeight.w700,
-        fontSize: 20.sp,
-        color: const Color(0xFFF2EEEB),
-      ),
-    );
-  }
-
-  Widget buildStatLabel(String label) {
-    return Text(
-      label,
-      textAlign: TextAlign.center,
-      style: TextStyle(
-        fontFamily: 'Almarai',
-        fontWeight: FontWeight.w400,
-        fontSize: 20.sp,
-        color: const Color(0xFFF2EEEB),
-      ),
-    );
-  }
-
-  Widget buildEditProfileButton() {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(164, 143, 136, 118),
-                shadowColor: const Color.fromARGB(0, 255, 255, 255),
-              ),
-              child: Text(
-                "تعديل الملف الشخصي",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Almarai',
-                  fontWeight: FontWeight.w400,
-                  fontSize: 19.sp,
-                  color: const Color(0xFFF2EEEB),
-                ),
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 0.05.sh),
-      ],
-    );
-  }
-
-  Widget buildPreferencesHeader() {
-    return Row(
-      textDirection: TextDirection.rtl,
-      children: [
-        SizedBox(width: 0.04.sw),
-        Text(
-          "تفضيلات",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Almarai',
-            fontWeight: FontWeight.w700,
-            fontSize: 20.sp,
-            color: const Color(0xFFF2EEEB),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget buildPreferencesDivider() {
-    return Column(
-      children: [
-        SizedBox(height: 0.012.sh),
-        Container(
-          width: 1.sw,
-          height: 0.0015.sh,
-          color: const Color(0x9d9d9b80),
-        ),
-      ],
-    );
-  }
-
-  Widget buildPreferencesGrid() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 4.0,
-          crossAxisSpacing: 4.0,
-        ),
-        itemCount: 10,
-        itemBuilder: (BuildContext context, int index) {
-          return Card(
-            child: Center(
-              child: Text(
-                '${index + 1}',
-                style: const TextStyle(fontSize: 24),
-              ),
-            ),
-          );
-        },
-      ),
     );
   }
 }

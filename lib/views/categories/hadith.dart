@@ -6,7 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../data/prophet_speech_json.dart';
-import 'liked_speech.dart';
+import 'liked_hadith.dart';
 
 class Prophetspeech extends StatefulWidget {
   const Prophetspeech({super.key});

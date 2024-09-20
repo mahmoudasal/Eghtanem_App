@@ -12,63 +12,20 @@ import 'login_page.dart';
 
 class SecondPage extends StatelessWidget {
   const SecondPage({super.key});
-  Future<ui.Image> _loadImage(String path) async {
-    try {
-      return await imageAssets.load(path);
-    } catch (e) {
-      if (kDebugMode) {
-        print("Error loading image: $e");
-      }
-      rethrow;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          FutureBuilder<ui.Image>(
-            future: _loadImage("assets/photo2.webp"),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  color: Colors.grey[200],
-                  child: const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              } else if (snapshot.hasError) {
-                return Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  color: const Color.fromARGB(255, 192, 158, 119),
-                  child: const Center(
-                    child: Icon(Icons.error),
-                  ),
-                );
-              } else if (snapshot.hasData) {
-                return Container(
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage("assets/photo2.webp"),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                );
-              } else {
-                return Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  color: Colors.grey[200],
-                  child: const Center(
-                    child: Icon(Icons.error),
-                  ),
-                );
-              }
-            },
+          // Directly use the image without FutureBuilder
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/photo2.webp"),
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
           Positioned.fill(
             child: Container(
@@ -91,7 +48,7 @@ class SecondPage extends StatelessWidget {
                 width: 1.sw,
               ),
               Text(
-                'تابع القنوات الدينية',
+                'زكاة الوقت تأديته في مرضاة الله',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: 'Almarai',
@@ -104,7 +61,7 @@ class SecondPage extends StatelessWidget {
                 height: 0.03.sh,
               ),
               Text(
-                'استمتع بمشاهدة فيديوهات قصيرة ومفيدة',
+                'استمتع بمشاهدة و سماع ما ينفعك في دنياك و اخرتك',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: 'Almarai',

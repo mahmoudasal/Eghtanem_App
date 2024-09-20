@@ -8,131 +8,148 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../widgets/custom_page_transition.dart';
 
-class FirstPage extends StatelessWidget {
+class FirstPage extends StatefulWidget {
   const FirstPage({super.key});
-  Future<ui.Image> _loadImage(String path) async {
+
+  @override
+  _FirstPageState createState() => _FirstPageState();
+}
+
+class _FirstPageState extends State<FirstPage> {
+  late ImageProvider _backgroundImage;
+  bool _isImageLoaded = false;
+  bool _hasLoadedOnce = false;
+
+  // Add references to other images to pre-cache
+  final ImageProvider _secondPageImage = const AssetImage("assets/photo2.webp");
+  final ImageProvider _loginPageImage =
+      const AssetImage("assets/thirdphoto.webp");
+
+  @override
+  void initState() {
+    super.initState();
+    _backgroundImage = const AssetImage("assets/photo1.webp");
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_hasLoadedOnce) {
+      _hasLoadedOnce = true;
+      _precacheImages();
+    }
+  }
+
+  void _precacheImages() async {
     try {
-      return await imageAssets.load(path);
+      // Pre-cache images
+      await precacheImage(_backgroundImage, context);
+      await precacheImage(_secondPageImage, context);
+      await precacheImage(_loginPageImage, context);
+
+      setState(() {
+        _isImageLoaded = true;
+      });
     } catch (e) {
       if (kDebugMode) {
-        print("Error loading image: $e");
+        print("Error pre-caching images: $e");
       }
-      rethrow;
+      setState(() {
+        _isImageLoaded = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          FutureBuilder<ui.Image>(
-            future: _loadImage("assets/photo1.webp"),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  color: Colors.grey[200],
-                  child: const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              } else if (snapshot.hasError) {
-                return Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  color: const Color.fromARGB(255, 192, 158, 119),
-                  child: const Center(
-                    child: Icon(Icons.error),
-                  ),
-                );
-              } else if (snapshot.hasData) {
-                return Container(
-                  decoration: const BoxDecoration(
+      body: _isImageLoaded
+          ? Stack(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: AssetImage("assets/photo1.webp"),
+                      image: _backgroundImage,
                       fit: BoxFit.cover,
                     ),
                   ),
-                );
-              } else {
-                return Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  color: Colors.grey[200],
-                  child: const Center(
-                    child: Icon(Icons.error),
-                  ),
-                );
-              }
-            },
-          ),
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.center,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    const Color.fromARGB(80, 0, 0, 0),
-                    Colors.black.withOpacity(0.999),
-                  ],
                 ),
-              ),
-            ),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text(
-                '!مرحباً بك في إغتنم',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: "Almarai",
-                  fontWeight: FontWeight.w800,
-                  fontSize: 24.sp,
-                  color: const Color(0xFFFAFAFA),
-                ),
-              ),
-              SizedBox(height: 13.h),
-              Text(
-                'اكتشف فيديوهات دينية مُلهمة',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: "Almarai",
-                  fontWeight: FontWeight.w700,
-                  fontSize: 28.sp,
-                  color: const Color(0xFFFAFAFA),
-                ),
-              ),
-              SizedBox(height: 0.17.sh),
-              SizedBox(
-                width: 0.9.sw,
-                height: 40.h,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).push(createRoute(const SecondPage()));
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF94795B),
-                  ),
-                  child: Text(
-                    'إستمرار',
-                    style: TextStyle(
-                      fontFamily: "Almarai",
-                      fontWeight: FontWeight.w700,
-                      fontSize: 22.sp,
-                      color: const Color(0xFFFAFAFA),
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.center,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          const Color.fromARGB(80, 0, 0, 0),
+                          Colors.black.withOpacity(0.999),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(height: 20.h),
-            ],
-          ),
-        ],
-      ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      '!مرحباً بك في إغتنم',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: "Almarai",
+                        fontWeight: FontWeight.w800,
+                        fontSize: 24.sp,
+                        color: const Color(0xFFFAFAFA),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 15.h,
+                      width: double.infinity,
+                    ),
+                    SizedBox(
+                      width: 0.9.sw,
+                      child: Text(
+                        'قال رسولُ اللهِ صلَّى اللهُ عليه وسلَّم لرجلٍ وهو يَعِظُه : اغتنِمْ خمسًا قبل خمسٍ : شبابَك قبل هَرَمِك، وصِحَّتَك قبل سَقَمِك، وغناك قبل فقرِك، وفراغَك قبل شُغلِك، وحياتَك قبل موتِك.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: "Almarai",
+                          fontWeight: FontWeight.w700,
+                          fontSize: 20.sp,
+                          color: const Color(0xFFFAFAFA),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 0.12.sh),
+                    SizedBox(
+                      width: 0.9.sw,
+                      height: 40.h,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            createRoute(const SecondPage()),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF94795B),
+                        ),
+                        child: Text(
+                          'إستمرار',
+                          style: TextStyle(
+                            fontFamily: "Almarai",
+                            fontWeight: FontWeight.w700,
+                            fontSize: 22.sp,
+                            color: const Color(0xFFFAFAFA),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20.h),
+                  ],
+                ),
+              ],
+            )
+          : const Center(
+              child: const CircularProgressIndicator(),
+            ),
     );
   }
 }

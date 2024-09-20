@@ -32,6 +32,7 @@ void showShareBottomSheet(BuildContext context) {
                 itemBuilder: (BuildContext context, int index) {
                   // Example assets and labels
                   final List<String> assets = [
+                    'assets/ui icons/copylink.svg',
                     'assets/ui icons/facebook.svg',
                     'assets/ui icons/twitter.svg',
                     'assets/ui icons/instagram.svg',
@@ -41,13 +42,14 @@ void showShareBottomSheet(BuildContext context) {
                     'assets/ui icons/linkedin.svg',
                   ];
                   final List<String> labels = [
+                    'نسخ الرابط',
                     'فيسبوك',
                     'تويتر',
                     'إنستجرام',
                     'واتساب',
-                    'تيك توك', 'فيسبوك', 'لينكد ان',
-
-                    // Add more labels here
+                    'تيك توك',
+                    'فيسبوك',
+                    'لينكد ان',
                   ];
 
                   return buildShareIcon(

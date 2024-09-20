@@ -22,12 +22,12 @@ class VideoPlayerCubit extends Cubit<VideoPlayerState> {
       _videoController = YoutubePlayerController(
         initialVideoId: videoId,
         flags: const YoutubePlayerFlags(
-            autoPlay: true,
-            mute: false,
-            forceHD: false,
-            hideControls: true,
-            loop: true,
-            controlsVisibleAtStart: false),
+          autoPlay: true,
+          mute: false,
+          forceHD: false,
+          hideControls: true,
+          loop: true,
+        ),
       );
 
       // Check if controller is successfully created
@@ -36,36 +36,51 @@ class VideoPlayerCubit extends Cubit<VideoPlayerState> {
       }
 
       emit(VideoPlayerLoaded(
-          videoController: _videoController!, isPlaying: true));
+        videoController: _videoController!,
+        isPlaying: true,
+      ));
     } catch (e) {
-      _logger.i("Error loading video: $e");
+      _logger.e("Error loading video: $e");
       emit(VideoPlayerError(errorMessage: "Failed to load video: $e"));
     }
   }
 
   void playPauseVideo(bool isPlaying) {
-    if (state is VideoPlayerLoaded) {
-      if (isPlaying) {
-        _videoController?.play();
-      } else {
-        _videoController?.pause();
+    if (_videoController != null && state is VideoPlayerLoaded) {
+      try {
+        if (isPlaying) {
+          _videoController?.play();
+        } else {
+          _videoController?.pause();
+        }
+        emit(VideoPlayerLoaded(
+          videoController: _videoController!,
+          isPlaying: isPlaying,
+        ));
+      } catch (e) {
+        _logger.e("Error playing/pausing video: $e");
+        emit(VideoPlayerError(errorMessage: "Failed to play/pause video: $e"));
       }
-      emit(VideoPlayerLoaded(
-          videoController: _videoController!, isPlaying: isPlaying));
+    } else {
+      _logger.w("VideoController is null or state is not VideoPlayerLoaded");
     }
   }
 
   @override
-  Future<void> close() {
-    _videoController?.dispose();
+  Future<void> close() async {
+    // Dispose the video controller and set it to null
+    if (_videoController != null) {
+      _videoController!.dispose();
+      _videoController = null;
+    }
     return super.close();
   }
-}
 
-String formatLikes(String likes) {
-  final int likesCount = int.tryParse(likes) ?? 0;
-  if (likesCount > 999) {
-    return '${(likesCount / 1000).toStringAsFixed(1)}k';
+  String formatLikes(String likes) {
+    final int likesCount = int.tryParse(likes) ?? 0;
+    if (likesCount > 999) {
+      return '${(likesCount / 1000).toStringAsFixed(1)}k';
+    }
+    return likes;
   }
-  return likes;
 }

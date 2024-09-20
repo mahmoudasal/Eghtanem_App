@@ -4,16 +4,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'interpretation_json_decoder.dart';
+import 'tafseer_json_decoder.dart';
 
-class Faith extends StatefulWidget {
-  const Faith({super.key});
+class Tafseer extends StatefulWidget {
+  const Tafseer({super.key});
 
   @override
-  FaithState createState() => FaithState();
+  TafseerState createState() => TafseerState();
 }
 
-class FaithState extends State<Faith> {
+class TafseerState extends State<Tafseer> {
   final List<String> suraNames = const [
     "الفاتحة",
     "البقرة",
@@ -149,8 +149,21 @@ class FaithState extends State<Faith> {
     });
   }
 
+  // Function to convert numbers to Arabic-Indic numerals
+  String convertToArabicNumeral(int number) {
+    const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    return number
+        .toString()
+        .split('')
+        .map((digit) => arabicNumerals[int.parse(digit)])
+        .join();
+  }
+
+  // Updated function to filter out interpretations with empty 'text'
   List<Interpretation> _getInterpretationsForSura(int suraNumber) {
-    return interpretations.where((item) => item.sura == suraNumber).toList();
+    return interpretations
+        .where((item) => item.sura == suraNumber && item.text.isNotEmpty)
+        .toList();
   }
 
   @override
@@ -210,38 +223,70 @@ class FaithState extends State<Faith> {
                   showModalBottomSheet(
                     backgroundColor: const Color(0xff1D1D1B),
                     context: context,
-                    builder: (context) => Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Directionality(
-                        textDirection: TextDirection.rtl,
-                        child: ListView.builder(
-                          itemCount: suraInterpretations.length,
-                          itemBuilder: (context, index) {
-                            return ListTile(
-                              title: Text(
-                                'آية ${suraInterpretations[index].aya}',
-                                style: TextStyle(
-                                  fontFamily: 'Almarai',
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16.sp,
-                                  color:
-                                      const Color.fromARGB(255, 255, 255, 255),
-                                ),
-                              ),
-                              subtitle: Text(
-                                suraInterpretations[index].text,
-                                style: TextStyle(
-                                  fontFamily: 'Almarai',
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 14.sp,
-                                  color:
-                                      const Color.fromARGB(255, 255, 255, 255),
-                                ),
-                              ),
-                            );
-                          },
+                    shape: const RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    builder: (context) => Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Handlebar
+                        Container(
+                          width: 40.w,
+                          height: 5.h,
+                          margin: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[600],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
-                      ),
+                        // Surah Title
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text(
+                            suraNames[index], // Display the sura name
+                            style: TextStyle(
+                              fontFamily: 'Almarai',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 20.sp,
+                              color: const Color(0xFFFFFFFF),
+                            ),
+                          ),
+                        ),
+                        // Interpretations List
+                        Expanded(
+                          child: Directionality(
+                            textDirection: TextDirection.rtl,
+                            child: ListView.builder(
+                              itemCount: suraInterpretations.length,
+                              itemBuilder: (context, index) {
+                                return ListTile(
+                                  title: Text(
+                                    'الايه ${convertToArabicNumeral(suraInterpretations[index].aya)}',
+                                    style: TextStyle(
+                                      fontFamily: 'Almarai',
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16.sp,
+                                      color: const Color.fromARGB(
+                                          255, 255, 255, 255),
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    suraInterpretations[index].text,
+                                    style: TextStyle(
+                                      fontFamily: 'Almarai',
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 14.sp,
+                                      color: const Color.fromARGB(
+                                          255, 255, 255, 255),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 }
@@ -253,7 +298,7 @@ class FaithState extends State<Faith> {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  suraNames[index], // Display sura name from the list
+                  suraNames[index], // Display sura name and number
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: 'Almarai',

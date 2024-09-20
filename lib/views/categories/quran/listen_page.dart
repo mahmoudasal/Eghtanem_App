@@ -242,11 +242,11 @@ class TelawahState extends State<Telawah> {
                 ),
                 trailing: _currentSurah == surahNumber
                     ? const Icon(
-                        Icons.play_arrow,
+                        Icons.pause,
                         color: Color.fromARGB(255, 182, 151, 115),
                       )
                     : const Icon(
-                        Icons.pause,
+                        Icons.play_arrow,
                         color: Color.fromARGB(255, 182, 151, 115),
                       ),
                 onTap: () {

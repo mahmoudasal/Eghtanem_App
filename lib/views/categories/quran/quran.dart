@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:egtanem_application/data/qra2at_json_parse.dart';
 import 'package:egtanem_application/data/surah_json_parse.dart' as surah_data;
 import 'package:egtanem_application/widgets/surah_card.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -89,7 +90,9 @@ Future<List<String>> fetchReciterSurahs(int reciterId) async {
       throw Exception('Failed to load surahs: ${response.reasonPhrase}');
     }
   } catch (e) {
-    print("Error fetching reciter surahs: $e");
+    if (kDebugMode) {
+      print("Error fetching reciter surahs: $e");
+    }
     rethrow;
   }
 }

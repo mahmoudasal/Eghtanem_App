@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../data/prophet_speech_json.dart';
 
-class LikedHadiths extends StatelessWidget {
+class LikedHadiths extends StatefulWidget {
   final Set<int> likedHadiths;
   final Future<List<Hadith>> allHadiths;
 
@@ -14,6 +13,30 @@ class LikedHadiths extends StatelessWidget {
     required this.likedHadiths,
     required this.allHadiths,
   });
+
+  @override
+  LikedHadithsState createState() => LikedHadithsState();
+}
+
+class LikedHadithsState extends State<LikedHadiths> {
+  late Set<int> likedHadiths;
+
+  @override
+  void initState() {
+    super.initState();
+    likedHadiths = widget.likedHadiths;
+  }
+
+  // Toggle the liked state of a hadith
+  void _toggleLike(int hadithNumber) {
+    setState(() {
+      if (likedHadiths.contains(hadithNumber)) {
+        likedHadiths.remove(hadithNumber);
+      } else {
+        likedHadiths.add(hadithNumber);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +74,7 @@ class LikedHadiths extends StatelessWidget {
         ],
       ),
       body: FutureBuilder<List<Hadith>>(
-        future: allHadiths,
+        future: widget.allHadiths,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -88,6 +111,7 @@ class LikedHadiths extends StatelessWidget {
               itemCount: hadiths.length,
               itemBuilder: (context, index) {
                 final hadith = hadiths[index];
+                final isLiked = likedHadiths.contains(hadith.number);
                 return Card(
                   color: const Color(0XFF171715),
                   shape: RoundedRectangleBorder(
@@ -99,6 +123,21 @@ class LikedHadiths extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Like button
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                isLiked
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: isLiked ? Colors.red : Colors.grey,
+                              ),
+                              onPressed: () => _toggleLike(hadith.number),
+                            ),
+                          ],
+                        ),
                         SizedBox(height: 10.h),
                         Text(
                           hadith.hadith,

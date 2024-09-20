@@ -1,11 +1,9 @@
-// ignore_for_file: file_names
-
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class IslamicEthics extends StatelessWidget {
-  const IslamicEthics({super.key});
+class ProphetsStories extends StatelessWidget {
+  ProphetsStories({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +18,7 @@ class IslamicEthics extends StatelessWidget {
         shadowColor: const Color(0xff1D1D1B),
         foregroundColor: const Color(0xff1D1D1B),
         title: Text(
-          'الاخلاق الاسلامية',
+          "قصص الانبياء",
           style: TextStyle(
             fontFamily: 'Almarai',
             fontWeight: FontWeight.w700,

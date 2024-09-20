@@ -17,7 +17,7 @@ class ShortsList extends StatelessWidget {
   final String caption;
   final String likes;
   final String comments;
-  final Future<void> Function() onLikePressed;
+  // final Future<void> Function() onLikePressed;
   final Map<String, dynamic> youtubeData; // Add youtubeData as a parameter
 
   const ShortsList({
@@ -28,7 +28,7 @@ class ShortsList extends StatelessWidget {
     required this.likes,
     required this.vid,
     required this.profilePic,
-    required this.onLikePressed,
+    // required this.onLikePressed,
     required this.youtubeData, // Include youtubeData in the constructor
   });
 

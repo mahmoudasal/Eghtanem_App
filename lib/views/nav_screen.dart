@@ -1,5 +1,5 @@
-import 'package:egtanem_application/cubits/shorts_cubit/shorts_fetching_cubit.dart';
-import 'package:egtanem_application/views/more_page.dart';
+import 'package:egtanem_application/cubits/cubit/media_cubit.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -20,12 +20,10 @@ class NaviagionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
-      const NotificationPageMore(),
       ProfilePage(youtubeData: youtubeData),
-      const HomeScreen(),
+      const LongVids(),
       const CategoriesPage(),
       ShortsListPage(youtubeData: youtubeData),
-      // Add your fifth page here
     ];
 
     return BlocProvider(
@@ -52,7 +50,7 @@ class NaviagionScreen extends StatelessWidget {
                 },
                 selectedLabelStyle:
                     const TextStyle(fontWeight: FontWeight.w700),
-                backgroundColor: currentIndex == 4
+                backgroundColor: currentIndex == 3
                     ? const Color.fromARGB(255, 0, 0, 0)
                     : const Color(0xff1D1D1B),
                 type: BottomNavigationBarType.fixed,
@@ -60,19 +58,8 @@ class NaviagionScreen extends StatelessWidget {
                   BottomNavigationBarItem(
                     icon: SizedBox(
                       height: 30.h,
-                      child: Icon(
-                        currentIndex == 0
-                            ? Icons.home_repair_service_rounded
-                            : Icons.insert_comment_sharp,
-                      ),
-                    ),
-                    label: 'المزيد',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: SizedBox(
-                      height: 30.h,
                       child: SvgPicture.asset(
-                        currentIndex == 1
+                        currentIndex == 0
                             ? "assets/ui icons/profile_selected.svg"
                             : "assets/ui icons/profile.svg",
                       ),
@@ -83,7 +70,7 @@ class NaviagionScreen extends StatelessWidget {
                     icon: SizedBox(
                       height: 30.h,
                       child: SvgPicture.asset(
-                        currentIndex == 2
+                        currentIndex == 1
                             ? "assets/ui icons/video-play_selected.svg"
                             : "assets/ui icons/video-play.svg",
                       ),
@@ -94,7 +81,7 @@ class NaviagionScreen extends StatelessWidget {
                     icon: SizedBox(
                       height: 30.h,
                       child: SvgPicture.asset(
-                        currentIndex == 3
+                        currentIndex == 2
                             ? "assets/ui icons/category_selected.svg"
                             : "assets/ui icons/category.svg",
                       ),
@@ -105,7 +92,7 @@ class NaviagionScreen extends StatelessWidget {
                     icon: SizedBox(
                       height: 30.h,
                       child: SvgPicture.asset(
-                        currentIndex == 4
+                        currentIndex == 3
                             ? "assets/ui icons/home.svg"
                             : "assets/ui icons/home_unselected.svg",
                       ),
@@ -125,32 +112,66 @@ class NaviagionScreen extends StatelessWidget {
   }
 }
 
-class ShortsListPage extends StatelessWidget {
+class ShortsListPage extends StatefulWidget {
   final Map<String, dynamic> youtubeData;
 
   const ShortsListPage({super.key, required this.youtubeData});
 
   @override
+  _ShortsListPageState createState() => _ShortsListPageState();
+}
+
+class _ShortsListPageState extends State<ShortsListPage> {
+  late final PageController _pageController;
+  late final MediaCubit _mediaCubit;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+    _mediaCubit = MediaCubit(mediaType: MediaType.short);
+    _mediaCubit.fetchMedia();
+
+    _pageController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_pageController.position.atEdge) {
+      bool isBottom = _pageController.position.pixels != 0;
+      if (isBottom && !_mediaCubit.isLoading && _mediaCubit.hasMoreData) {
+        _mediaCubit.fetchMedia(loadMore: true);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _mediaCubit.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ShortsCubit()..fetchShorts(),
-      child: BlocBuilder<ShortsCubit, ShortsState>(
+    return BlocProvider<MediaCubit>.value(
+      value: _mediaCubit,
+      child: BlocBuilder<MediaCubit, MediaState>(
         builder: (context, state) {
-          if (state is ShortsLoading &&
-              context.read<ShortsCubit>().shorts.isEmpty) {
+          if (state is MediaLoading && _mediaCubit.mediaItems.isEmpty) {
             return const Center(child: CircularProgressIndicator());
-          } else if (state is ShortsError) {
+          } else if (state is MediaError) {
             return Center(child: Text(state.errorMessage));
-          } else if (state is ShortsLoaded) {
+          } else {
             return PageView.builder(
+              controller: _pageController,
               scrollDirection: Axis.vertical,
-              itemCount: context.read<ShortsCubit>().shorts.length + 1,
+              itemCount: _mediaCubit.mediaItems.length +
+                  (_mediaCubit.hasMoreData ? 1 : 0),
               itemBuilder: (context, index) {
-                if (index == context.read<ShortsCubit>().shorts.length) {
-                  context.read<ShortsCubit>().fetchShorts(loadMore: true);
+                if (index == _mediaCubit.mediaItems.length) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                final short = context.read<ShortsCubit>().shorts[index];
+                final short = _mediaCubit.mediaItems[index];
                 return ShortsList(
                   name: short['channelTitle'],
                   profilePic: short['channelPic'],
@@ -158,15 +179,10 @@ class ShortsListPage extends StatelessWidget {
                   caption: short['title'],
                   likes: short['likes'],
                   comments: short['comments'],
-                  onLikePressed: () => context
-                      .read<ShortsCubit>()
-                      .likeVideo(short['videoId'], youtubeData['accessToken']),
-                  youtubeData: youtubeData,
+                  youtubeData: widget.youtubeData,
                 );
               },
             );
-          } else {
-            return const Center(child: Text('Unknown error occurred.'));
           }
         },
       ),

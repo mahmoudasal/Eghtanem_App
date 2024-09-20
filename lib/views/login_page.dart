@@ -154,47 +154,14 @@ class LoginPage extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          FutureBuilder<ui.Image>(
-            future: _loadImage('assets/thirdphoto.webp'),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  color: Colors.grey[200],
-                  child: const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              } else if (snapshot.hasError) {
-                return Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  color: const Color.fromARGB(255, 192, 158, 119),
-                  child: const Center(
-                    child: Icon(Icons.error),
-                  ),
-                );
-              } else if (snapshot.hasData) {
-                return Container(
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/thirdphoto.webp'),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                );
-              } else {
-                return Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  color: Colors.grey[200],
-                  child: const Center(
-                    child: Icon(Icons.error),
-                  ),
-                );
-              }
-            },
+          // Directly use the image without FutureBuilder
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/thirdphoto.webp'),
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
           Positioned.fill(
             child: Container(
