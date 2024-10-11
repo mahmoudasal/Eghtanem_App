@@ -8,14 +8,13 @@ class Dhikr {
   final int id;
   final String text;
   final int count;
-  final String audio;
+
   final String filename;
 
   Dhikr({
     required this.id,
     required this.text,
     required this.count,
-    required this.audio,
     required this.filename,
   });
 
@@ -24,7 +23,6 @@ class Dhikr {
       id: json['id'],
       text: json['text'],
       count: json['count'],
-      audio: json['audio'],
       filename: json['filename'],
     );
   }
@@ -33,14 +31,13 @@ class Dhikr {
 class Category {
   final int id;
   final String category;
-  final String audio;
+
   final String filename;
   final List<Dhikr> array;
 
   Category({
     required this.id,
     required this.category,
-    required this.audio,
     required this.filename,
     required this.array,
   });
@@ -52,7 +49,6 @@ class Category {
     return Category(
       id: json['id'],
       category: json['category'],
-      audio: json['audio'],
       filename: json['filename'],
       array: arrayList,
     );

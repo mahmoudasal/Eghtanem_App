@@ -22,12 +22,12 @@ class VideoPlayerCubit extends Cubit<VideoPlayerState> {
       _videoController = YoutubePlayerController(
         initialVideoId: videoId,
         flags: const YoutubePlayerFlags(
-          autoPlay: true,
-          mute: false,
-          forceHD: false,
-          hideControls: true,
-          loop: true,
-        ),
+            autoPlay: true,
+            mute: false,
+            forceHD: false,
+            hideControls: true,
+            loop: true,
+            hideThumbnail: false),
       );
 
       // Check if controller is successfully created

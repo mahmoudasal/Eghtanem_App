@@ -1,128 +1,199 @@
 import 'package:egtanem_application/cubits/prophet_stories/prophet_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
-// ignore: must_be_immutable
-class PropheticBiography extends StatefulWidget {
-  const PropheticBiography({super.key});
+class ProphetsStories extends StatefulWidget {
+  const ProphetsStories({super.key});
 
   @override
-  PropheticBiographyState createState() => PropheticBiographyState();
+  ProphetsStoriesState createState() => ProphetsStoriesState();
 }
 
-class PropheticBiographyState extends State<PropheticBiography> {
+class ProphetsStoriesState extends State<ProphetsStories> {
   final List<Map<String, String>> videos = const [
     {
-      "title": "الدرس الأول- العالم قبل الإسلام",
-      "url": "https://www.youtube.com/watch?v=LI99lWP1zac"
-    },
-    {
-      "title": "الدرس الثاني- مولد النبي وبداية شبابه",
-      "url": "https://www.youtube.com/watch?v=A6_y0HuwSQw"
+      "title": "قصة بداية الخلق وكيف خلق الله العالم وخلق آدم عليه السلام",
+      "url": "https://www.youtube.com/watch?v=pB7uZzu2dLI"
     },
     {
       "title":
-          "الدرس الثالث الجزء الأول- وصف النبي صلي الله عليه وسلم وزواجه من السيدة خديجة",
-      "url": "https://www.youtube.com/watch?v=nqpVIANGU-o"
+          "فسجد الملائكة، قصة سجود الملائكة لآدم عليه السلام و عصيان إبليس لأمر الله",
+      "url": "https://www.youtube.com/watch?v=8UTKSiLnL7o"
+    },
+    {
+      "title": "قصة الشجرة التي نهى عنها آدم عليه السلام",
+      "url": "https://www.youtube.com/watch?v=MLuVgXMFAJs"
+    },
+    {
+      "title": "قصة هابيل و قابيل و أول جريمة قتل في التاريخ",
+      "url": "https://www.youtube.com/watch?v=8fAUzFl5eRI"
+    },
+    {
+      "title": "قصة أول رسول يبعثه الله لأهل الأرض",
+      "url": "https://www.youtube.com/watch?v=8HOQIKt3uUQ"
+    },
+    {
+      "title": "قصة نوح عليه السلام و صناعة الفلك",
+      "url": "https://www.youtube.com/watch?v=JifgWr2Xo0M"
+    },
+    {
+      "title": "قصة نوح عليه السلام و الطوفان العظيم",
+      "url": "https://www.youtube.com/watch?v=RJpQo78JvT8"
+    },
+    {
+      "title": "هود عليه السلام يتحدى قوم عاد الجبابرة",
+      "url": "https://www.youtube.com/watch?v=DdPCewixmUk"
+    },
+    {
+      "title": "الريح العقيم و كيف أهلك الله قوم عاد بعد تجبرهم",
+      "url": "https://www.youtube.com/watch?v=AS0SIybXFGg"
+    },
+    {
+      "title": "قصة نبي الله صالح عليه السلام و إستكبار ثمود",
+      "url": "https://www.youtube.com/watch?v=ZBYdoe5fNa4"
+    },
+    {
+      "title": "قصة ناقة الله و كيف اهلك الله ثمود",
+      "url": "https://www.youtube.com/watch?v=I1dUAtzk5gM"
+    },
+    {
+      "title": "نشيدة خير الخلق  أحمد النفيس  برنامج قصص الأنبياء",
+      "url": "https://www.youtube.com/watch?v=SGVaXPc__g0"
+    },
+    {
+      "title": "قصة التسعة رهط المفسدين مع نبي الله صالح",
+      "url": "https://www.youtube.com/watch?v=FTPhkGxAA3g"
+    },
+    {
+      "title": "قصة خليل الله إبراهيم عليه السلام",
+      "url": "https://www.youtube.com/watch?v=LZzTxnKPo5w"
+    },
+    {
+      "title": "قصة إبراهيم عليه السلام و تحطيم الأصنام",
+      "url": "https://www.youtube.com/watch?v=6AuGZgzuUd0"
+    },
+    {
+      "title": "قصة إبراهيم عليه السلام مع النمرود أعتى ملوك الأرض",
+      "url": "https://www.youtube.com/watch?v=mbmCUY8iaJA"
     },
     {
       "title":
-          "الدرس الثالث الجزء الثاني- وصف النبي صلي الله عليه وسلم وزواجه من السيدة خديجة",
-      "url": "https://www.youtube.com/watch?v=YdWK45slrqc"
-    },
-    {
-      "title": "الدرس الرابع- نزول الوحي علي النبي والدعوة السرية بمكة",
-      "url": "https://www.youtube.com/watch?v=6SiKw-qQ6mk"
-    },
-    {
-      "title": "الدرس الخامس- بداية الجهر بالدعوة",
-      "url": "https://www.youtube.com/watch?v=GLvr-pYGLOs"
+          "نار لا تحرق معجزة نبي الله إبراهيم عليه السلام و خروجه من النار سالماً",
+      "url": "https://www.youtube.com/watch?v=N8CUpZr8SHk"
     },
     {
       "title":
-          "الدرس السادس- بداية فترة استضعاف المسلمين في مكة والهجرة إلى الحبشة",
-      "url": "https://www.youtube.com/watch?v=aliwSuClQRI"
+          "سيدنا ابراهيم يترك السيدة هاجر وإسماعيل عليهم السلام فى الصحراء بأمر من الله",
+      "url": "https://www.youtube.com/watch?v=VQpvw49HG0Q"
     },
     {
-      "title": "الدرس السابع- إسلام عمر بن الخطاب ووفاة أبو طالب عم النبي",
-      "url": "https://www.youtube.com/watch?v=dZ1EkPuj91w"
+      "title": "قصة الذبيح إسماعيل عليه السلام",
+      "url": "https://www.youtube.com/watch?v=K2KHCxpGJ1s"
     },
     {
-      "title":
-          "الدرس الثامن- عام الحزن ورحلة النبي صلي الله عليه وسلم إلى الطائف",
-      "url": "https://www.youtube.com/watch?v=Tl1NmCYk1G4"
+      "title": "قصة فاحشة سدوم و النهاية المفزعة لهم",
+      "url": "https://www.youtube.com/watch?v=wVd6CdWhwhM"
     },
     {
-      "title": "الدرس التاسع- رحلة الإسراء والمعراج",
-      "url": "https://www.youtube.com/watch?v=mvwhozvTKd8"
+      "title": "قصة بناء إبراهيم و إسماعيل عليهما السلام البيت الحرام",
+      "url": "https://www.youtube.com/watch?v=k4nk2i6PEQo"
     },
     {
-      "title": "الدرس العاشر- الطواف علي القبائل وبيعة العقبة الأولي",
-      "url": "https://www.youtube.com/watch?v=SlBo6bmtuTI"
+      "title": "أربعة من الطير .. ماذا طلب إبراهيم الخليل من ربه ؟",
+      "url": "https://www.youtube.com/watch?v=SmyDB6MxvjM"
     },
     {
-      "title": "الدرس الحادي عشر- أحداث الهجرة إلى المدينة",
-      "url": "https://www.youtube.com/watch?v=GGFse7G6cAs"
+      "title": "قصة رؤيا يوسف عليه السلام و حسد إخوته",
+      "url": "https://www.youtube.com/watch?v=Yfxzxd25s_s"
     },
     {
-      "title": "الدرس الثاني عشر- بداية العهد المدني وتأسيس مدينة المسلمين",
-      "url": "https://www.youtube.com/watch?v=3rzbyI2_cvc"
+      "title": "قصة يوسف عليه السلام و أكذوبة الذئب",
+      "url": "https://www.youtube.com/watch?v=iWLabR0VJqE"
     },
     {
-      "title": "الدرس الثالث عشر- مجتمع المدينة ومفهوم الجهاد في سبيل الله",
-      "url": "https://www.youtube.com/watch?v=7spRnIahHk4"
+      "title": "يوسف الصديق عليه السلام و فتنة داخل قصر عزيز مصر",
+      "url": "https://www.youtube.com/watch?v=bmIRaxIlGj4"
     },
     {
-      "title": "الدرس الرابع عشر- غزوة بدر",
-      "url": "https://www.youtube.com/watch?v=b7YVYhcQdfU"
+      "title": "قصة يوسف عليه السلام و ماذا حدث داخل السجن",
+      "url": "https://www.youtube.com/watch?v=PK91XcehU8I"
     },
     {
-      "title": "الدرس الخامس عشر- أحداث ما بين بدر وأحد",
-      "url": "https://www.youtube.com/watch?v=Pt2EEsFtf5Y"
+      "title": "يوسف الصديق عليه السلام عزيزًا لمصر",
+      "url": "https://www.youtube.com/watch?v=-7Dvnyg8q3k"
     },
     {
-      "title": "الدرس السادس عشر- غزوة أحد",
-      "url": "https://www.youtube.com/watch?v=EWvAT3HcUic"
+      "title": "لقاء نبي الله يوسف الصديق بأخيه بعد فراق طويل",
+      "url": "https://www.youtube.com/watch?v=QK2gqqETvDw"
     },
     {
-      "title": "الدرس السابع عشر- حادثة الإفك",
-      "url": "https://www.youtube.com/watch?v=2XJ1102-9rg"
+      "title": "رؤيا يوسف الصديق عليه السلام تتحقق",
+      "url": "https://www.youtube.com/watch?v=6zifF1cJJkU"
     },
     {
-      "title": "الدرس الثامن عشر- غزوة الخندق",
-      "url": "https://www.youtube.com/watch?v=XPql-o9tQ0s"
+      "title": "ومضات (١) من قصص الأنبياء",
+      "url": "https://www.youtube.com/watch?v=pekXxazOgsg"
     },
     {
-      "title": "الدرس التاسع عشر- صلح الحديبية",
-      "url": "https://www.youtube.com/watch?v=mbsTyEaQmJY"
+      "title": "ومضات (2) من قصص الأنبياء",
+      "url": "https://www.youtube.com/watch?v=xrtXvmyHxEA"
     },
     {
-      "title": "الدرس العشرون- غزوة خيبر",
-      "url": "https://www.youtube.com/watch?v=3MF0xKJ2DWo"
+      "title": "قصة شعيب عليه السلام",
+      "url": "https://www.youtube.com/watch?v=G41XJo_Z-OM"
     },
     {
-      "title": "الدرس الواحد والعشرون- أحداث ما قبل فتح مكة",
-      "url": "https://www.youtube.com/watch?v=9SX9K1csx28"
+      "title": "قصة أيوب عليه السلام",
+      "url": "https://www.youtube.com/watch?v=UQ3eIbiij5g"
     },
     {
-      "title": "الدرس الثاني والعشرون- فتح مكة",
-      "url": "https://www.youtube.com/watch?v=TSkXmxSs-pA"
+      "title": "قصة يونس عليه السلام و ماذا حدث في بطن الحوت",
+      "url": "https://www.youtube.com/watch?v=euSfGzg0MFo"
     },
     {
-      "title": "الدرس الثالث والعشرون- غزوة حنين وحصار الطائف",
-      "url": "https://www.youtube.com/watch?v=ySswp1_bn4A"
+      "title": "قصة كليم الله موسى عليه السلام  الجزء الاول",
+      "url": "https://www.youtube.com/watch?v=Aw4FLH5c6dM"
     },
     {
-      "title": "الدرس الرابع والعشرون- غزوة تبوك",
-      "url": "https://www.youtube.com/watch?v=ZrcxE10HVoQ"
+      "title": "قصة كليم الله موسى عليه السلام و خروجه من مصر إلى أرض مدين",
+      "url": "https://www.youtube.com/watch?v=sIRAxluOYEk"
     },
     {
-      "title": "الدرس الخامس والعشرون والأخير- وفاة النبي",
-      "url": "https://www.youtube.com/watch?v=k8CLspkQSEk"
+      "title": "قصة موسى عليه السلام الجزء الثالث",
+      "url": "https://www.youtube.com/watch?v=WDsBN-AimRY"
     },
+    {
+      "title": "قصة موسى عليه السلام الجزء الرابع",
+      "url": "https://www.youtube.com/watch?v=l4Z36KvRBus"
+    },
+    {
+      "title": "قصة موسى عليه السلام الجزء الخامس",
+      "url": "https://www.youtube.com/watch?v=ct3azvIgxGU"
+    },
+    {
+      "title": "قصة موسى عليه السلام الجزء السابع",
+      "url": "https://www.youtube.com/watch?v=DvII6sqUP3Q"
+    },
+    {
+      "title": "قصة موسى عليه السلام الجزء الثامن",
+      "url": "https://www.youtube.com/watch?v=3PAxnK3fids"
+    },
+    {
+      "title": "قصة موسى عليه السلام الجزء التاسع",
+      "url": "https://www.youtube.com/watch?v=xE6xA4kWllk"
+    },
+    {
+      "title": "قصة موسى عليه السلام الجزء العاشر",
+      "url": "https://www.youtube.com/watch?v=qYTany6MxlU"
+    },
+    {
+      "title": "قصة موسى عليه السلام الجزء الثالث عشر",
+      "url": "https://www.youtube.com/watch?v=KqSL3jT8v-E"
+    }
   ];
 
   late VideoPlayerCubit _videoPlayerCubit;
@@ -158,7 +229,7 @@ class PropheticBiographyState extends State<PropheticBiography> {
             shadowColor: const Color(0xff1D1D1B),
             foregroundColor: const Color(0xff1D1D1B),
             title: Text(
-              'السيره النبوية',
+              'قصص الأنبياء',
               style: TextStyle(
                 fontFamily: 'Almarai',
                 fontWeight: FontWeight.w700,
@@ -245,8 +316,6 @@ class PropheticBiographyState extends State<PropheticBiography> {
                         },
                         children: [
                           BlocBuilder<VideoPlayerCubit, VideoPlayerState>(
-                            bloc:
-                                _videoPlayerCubit, // Ensure we use the correct cubit instance
                             builder: (context, state) {
                               final cubit = _videoPlayerCubit;
                               if (state is VideoLoading &&

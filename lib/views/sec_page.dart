@@ -1,9 +1,3 @@
-// ignore_for_file: unused_element
-
-import 'dart:ui' as ui;
-
-import 'package:egtanem_application/views/profile.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -15,10 +9,13 @@ class SecondPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Initialize ScreenUtil for responsive sizing
+    ScreenUtil.init(context, designSize: const Size(360, 690));
+
     return Scaffold(
       body: Stack(
         children: [
-          // Directly use the image without FutureBuilder
+          // Background image
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -27,74 +24,78 @@ class SecondPage extends StatelessWidget {
               ),
             ),
           ),
+          // Gradient overlay
           Positioned.fill(
             child: Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.center,
                   end: Alignment.bottomCenter,
                   colors: [
-                    const Color.fromARGB(120, 0, 0, 0),
-                    Colors.black.withOpacity(0.9999),
+                    Color.fromARGB(120, 0, 0, 0),
+                    Colors.black,
                   ],
                 ),
               ),
             ),
           ),
-          Column(
-            children: [
-              SizedBox(
-                height: 0.53.sh,
-                width: 1.sw,
-              ),
-              Text(
-                'زكاة الوقت تأديته في مرضاة الله',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Almarai',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 25.sp,
-                  color: const Color(0xFFF2EEEB),
-                ),
-              ),
-              SizedBox(
-                height: 0.03.sh,
-              ),
-              Text(
-                'استمتع بمشاهدة و سماع ما ينفعك في دنياك و اخرتك',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Almarai',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 25.sp,
-                  color: const Color(0xFFFAFAFA),
-                ),
-              ),
-              SizedBox(
-                height: 0.22.sh,
-              ),
-              SizedBox(
-                width: 0.9.sw,
-                height: 40.h,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).push(createRoute(LoginPage()));
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF94795B),
-                  ),
-                  child: Text(
-                    'ابدأ المشاهدة',
+          // Content
+          SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  // First Text
+                  Text(
+                    'زكاة الوقت تأديته في مرضاة الله',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: 'Almarai',
                       fontWeight: FontWeight.w700,
-                      fontSize: 22.sp,
+                      fontSize: 23.sp,
+                      color: const Color(0xFFF2EEEB),
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  // Second Text
+                  Text(
+                    'استمتع بمشاهدة و سماع ما ينفعك في دنياك و اخرتك',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Almarai',
+                      fontWeight: FontWeight.w700,
+                      fontSize: 24.sp,
                       color: const Color(0xFFFAFAFA),
                     ),
                   ),
-                ),
+                  SizedBox(height: 120.h),
+                  // Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50.h,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(createRoute(LoginPage()));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF94795B),
+                      ),
+                      child: Text(
+                        'ابدأ المشاهدة',
+                        style: TextStyle(
+                          fontFamily: 'Almarai',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 22.sp,
+                          color: const Color(0xFFFAFAFA),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                ],
               ),
-            ],
+            ),
           ),
         ],
       ),

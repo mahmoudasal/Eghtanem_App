@@ -1,9 +1,5 @@
 import 'dart:io';
-import 'dart:ui' as ui;
-
 import 'package:blurrycontainer/blurrycontainer.dart';
-import 'package:egtanem_application/views/profile.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -16,13 +12,42 @@ import '../controller/secure_token.dart';
 import '../widgets/custom_page_transition.dart';
 import 'nav_screen.dart';
 
-class LoginPage extends StatelessWidget {
-  LoginPage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
+  @override
+  LoginPageState createState() => LoginPageState();
+}
+
+class LoginPageState extends State<LoginPage> {
   // Initialize a logger
   final Logger logger = Logger();
 
   final storageService = SecureStorageService();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Pre-cache images here
+    _precacheImages(context);
+  }
+
+  void _precacheImages(BuildContext context) {
+    // List of images to pre-cache
+    final images = [
+      'assets/احاديث.webp',
+      'assets/المصحف.webp',
+      'assets/السيره النبويه.webp',
+      'assets/عقيده.webp',
+      'assets/الأخلاق الإسلامية.webp',
+      'assets/الأدعية والأذكار.webp',
+    ];
+
+    for (final imagePath in images) {
+      precacheImage(AssetImage(imagePath), context);
+    }
+    logger.i("Images pre-cached successfully.");
+  }
 
   Future<void> _signInWithGoogle(BuildContext context) async {
     try {
@@ -54,14 +79,31 @@ class LoginPage extends StatelessWidget {
       logger.i("User Credential: ${userCredential.user}");
 
       // Fetch YouTube channel information
-      final youtubeData = await _fetchYouTubeChannelInfo();
+      Map<String, dynamic>? youtubeData;
+      try {
+        youtubeData = await _fetchYouTubeChannelInfo();
+      } catch (e, stackTrace) {
+        // Handle the exception and proceed
+        logger.e("Failed to fetch YouTube channel info: $e", e, stackTrace);
+        youtubeData = null; // Proceed without youtubeData
+        // Optionally, show a message to the user
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                "Unable to fetch YouTube data. Some features may be limited.",
+              ),
+            ),
+          );
+        }
+      }
 
       // Ensure the context is still valid
       if (!context.mounted) return;
 
-      // Navigate to the next screen with youtubeData
+      // Navigate to the next screen with youtubeData (can be null)
       Navigator.of(context).pushReplacement(
-        createRoute(NaviagionScreen(youtubeData: youtubeData)),
+        createRoute(NaviagionScreen(youtubeData: youtubeData ?? {})),
       );
     } on FirebaseAuthException catch (e) {
       logger.e("Firebase Auth Error: $e");
@@ -138,31 +180,19 @@ class LoginPage extends StatelessWidget {
     throw Exception('Failed after $maxRetries retries');
   }
 
-  Future<ui.Image> _loadImage(String path) async {
-    try {
-      return await imageAssets.load(path);
-    } catch (e) {
-      if (kDebugMode) {
-        print("Error loading image: $e");
-      }
-      rethrow;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Directly use the image without FutureBuilder
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/thirdphoto.webp'),
-                fit: BoxFit.cover,
-              ),
+          // Background image filling the entire screen
+          Positioned.fill(
+            child: Image.asset(
+              'assets/thirdphoto.webp',
+              fit: BoxFit.cover,
             ),
           ),
+          // Gradient overlay for the background image
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -177,76 +207,86 @@ class LoginPage extends StatelessWidget {
               ),
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                height: 0.2.sh,
-                width: MediaQuery.of(context).size.width,
-              ),
-              Opacity(
-                opacity: 0.5,
-                child: Image.asset(
-                  'assets/photo3.webp',
-                  width: 0.65.sw,
-                  colorBlendMode: BlendMode.plus,
-                ),
-              ),
-              Text(
-                "إغتنم",
-                style: TextStyle(
-                  fontFamily: 'Almarai',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 24.sp,
-                  color: const Color(0xFFD5CBBF),
-                ),
-              ),
-              SizedBox(height: 0.02.sh),
-              BlurryContainer(
-                blur: 20,
-                width: 0.8.sw,
-                height: 0.1.sh,
-                elevation: 0,
-                color: const Color.fromARGB(118, 0, 0, 0),
-                padding: const EdgeInsets.all(8),
-                borderRadius: BorderRadius.circular(20),
+          // SafeArea to avoid overlaps with system UI
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                // Ensures content is scrollable on smaller screens
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(83, 55, 53, 77),
-                        shadowColor: Colors.transparent,
-                        splashFactory: NoSplash.splashFactory,
+                    // Spacing at the top
+                    SizedBox(height: 0.1.sh),
+                    // Logo or main image with adaptive size
+                    Opacity(
+                      opacity: 0.5,
+                      child: Image.asset(
+                        'assets/photo3.webp',
+                        width: 0.65.sw,
+                        colorBlendMode: BlendMode.plus,
                       ),
-                      onPressed: () {
-                        _signInWithGoogle(context);
-                      },
-                      child: SizedBox(
-                        height: 0.03.sh,
-                        width: 0.6.sw,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const ImageIcon(AssetImage("assets/google.png")),
-                            SizedBox(width: 0.05.sw),
-                            Text(
-                              "تسجيل الدخول عبر جوجل",
-                              style: TextStyle(
-                                fontFamily: 'Almarai',
-                                fontWeight: FontWeight.w400,
-                                fontSize: 16.sp,
-                                color: Colors.white,
-                              ),
+                    ),
+                    // Main title text
+                    Text(
+                      "إغتنم",
+                      textDirection: TextDirection.rtl,
+                      style: TextStyle(
+                        fontFamily: 'Almarai',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 24.sp,
+                        color: const Color(0xFFD5CBBF),
+                      ),
+                    ),
+                    SizedBox(height: 0.02.sh),
+                    // Button container with padding instead of fixed width
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 0.1.sw),
+                      child: BlurryContainer(
+                        blur: 20,
+                        elevation: 0,
+                        color: const Color.fromARGB(118, 0, 0, 0),
+                        padding: const EdgeInsets.all(18),
+                        borderRadius: BorderRadius.circular(20),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                const Color.fromARGB(83, 55, 53, 77),
+                            shadowColor: Colors.transparent,
+                            splashFactory: NoSplash.splashFactory,
+                          ),
+                          onPressed: () {
+                            _signInWithGoogle(context);
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 0.02.sh),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const ImageIcon(
+                                    AssetImage("assets/google.png")),
+                                SizedBox(width: 0.05.sw),
+                                Text(
+                                  "تسجيل الدخول عبر جوجل",
+                                  textDirection: TextDirection.rtl,
+                                  style: TextStyle(
+                                    fontFamily: 'Almarai',
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 16.sp,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
+                    // Additional spacing at the bottom
+                    SizedBox(height: 0.1.sh),
                   ],
                 ),
               ),
-            ],
+            ),
           ),
         ],
       ),

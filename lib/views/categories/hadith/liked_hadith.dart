@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../data/prophet_speech_json.dart';
+import '../../../data/prophet_speech_json.dart';
 
 class LikedHadiths extends StatefulWidget {
   final Set<int> likedHadiths;
@@ -140,6 +140,7 @@ class LikedHadithsState extends State<LikedHadiths> {
                         ),
                         SizedBox(height: 10.h),
                         Text(
+                          textDirection: TextDirection.rtl,
                           hadith.hadith,
                           style: TextStyle(
                             fontFamily: 'Almarai',
@@ -149,6 +150,7 @@ class LikedHadithsState extends State<LikedHadiths> {
                         ),
                         SizedBox(height: 10.h),
                         Text(
+                          textDirection: TextDirection.rtl,
                           hadith.description,
                           style: TextStyle(
                             fontFamily: 'Almarai',

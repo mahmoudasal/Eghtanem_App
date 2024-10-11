@@ -4,11 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../widgets/categories_card.dart';
 
-import 'supplications_&_remembrances.dart';
-import 'prophets _stories.dart';
+import 'duah_zikr/duah_zikr.dart';
+import 'prophets_stories.dart';
 
 import 'tafseer/tafseer.dart';
-import 'hadith.dart';
+import 'hadith/hadith.dart';
 import 'prophetic_biography.dart';
 import 'quran/quran.dart';
 
@@ -58,7 +58,7 @@ class CategoriesPage extends StatelessWidget {
             CustomCard(
               imagePath: 'assets/السيره النبويه.webp',
               cardName: 'السيرة النبوية',
-              pageBuilder: () => PropheticBiography(),
+              pageBuilder: () => const PropheticBiography(),
             ),
             CustomCard(
               imagePath: 'assets/عقيده.webp',
@@ -68,7 +68,7 @@ class CategoriesPage extends StatelessWidget {
             CustomCard(
               imagePath: 'assets/الأخلاق الإسلامية.webp',
               cardName: 'قصص الانبياء',
-              pageBuilder: () => ProphetsStories(),
+              pageBuilder: () => const ProphetsStories(),
             ),
             CustomCard(
               imagePath: 'assets/الأدعية والأذكار.webp',

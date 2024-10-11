@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../data/prophet_speech_json.dart';
+import '../../../data/prophet_speech_json.dart';
 import 'liked_hadith.dart';
 
 class Prophetspeech extends StatefulWidget {
@@ -123,7 +123,7 @@ class ProphetspeechState extends State<Prophetspeech> {
                 return Card(
                   color: const Color(0XFF171715),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   margin: EdgeInsets.symmetric(vertical: 8.h),
                   child: Padding(
@@ -147,18 +147,18 @@ class ProphetspeechState extends State<Prophetspeech> {
                         ),
                         SizedBox(height: 10.h),
                         Text(
+                          textDirection: TextDirection.rtl,
                           hadith.hadith,
                           style: TextStyle(
-                            fontFamily: 'Almarai',
                             fontSize: 18.sp,
                             color: const Color(0xFFFAFAFA),
                           ),
                         ),
                         SizedBox(height: 10.h),
                         Text(
+                          textDirection: TextDirection.rtl,
                           hadith.description,
                           style: TextStyle(
-                            fontFamily: 'Almarai',
                             fontSize: 16.sp,
                             color: const Color(0xFFFAFAFA),
                           ),

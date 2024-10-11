@@ -1,6 +1,3 @@
-import 'dart:ui' as ui;
-
-import 'package:egtanem_application/views/profile.dart';
 import 'package:egtanem_application/views/sec_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -12,10 +9,10 @@ class FirstPage extends StatefulWidget {
   const FirstPage({super.key});
 
   @override
-  _FirstPageState createState() => _FirstPageState();
+  FirstPageState createState() => FirstPageState();
 }
 
-class _FirstPageState extends State<FirstPage> {
+class FirstPageState extends State<FirstPage> {
   late ImageProvider _backgroundImage;
   bool _isImageLoaded = false;
   bool _hasLoadedOnce = false;
@@ -106,7 +103,7 @@ class _FirstPageState extends State<FirstPage> {
                       width: double.infinity,
                     ),
                     SizedBox(
-                      width: 0.9.sw,
+                      width: 0.8.sw,
                       child: Text(
                         'قال رسولُ اللهِ صلَّى اللهُ عليه وسلَّم لرجلٍ وهو يَعِظُه : اغتنِمْ خمسًا قبل خمسٍ : شبابَك قبل هَرَمِك، وصِحَّتَك قبل سَقَمِك، وغناك قبل فقرِك، وفراغَك قبل شُغلِك، وحياتَك قبل موتِك.',
                         textAlign: TextAlign.center,
@@ -121,7 +118,7 @@ class _FirstPageState extends State<FirstPage> {
                     SizedBox(height: 0.12.sh),
                     SizedBox(
                       width: 0.9.sw,
-                      height: 40.h,
+                      height: 50.h,
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).push(
@@ -147,8 +144,8 @@ class _FirstPageState extends State<FirstPage> {
                 ),
               ],
             )
-          : const Center(
-              child: const CircularProgressIndicator(),
+          : Container(
+              color: Colors.black,
             ),
     );
   }

@@ -4,8 +4,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:asset_cache/asset_cache.dart';
-import 'package:flutter/services.dart'
-    show Clipboard, ClipboardData, rootBundle;
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:social_share/social_share.dart';
 
 final imageAssets = ImageAssetCache(basePath: '');
@@ -36,10 +35,10 @@ class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key, required this.youtubeData});
 
   @override
-  _ProfilePageState createState() => _ProfilePageState();
+  ProfilePageState createState() => ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class ProfilePageState extends State<ProfilePage> {
   late Future<Hadith?> futureRandomHadith;
 
   @override
@@ -61,10 +60,9 @@ class _ProfilePageState extends State<ProfilePage> {
         return hadiths[random.nextInt(hadiths.length)];
       }
       return null;
-    } catch (e, stacktrace) {
+    } catch (e) {
       // Log error and stacktrace for further analysis
-      print('Error loading Hadith: $e');
-      print(stacktrace);
+
       // Optionally, notify the user
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error loading Hadith: $e')),
@@ -78,22 +76,8 @@ class _ProfilePageState extends State<ProfilePage> {
       return await imageAssets.load(path);
     } catch (e) {
       // Log the error for the image loading issue
-      print('Error loading image: $e');
-      rethrow;
-    }
-  }
 
-  void _copyToClipboard(String text) {
-    try {
-      Clipboard.setData(ClipboardData(text: text));
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Hadith copied to clipboard')),
-      );
-    } catch (e) {
-      // Handle clipboard errors and notify the user
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to copy to clipboard: $e')),
-      );
+      rethrow;
     }
   }
 
@@ -105,8 +89,6 @@ class _ProfilePageState extends State<ProfilePage> {
       );
     } catch (e) {
       // Handle sharing errors and notify the user
-
-      print('Error sharing Hadith: $e');
     }
   }
 

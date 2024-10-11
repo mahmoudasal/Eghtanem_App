@@ -1,11 +1,9 @@
-import 'package:bloc/bloc.dart';
 import 'dart:convert';
-import 'dart:io';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'dart:math';
+import 'package:bloc/bloc.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logger/logger.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 enum MediaType { video, short }
 
@@ -13,148 +11,271 @@ abstract class MediaState {}
 
 class MediaInitial extends MediaState {}
 
-class MediaLoading extends MediaState {
-  final List<Map<String, dynamic>> mediaItems;
-  MediaLoading(this.mediaItems);
-}
-
-class MediaLoadingMore extends MediaState {}
+class MediaLoading extends MediaState {}
 
 class MediaLoaded extends MediaState {
-  final List<Map<String, dynamic>> mediaItems;
-  final String? nextPageToken;
+  final List<Map<String, dynamic>> newMediaItems;
 
-  MediaLoaded(this.mediaItems, this.nextPageToken);
+  MediaLoaded({required this.newMediaItems});
 }
 
 class MediaError extends MediaState {
   final String errorMessage;
 
-  MediaError(this.errorMessage);
+  MediaError({required this.errorMessage});
 }
 
 class MediaCubit extends Cubit<MediaState> {
+  final MediaType mediaType;
+  final Logger logger = Logger();
+
+  bool isLoading = false;
+  bool hasMoreData = true;
+
+  // Store nextPageTokens for channels
+  Map<String, String?> _channelNextPageTokens = {};
+
+  // Store media items and shown video IDs
+  List<Map<String, dynamic>> mediaItems = [];
+  Set<String> shownVideoIds = {};
+
   MediaCubit({required this.mediaType}) : super(MediaInitial());
 
-  final MediaType mediaType;
-
-  final _secureStorage = const FlutterSecureStorage();
-  String? _nextPageToken;
-  bool _hasMoreData = true;
-  bool _isLoading = false;
-  final List<Map<String, dynamic>> _mediaItems = [];
-  var logger = Logger();
-
-  List<Map<String, dynamic>> get mediaItems => _mediaItems;
-  bool get hasMoreData => _hasMoreData;
-  bool get isLoading => _isLoading;
-
   Future<void> fetchMedia({bool loadMore = false}) async {
-    if (_isLoading) return;
-    _isLoading = true;
+    if (isLoading) return;
 
-    // Emit appropriate loading state
-    if (!loadMore && _mediaItems.isEmpty) {
-      emit(MediaLoading(_mediaItems));
-    } else {
-      emit(MediaLoadingMore());
-    }
+    isLoading = true;
+    emit(MediaLoading());
 
     try {
-      final accessToken = await _getAccessToken();
-      if (accessToken == null) {
-        throw Exception('User not signed in');
+      List<Map<String, dynamic>> newMediaItems = [];
+
+      // Attempt to fetch media up to 10 times if no items are found
+      int retryCount = 0;
+      const int maxRetries = 10;
+      bool itemsFound = false;
+
+      while (retryCount < maxRetries && !itemsFound) {
+        retryCount++;
+
+        // Select random channels
+        final channelIds = _getRandomChannelIds(5);
+
+        for (var channelId in channelIds) {
+          final uri = _buildUri(channelId, _channelNextPageTokens[channelId]);
+
+          logger.d('Fetching media from URI: $uri');
+
+          final response = await http.get(uri);
+
+          logger.d('API Response Status Code: ${response.statusCode}');
+          logger.v('API Response Body: ${response.body}');
+
+          if (response.statusCode == 200) {
+            final responseData = json.decode(response.body);
+
+            // Update nextPageToken
+            _channelNextPageTokens[channelId] = responseData['nextPageToken'];
+
+            final parsedMediaItems = await _parseMediaData(responseData);
+
+            // Filter out already shown videos
+            parsedMediaItems.removeWhere(
+              (item) => shownVideoIds.contains(item['videoId']),
+            );
+
+            if (parsedMediaItems.isNotEmpty) {
+              itemsFound = true;
+              newMediaItems.addAll(parsedMediaItems);
+            } else {
+              logger.w(
+                  'No new items found for channel $channelId on attempt $retryCount.');
+            }
+          } else {
+            final errorData = json.decode(response.body);
+            final errorMessage =
+                errorData['error']['message'] ?? 'Unknown error';
+            logger.e('Failed to fetch media: $errorMessage');
+          }
+        }
+
+        if (!itemsFound && retryCount < maxRetries) {
+          logger.w(
+              'No items found on attempt $retryCount. Retrying after delay...');
+          await Future.delayed(const Duration(seconds: 1));
+        }
       }
 
-      logger.d("Access token retrieved successfully.");
-      final uri = _buildUri();
-      logger.d('Fetching media from URI: $uri');
+      if (itemsFound) {
+        // Shuffle and update media items
+        newMediaItems.shuffle();
+        shownVideoIds.addAll(newMediaItems.map((item) => item['videoId']));
 
-      final response = await http.get(uri, headers: {
-        'Authorization': 'Bearer $accessToken',
-      });
-
-      logger.i('API Response Status Code: ${response.statusCode}');
-      logger.v('API Response Body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        logger.d('Parsed API Response: $data');
-
-        final newItems = await _parseMediaData(data, accessToken);
-
-        // Remove duplicates
-        final existingVideoIds =
-            _mediaItems.map((item) => item['videoId']).toSet();
-        final uniqueNewItems = newItems
-            .where((item) => !existingVideoIds.contains(item['videoId']))
-            .toList();
-
-        _mediaItems.addAll(uniqueNewItems);
-
-        if (data['nextPageToken'] != null) {
-          _nextPageToken = data['nextPageToken'];
-          logger.d('Updated nextPageToken: $_nextPageToken');
+        if (loadMore) {
+          mediaItems.addAll(newMediaItems);
         } else {
-          _hasMoreData = false;
-          logger.d('No more data to load. Setting _hasMoreData to false.');
+          mediaItems = newMediaItems;
         }
 
-        if (!isClosed) {
-          emit(MediaLoaded(_mediaItems, _nextPageToken));
-        }
+        emit(MediaLoaded(newMediaItems: newMediaItems));
+
+        // Check if more data is available
+        hasMoreData =
+            _channelNextPageTokens.values.any((token) => token != null);
       } else {
-        logger.e('Failed to fetch media. Status Code: ${response.statusCode}');
-        throw HttpException(
-            'Failed to fetch media. Status code: ${response.statusCode}');
+        // No items found after retries
+        emit(MediaError(errorMessage: 'Check your internet connection'));
       }
     } catch (e, stacktrace) {
       logger.e('An error occurred while fetching media', e, stacktrace);
-      if (!isClosed) {
-        emit(MediaError('Failed to fetch media: ${e.toString()}'));
-      }
+      emit(MediaError(errorMessage: 'An error occurred. Please try again.'));
     } finally {
-      _isLoading = false;
-      logger.d("Media fetch operation completed.");
+      isLoading = false;
+      logger.d('Media fetch operation completed.');
     }
   }
 
-  Uri _buildUri() {
-    final channelId = mediaType == MediaType.video
-        ? 'UCWjCSGhmSGu0VLf2mPFS0Kg' // Replace with your channel ID
-        : 'UCp479sePW_R7NM8AhPyUDoQ'; // Channel ID for shorts
+  // Helper method to get multiple random channel IDs
+  List<String> _getRandomChannelIds(int count) {
+    final channelIds = dotenv.env['CHANNEL_IDS']?.split(',');
+
+    if (channelIds == null || channelIds.isEmpty) {
+      throw Exception(
+          'Channel IDs not found. Please set your channel IDs in the .env file.');
+    }
+
+    final random = Random();
+    final randomChannelIds = <String>{};
+
+    while (randomChannelIds.length < count &&
+        randomChannelIds.length < channelIds.length) {
+      final randomChannelId = channelIds[random.nextInt(channelIds.length)];
+      randomChannelIds.add(randomChannelId);
+    }
+
+    logger.d('Selected random channel IDs: $randomChannelIds');
+    return randomChannelIds.toList();
+  }
+
+  Uri _buildUri(String channelId, String? pageToken) {
+    final apiKey = dotenv.env['API_KEY'];
+
+    if (apiKey == null) {
+      throw Exception(
+          'API Key not found. Please set your API Key in the .env file.');
+    }
 
     final params = {
       'part': 'snippet',
       'channelId': channelId,
       'type': 'video',
-      // Remove 'order' parameter to get more randomness
-      'maxResults': '10',
-      // Use 'videoDuration' to help filter shorts and long videos
-      if (mediaType == MediaType.video) 'videoDuration': 'any',
-      if (mediaType == MediaType.short) 'videoDuration': 'short',
-      if (_nextPageToken != null) 'pageToken': _nextPageToken,
+      'maxResults': '8',
+      'key': apiKey,
     };
 
+    if (pageToken != null) {
+      params['pageToken'] = pageToken;
+    }
+
     final uri = Uri.https('www.googleapis.com', '/youtube/v3/search', params);
+    logger.d('Using channel ID: $channelId');
     return uri;
   }
 
-  Future<Map<String, Map<String, dynamic>>> _fetchVideosDetails(
-      String accessToken, List<String> videoIds) async {
-    final Map<String, Map<String, dynamic>> videoDetailsMap = {};
+  Future<List<Map<String, dynamic>>> _parseMediaData(
+      Map<String, dynamic> data) async {
+    final List<dynamic>? items = data['items'];
+    if (items == null || items.isEmpty) {
+      logger.w('No items found in the API response.');
+      return [];
+    }
 
+    // Extract video IDs and channel IDs
+    final videoIds = <String>[];
+    final channelIds = <String>[];
+
+    for (var item in items) {
+      final videoId = item['id']?['videoId'];
+      if (videoId != null) {
+        videoIds.add(videoId);
+      } else {
+        logger.w('Video ID not found for an item.');
+        continue; // Skip if no videoId
+      }
+
+      final channelId = item['snippet']?['channelId'];
+      if (channelId != null) {
+        channelIds.add(channelId);
+      } else {
+        logger.w('Channel ID not found for an item.');
+      }
+    }
+
+    // Fetch additional details
+    final videoDetailsMap = await _fetchVideosDetails(videoIds);
+    final channelPicturesMap = await _fetchChannelsPictures(channelIds);
+
+    // Build media items
+    final mediaItems = <Map<String, dynamic>>[];
+    for (var item in items) {
+      try {
+        final videoId = item['id']?['videoId'] ?? '';
+        final snippet = item['snippet'] ?? {};
+        final title = snippet['title'] ?? '';
+        final thumbnail =
+            snippet['thumbnails']?['high']?['url'] ?? ''; // High quality
+        final channelTitle = snippet['channelTitle'] ?? '';
+        final channelId = snippet['channelId'] ?? '';
+
+        final videoDetails = videoDetailsMap[videoId];
+        final channelPic = channelPicturesMap[channelId];
+
+        final mediaItem = {
+          'videoId': videoId,
+          'title': title,
+          'thumbnail': thumbnail,
+          'channelTitle': channelTitle,
+          'channelPic': channelPic ?? '',
+          'views': int.parse(videoDetails?['views'] ?? '0'),
+          'likes': int.parse(videoDetails?['likes'] ?? '0'),
+          'comments': int.parse(videoDetails?['comments'] ?? '0'),
+          'duration': videoDetails?['duration'] ?? '0',
+        };
+
+        mediaItems.add(mediaItem);
+      } catch (e, stacktrace) {
+        logger.e('Error parsing media item', e, stacktrace);
+      }
+    }
+
+    logger.d('Parsed ${mediaItems.length} media items successfully.');
+    return mediaItems;
+  }
+
+  Future<Map<String, Map<String, dynamic>>> _fetchVideosDetails(
+      List<String> videoIds) async {
+    final videoDetailsMap = <String, Map<String, dynamic>>{};
+    final apiKey = dotenv.env['API_KEY'];
+
+    // Fetch video details in chunks of 50
     for (int i = 0; i < videoIds.length; i += 50) {
       final chunk = videoIds.sublist(
-          i, i + 50 > videoIds.length ? videoIds.length : i + 50);
-
-      final response = await http.get(
-        Uri.parse(
-            'https://www.googleapis.com/youtube/v3/videos?part=statistics,contentDetails&id=${chunk.join(",")}'),
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-        },
+        i,
+        i + 50 > videoIds.length ? videoIds.length : i + 50,
       );
+
+      final params = {
+        'part': 'statistics,contentDetails',
+        'id': chunk.join(','),
+        'key': apiKey!,
+      };
+
+      final uri = Uri.https('www.googleapis.com', '/youtube/v3/videos', params);
+
+      final response = await http.get(uri);
+
+      logger.d('Video details response status code: ${response.statusCode}');
+      logger.v('Video details response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final items = json.decode(response.body)['items'];
@@ -164,18 +285,19 @@ class MediaCubit extends Cubit<MediaState> {
           final contentDetails = item['contentDetails'];
 
           final duration = contentDetails['duration'];
-          final durationSeconds = _parseDuration(duration);
+          final durationFormatted = _formatDuration(duration);
 
           videoDetailsMap[videoId] = {
-            'likeCount': statistics['likeCount'],
-            'commentCount': statistics['commentCount'],
             'views': statistics['viewCount'] ?? '0',
-            'duration': _formatDuration(duration),
-            'durationSeconds': durationSeconds,
+            'likes': statistics['likeCount'] ?? '0',
+            'comments': statistics['commentCount'] ?? '0',
+            'duration': durationFormatted,
           };
         }
       } else {
-        throw Exception('Failed to fetch video details');
+        final errorData = json.decode(response.body);
+        final errorMessage = errorData['error']['message'] ?? 'Unknown error';
+        throw Exception('Failed to fetch video details: $errorMessage');
       }
     }
 
@@ -183,20 +305,30 @@ class MediaCubit extends Cubit<MediaState> {
   }
 
   Future<Map<String, String>> _fetchChannelsPictures(
-      String accessToken, List<String> channelIds) async {
-    final Map<String, String> channelPicturesMap = {};
+      List<String> channelIds) async {
+    final channelPicturesMap = <String, String>{};
+    final apiKey = dotenv.env['API_KEY'];
 
+    // Fetch channel pictures in chunks of 50
     for (int i = 0; i < channelIds.length; i += 50) {
       final chunk = channelIds.sublist(
-          i, i + 50 > channelIds.length ? channelIds.length : i + 50);
-
-      final response = await http.get(
-        Uri.parse(
-            'https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${chunk.join(",")}'),
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-        },
+        i,
+        i + 50 > channelIds.length ? channelIds.length : i + 50,
       );
+
+      final params = {
+        'part': 'snippet',
+        'id': chunk.join(','),
+        'key': apiKey!,
+      };
+
+      final uri =
+          Uri.https('www.googleapis.com', '/youtube/v3/channels', params);
+
+      final response = await http.get(uri);
+
+      logger.d('Channel pictures response status code: ${response.statusCode}');
+      logger.v('Channel pictures response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final items = json.decode(response.body)['items'];
@@ -207,205 +339,43 @@ class MediaCubit extends Cubit<MediaState> {
           channelPicturesMap[channelId] = channelPicUrl;
         }
       } else {
-        throw Exception('Failed to fetch channel pictures');
+        final errorData = json.decode(response.body);
+        final errorMessage = errorData['error']['message'] ?? 'Unknown error';
+        throw Exception('Failed to fetch channel pictures: $errorMessage');
       }
     }
 
     return channelPicturesMap;
   }
 
-  Future<String?> _getAccessToken() async {
-    try {
-      final googleUser = await GoogleSignIn().signInSilently();
-      if (googleUser == null) {
-        logger.w('Google sign-in failed, user not signed in.');
-        return null;
-      }
-
-      final googleAuth = await googleUser.authentication;
-      await _secureStorage.write(
-          key: 'accessToken', value: googleAuth.accessToken);
-      logger.d('Access token saved securely.');
-      return googleAuth.accessToken;
-    } catch (e) {
-      logger.e('Failed to get access token', e);
-      throw Exception('Failed to retrieve access token.');
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> _parseMediaData(
-      Map<String, dynamic> data, String accessToken) async {
-    final items = data['items'] as List;
-
-    // Collect video IDs and channel IDs
-    final videoIds = items
-        .where((item) => item['id']['kind'] == 'youtube#video')
-        .map<String>((item) => item['id']['videoId'] as String)
-        .toList();
-
-    final channelIds = items
-        .map<String>((item) => item['snippet']['channelId'] as String)
-        .toSet()
-        .toList(); // Use Set to avoid duplicates
-
-    // Fetch all video details and channel pictures
-    final videoDetailsMap = await _fetchVideosDetails(accessToken, videoIds);
-    final channelPicturesMap =
-        await _fetchChannelsPictures(accessToken, channelIds);
-
-    final List<Map<String, dynamic>> resultItems = [];
-
-    for (var item in items) {
-      if (item['id']['kind'] != 'youtube#video') continue;
-
-      final videoId = item['id']['videoId'];
-      final channelId = item['snippet']['channelId'];
-
-      final details = videoDetailsMap[videoId];
-      final channelPic = channelPicturesMap[channelId];
-
-      if (details == null || channelPic == null) continue;
-
-      final durationSeconds = details['durationSeconds'];
-
-      // Filter videos based on duration
-      if ((mediaType == MediaType.video && durationSeconds > 60) ||
-          (mediaType == MediaType.short && durationSeconds <= 60)) {
-        resultItems.add({
-          'videoId': videoId,
-          'title': item['snippet']['title'],
-          'thumbnail': item['snippet']['thumbnails']['high']['url'],
-          'description': item['snippet']['description'],
-          'publishedAt': item['snippet']['publishedAt'],
-          'channelTitle': item['snippet']['channelTitle'],
-          'channelPic': channelPic,
-          'likes': details['likeCount'] ?? '0',
-          'comments': details['commentCount'] ?? '0',
-          'views': details['views'] ?? '0',
-          'duration': details['duration'] ?? 'N/A',
-        });
-      }
-    }
-
-    // Shuffle to randomize videos
-    resultItems.shuffle();
-
-    return resultItems;
-  }
-
-  Future<Map<String, dynamic>> _fetchVideoDetails(
-      String accessToken, String videoId) async {
-    final response = await http.get(
-      Uri.parse(
-          'https://www.googleapis.com/youtube/v3/videos?part=statistics,contentDetails&id=$videoId'),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final items = json.decode(response.body)['items'];
-      if (items == null || items.isEmpty) {
-        throw Exception('Video details not found');
-      }
-      final videoDetails = items[0];
-      final statistics = videoDetails['statistics'];
-      final contentDetails = videoDetails['contentDetails'];
-
-      final duration = contentDetails['duration'];
-      final durationSeconds = _parseDuration(duration);
-
-      return {
-        'likeCount': statistics['likeCount'],
-        'commentCount': statistics['commentCount'],
-        'views': statistics['viewCount'] ?? '0',
-        'duration': _formatDuration(duration),
-        'durationSeconds': durationSeconds,
-      };
-    } else {
-      throw Exception('Failed to fetch video details');
-    }
-  }
-
-  int _parseDuration(String duration) {
-    final regex = RegExp(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?');
-    final match = regex.firstMatch(duration);
-
-    if (match != null) {
-      final hours = int.tryParse(match.group(1) ?? '0') ?? 0;
-      final minutes = int.tryParse(match.group(2) ?? '0') ?? 0;
-      final seconds = int.tryParse(match.group(3) ?? '0') ?? 0;
-
-      return hours * 3600 + minutes * 60 + seconds;
-    }
-    return 0;
-  }
-
   String _formatDuration(String duration) {
+    // Parse ISO 8601 duration
     final regex = RegExp(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?');
     final match = regex.firstMatch(duration);
 
     if (match != null) {
-      final hours =
-          match.group(1) != null ? match.group(1)!.replaceAll('H', '') : '0';
-      final minutes =
-          match.group(2) != null ? match.group(2)!.replaceAll('M', '') : '0';
-      final seconds =
-          match.group(3) != null ? match.group(3)!.replaceAll('S', '') : '0';
+      final hours = int.parse(match.group(1) ?? '0');
+      final minutes = int.parse(match.group(2) ?? '0');
+      final seconds = int.parse(match.group(3) ?? '0');
 
-      final hoursInt = int.tryParse(hours) ?? 0;
-      final minutesInt = int.tryParse(minutes) ?? 0;
-      final secondsInt = int.tryParse(seconds) ?? 0;
-
-      String formattedDuration = '';
-      if (hoursInt > 0) {
-        formattedDuration += '$hoursInt:';
+      if (hours > 0) {
+        return '${hours.toString().padLeft(2, '0')}:'
+            '${minutes.toString().padLeft(2, '0')}:'
+            '${seconds.toString().padLeft(2, '0')}';
+      } else {
+        return '${minutes.toString().padLeft(2, '0')}:'
+            '${seconds.toString().padLeft(2, '0')}';
       }
-      formattedDuration += '${minutesInt.toString().padLeft(2, '0')}:';
-      formattedDuration += secondsInt.toString().padLeft(2, '0');
-
-      return formattedDuration;
-    }
-    return '0:00';
-  }
-
-  Future<String> _fetchChannelPicture(
-      String accessToken, String channelId) async {
-    final response = await http.get(
-      Uri.parse(
-          'https://www.googleapis.com/youtube/v3/channels?part=snippet&id=$channelId'),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      return json.decode(response.body)['items'][0]['snippet']['thumbnails']
-          ['default']['url'];
     } else {
-      throw const HttpException('Failed to fetch channel picture');
+      return '00:00';
     }
   }
+}
 
-  Future<void> likeMedia(String videoId, String accessToken) async {
-    try {
-      final response = await http.post(
-        Uri.parse('https://www.googleapis.com/youtube/v3/videos/rate'),
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({
-          'id': videoId,
-          'rating': 'like',
-        }),
-      );
+class VideoCubit extends MediaCubit {
+  VideoCubit() : super(mediaType: MediaType.video);
+}
 
-      if (response.statusCode != 204) {
-        throw Exception('Failed to like video');
-      }
-    } catch (e) {
-      throw Exception('Error liking video: $e');
-    }
-  }
+class ShortsCubit extends MediaCubit {
+  ShortsCubit() : super(mediaType: MediaType.short);
 }

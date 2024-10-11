@@ -1,13 +1,13 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:video_player/video_player.dart';
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:logger/logger.dart';
 
 // Define VideoPlayerStates
 abstract class VideoPlayerState extends Equatable {
   @override
   List<Object> get props => [];
+  late final YoutubePlayerController controller;
 }
 
 class VideoInitial extends VideoPlayerState {}
@@ -15,7 +15,7 @@ class VideoInitial extends VideoPlayerState {}
 class VideoLoading extends VideoPlayerState {}
 
 class VideoPlaying extends VideoPlayerState {
-  final VideoPlayerController controller;
+  final YoutubePlayerController controller;
 
   VideoPlaying(this.controller);
 
@@ -24,7 +24,7 @@ class VideoPlaying extends VideoPlayerState {
 }
 
 class VideoPaused extends VideoPlayerState {
-  final VideoPlayerController controller;
+  final YoutubePlayerController controller;
 
   VideoPaused(this.controller);
 
@@ -42,7 +42,7 @@ class VideoError extends VideoPlayerState {
 }
 
 class VideoPlayerCubit extends Cubit<VideoPlayerState> {
-  VideoPlayerController? _videoController;
+  YoutubePlayerController? _youtubeController;
   final Logger _logger = Logger();
   int? _currentlyExpandedIndex; // Store the index of the expanded tile
 
@@ -50,33 +50,33 @@ class VideoPlayerCubit extends Cubit<VideoPlayerState> {
 
   int? get currentlyExpandedIndex => _currentlyExpandedIndex;
 
-  Future<void> playVideo(String url, int index) async {
+  void playVideo(String url, int index) {
     try {
       emit(VideoLoading());
 
-      var yt = YoutubeExplode();
-      var videoId = VideoId.fromString(url);
+      String? videoId = YoutubePlayer.convertUrlToId(url);
 
-      _logger.i("Fetching stream manifest for video: $url");
-      var manifest = await yt.videos.streamsClient.getManifest(videoId);
+      if (videoId != null) {
+        // Stop and dispose the previous video controller if necessary
+        _disposeVideoController();
 
-      var streamInfo = manifest.muxed.withHighestBitrate();
-      var videoUrl = streamInfo.url.toString();
+        // Initialize the new youtube player controller
+        _youtubeController = YoutubePlayerController(
+          initialVideoId: videoId,
+          flags: const YoutubePlayerFlags(
+              autoPlay: true,
+              mute: false,
+              controlsVisibleAtStart: false,
+              hideControls: true,
+              forceHD: false),
+        );
 
-      _logger.i("Stream URL fetched successfully: $videoUrl");
+        _currentlyExpandedIndex = index; // Set the expanded index
 
-      // Stop and dispose the previous video controller if necessary
-      _disposeVideoController();
-
-      // Initialize the new video controller
-      _videoController = VideoPlayerController.network(videoUrl)
-        ..initialize().then((_) {
-          _videoController!.play();
-          _currentlyExpandedIndex = index; // Set the expanded index
-          emit(VideoPlaying(_videoController!));
-        });
-
-      yt.close();
+        emit(VideoPlaying(_youtubeController!));
+      } else {
+        emit(VideoError("Invalid YouTube video URL."));
+      }
     } catch (e, stackTrace) {
       _logger.e("Error playing video: $url", e, stackTrace);
       emit(VideoError("Failed to load video. Please try again."));
@@ -84,16 +84,16 @@ class VideoPlayerCubit extends Cubit<VideoPlayerState> {
   }
 
   void pauseVideo() {
-    if (_videoController != null && _videoController!.value.isPlaying) {
-      _videoController!.pause();
-      emit(VideoPaused(_videoController!));
+    if (_youtubeController != null && _youtubeController!.value.isPlaying) {
+      _youtubeController!.pause();
+      emit(VideoPaused(_youtubeController!));
     }
   }
 
   void resumeVideo() {
-    if (_videoController != null && !_videoController!.value.isPlaying) {
-      _videoController!.play();
-      emit(VideoPlaying(_videoController!));
+    if (_youtubeController != null && !_youtubeController!.value.isPlaying) {
+      _youtubeController!.play();
+      emit(VideoPlaying(_youtubeController!));
     }
   }
 
@@ -110,27 +110,27 @@ class VideoPlayerCubit extends Cubit<VideoPlayerState> {
   }
 
   void _disposeVideoController() {
-    if (_videoController != null) {
-      _logger.i("Disposing video controller");
-      _videoController!.pause();
-      _videoController!.dispose();
-      _videoController = null;
+    if (_youtubeController != null) {
+      _logger.i("Disposing YouTube player controller");
+      _youtubeController!.pause();
+      _youtubeController!.dispose();
+      _youtubeController = null;
     }
   }
 
   void skipForward() {
-    if (_videoController != null && _videoController!.value.isInitialized) {
-      final newPosition =
-          _videoController!.value.position + const Duration(seconds: 5);
-      _videoController!.seekTo(newPosition);
+    if (_youtubeController != null && _youtubeController!.value.isReady) {
+      final currentPosition = _youtubeController!.value.position;
+      final newPosition = currentPosition + const Duration(seconds: 5);
+      _youtubeController!.seekTo(newPosition);
     }
   }
 
   void skipBackward() {
-    if (_videoController != null && _videoController!.value.isInitialized) {
-      final newPosition =
-          _videoController!.value.position - const Duration(seconds: 5);
-      _videoController!.seekTo(newPosition);
+    if (_youtubeController != null && _youtubeController!.value.isReady) {
+      final currentPosition = _youtubeController!.value.position;
+      final newPosition = currentPosition - const Duration(seconds: 5);
+      _youtubeController!.seekTo(newPosition);
     }
   }
 

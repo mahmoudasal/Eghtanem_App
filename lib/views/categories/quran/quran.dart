@@ -58,7 +58,7 @@ Future<List<String>> fetchReciterSurahs(int reciterId) async {
   try {
     final response = await http.get(
       Uri.parse(
-          'https://mp3quran.net/api/v3/reciters?language=eng&rewaya=1&reciter=$reciterId'),
+          'https://mp3quran.net/api/v3/reciters?language=eng&rewaya=2&reciter=$reciterId'),
     );
 
     if (response.statusCode == 200) {

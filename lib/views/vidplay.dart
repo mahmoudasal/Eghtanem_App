@@ -1,9 +1,10 @@
-import 'package:egtanem_application/widgets/share_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:social_share/social_share.dart'; // Import the package
+
 import '../cubits/cubit/media_cubit.dart'; // Import MediaCubit
 
 class VideoDetailScreen extends StatefulWidget {
@@ -41,32 +42,23 @@ class VideoDetailScreenState extends State<VideoDetailScreen> {
     super.initState();
 
     _controller = YoutubePlayerController(
-      initialVideoId: YoutubePlayer.convertUrlToId(widget.videoUrl) ?? '',
+      initialVideoId: widget.videoUrl,
       flags: const YoutubePlayerFlags(
         autoPlay: true,
         mute: false,
-        loop: true,
+        loop: false,
         controlsVisibleAtStart: true,
       ),
     );
 
     _mediaCubit = MediaCubit(mediaType: MediaType.video);
     _mediaCubit.fetchMedia();
-
-    // Remove the ScrollController initialization
-    // _scrollController = ScrollController();
-    // _scrollController.addListener(_onScroll);
   }
-
-  // Remove the _onScroll method since it is no longer needed
-  // void _onScroll() {}
 
   @override
   void dispose() {
     _controller.dispose();
     _mediaCubit.close();
-    // Remove the ScrollController disposal
-    // _scrollController.dispose();
     super.dispose();
   }
 
@@ -77,6 +69,17 @@ class VideoDetailScreenState extends State<VideoDetailScreen> {
     await Future.delayed(const Duration(milliseconds: 100));
     if (mounted) {
       Navigator.of(context).pop();
+    }
+  }
+
+  void _shareContent() async {
+    try {
+      String shareText =
+          'Check out this video "${widget.title}" on YouTube: https://www.youtube.com/watch?v=${widget.videoUrl}';
+
+      await SocialShare.shareOptions(shareText);
+    } catch (e) {
+      // Handle sharing errors and notify the user
     }
   }
 
@@ -224,21 +227,34 @@ class VideoDetailScreenState extends State<VideoDetailScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           _buildActionColumn(
-              icon: Icons.thumb_up_alt_outlined, label: widget.likeCount),
+            icon: Icons.thumb_up_alt_outlined,
+            label: widget.likeCount,
+            onPressed: () {
+              // Implement like functionality here if needed
+            },
+          ),
           _buildActionColumn(
-              icon: Icons.share,
-              label: 'مشاركة',
-              onPressed: () => showShareBottomSheet(context)),
-          _buildActionColumn(icon: Icons.add_outlined, label: 'حفظ'),
+            icon: Icons.share,
+            label: 'مشاركة',
+            onPressed: _shareContent,
+          ),
+          _buildActionColumn(
+            icon: Icons.add_outlined,
+            label: 'حفظ',
+            onPressed: () {
+              // Implement save functionality here if needed
+            },
+          ),
         ],
       ),
     );
   }
 
-  Column _buildActionColumn(
-      {required IconData icon,
-      required String label,
-      VoidCallback? onPressed}) {
+  Column _buildActionColumn({
+    required IconData icon,
+    required String label,
+    VoidCallback? onPressed,
+  }) {
     return Column(
       children: <Widget>[
         GestureDetector(
@@ -359,10 +375,7 @@ class VideoDetailScreenState extends State<VideoDetailScreen> {
             child: CircularProgressIndicator(),
           );
         } else if (state is MediaLoaded || state is MediaLoading) {
-          // Fetch only the first 5 videos
-          final mediaItems = _mediaCubit.mediaItems
-              .take(5)
-              .toList(); // Take only the first 5 videos
+          final mediaItems = _mediaCubit.mediaItems.take(5).toList();
           return ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -428,7 +441,7 @@ class VideoDetailScreenState extends State<VideoDetailScreen> {
                 Row(
                   children: [
                     Text(
-                      '${_formatViews(videoData['views'] ?? '0')} مشاهدة',
+                      '${_formatViews(videoData['views'] ?? 0)} مشاهدة',
                       style: TextStyle(
                         fontSize: 12.sp,
                         color: Colors.grey.shade600,

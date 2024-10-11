@@ -1,9 +1,9 @@
-import 'package:egtanem_application/cubits/cubit/media_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:logger/logger.dart';
 import 'vidplay.dart';
+import 'package:egtanem_application/cubits/cubit/media_cubit.dart';
 import 'package:egtanem_application/widgets/custom_page_transition.dart';
 
 class LongVids extends StatefulWidget {
@@ -20,8 +20,8 @@ class LongVidsState extends State<LongVids> {
 
   // Local list to manage media items
   final List<Map<String, dynamic>> _mediaItems = [];
-  bool _isShowingLoadingDialog =
-      false; // Track if the loading dialog is being shown
+  bool _isShowingLoadingDialog = false;
+  bool _isLoadingMore = false; // Track if more data is being loaded
 
   @override
   void initState() {
@@ -97,114 +97,104 @@ class LongVidsState extends State<LongVids> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<MediaCubit>(
-      create: (context) => _mediaCubit,
-      child: Scaffold(
-        backgroundColor: const Color(0xff1D1D1B),
-        body: BlocListener<MediaCubit, MediaState>(
-          listener: (context, state) {
-            try {
-              if (state is MediaLoading) {
-                // Show a loading indicator for initial load
-                if (_mediaItems.isEmpty) {
-                  _showLoadingDialog();
-                }
-              } else if (state is MediaLoadingMore) {
-                ScaffoldMessenger.of(context).clearSnackBars();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Loading more videos'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              } else if (state is MediaLoaded) {
-                _hideLoadingDialog(); // Remove initial loading indicator
-                ScaffoldMessenger.of(context).clearSnackBars();
-                _insertNewItems(state.mediaItems);
-              } else if (state is MediaError) {
-                _hideLoadingDialog(); // Remove initial loading indicator
-                ScaffoldMessenger.of(context).clearSnackBars();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Error: ${state.errorMessage}'),
-                  ),
-                );
-              }
-            } catch (e, stacktrace) {
-              _mediaCubit.logger.e('Error in BlocListener', e, stacktrace);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                      'An unexpected error occurred. Please try again later.'),
-                ),
-              );
-            }
-          },
-          child: AnimatedList(
-            key: _listKey,
-            controller: _scrollController,
-            initialItemCount: _mediaItems.length,
-            itemBuilder: (context, index, animation) {
-              try {
-                if (index < _mediaItems.length) {
-                  final videoData = _mediaItems[index];
-                  return SizeTransition(
-                    sizeFactor: animation,
-                    child: VideoTile(
-                      key: ValueKey(videoData['videoId']),
-                      index: index,
-                      totalItems: _mediaItems.length, // Pass the total length
-                      title: videoData['title'],
-                      imgUrl: videoData['thumbnail'],
-                      name: videoData['channelTitle'],
-                      views: _formatViews(videoData['views'] ?? '0'),
-                      profilePic: videoData['channelPic'],
-                      duration: videoData['duration'] ?? '0',
-                      videoUrl: videoData['videoId'],
+    return BlocProvider.value(
+      value: _mediaCubit,
+      child: Container(
+        color: const Color(0xff1D1D1B),
+        child: SafeArea(
+          child: Scaffold(
+            backgroundColor: const Color(0xff1D1D1B),
+            body: BlocListener<MediaCubit, MediaState>(
+              listener: (context, state) {
+                if (state is MediaLoading) {
+                  if (_mediaItems.isEmpty) {
+                    _showLoadingDialog();
+                  } else {
+                    // We are loading more data
+                    setState(() {
+                      _isLoadingMore = true;
+                    });
+                  }
+                } else if (state is MediaLoaded) {
+                  _hideLoadingDialog();
+                  ScaffoldMessenger.of(context).clearSnackBars();
+                  _insertNewItems(state.newMediaItems);
+                  setState(() {
+                    _isLoadingMore = false;
+                  });
+                } else if (state is MediaError) {
+                  _hideLoadingDialog();
+                  ScaffoldMessenger.of(context).clearSnackBars();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error: ${state.errorMessage}'),
                     ),
                   );
-                } else if (_mediaCubit.hasMoreData) {
-                  // Show loading indicator as a separate item
-                  return const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                } else {
-                  // No more data to load
-                  return const SizedBox.shrink();
+                  setState(() {
+                    _isLoadingMore = false;
+                  });
                 }
-              } catch (e, stacktrace) {
-                _mediaCubit.logger
-                    .e('Error building AnimatedList', e, stacktrace);
-                return const Center(child: Text('Error loading videos.'));
-              }
-            },
+              },
+              child: Column(
+                children: [
+                  Expanded(
+                    child: AnimatedList(
+                      key: _listKey,
+                      controller: _scrollController,
+                      initialItemCount: _mediaItems.length,
+                      itemBuilder: (context, index, animation) {
+                        final videoData = _mediaItems[index];
+                        return SizeTransition(
+                          sizeFactor: animation,
+                          child: VideoTile(
+                            key: ValueKey(videoData['videoId']),
+                            index: index,
+                            totalItems: _mediaItems.length,
+                            title: videoData['title'],
+                            imgUrl: videoData['thumbnail'],
+                            name: videoData['channelTitle'],
+                            views: _formatViews(videoData['views'] ?? 0),
+                            profilePic: videoData['channelPic'],
+                            duration: videoData['duration'] ?? '0',
+                            videoUrl: videoData['videoId'],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  if (_isLoadingMore)
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 
-  String _formatViews(String views) {
+  String _formatViews(int views) {
     try {
-      int viewsInt = int.tryParse(views) ?? 0;
-      if (viewsInt >= 1000000) {
-        return '${(viewsInt / 1000000).toStringAsFixed(1)}M';
-      } else if (viewsInt >= 1000) {
-        return '${(viewsInt / 1000).toStringAsFixed(1)}K';
+      if (views >= 1000000) {
+        return '${(views / 1000000).toStringAsFixed(1)}M';
+      } else if (views >= 1000) {
+        return '${(views / 1000).toStringAsFixed(1)}K';
       } else {
-        return views;
+        return views.toString();
       }
     } catch (e) {
       _mediaCubit.logger.e('Error formatting views', e);
-      return views;
+      return views.toString();
     }
   }
 }
 
 class VideoTile extends StatelessWidget {
   final int index;
-  final int totalItems; // Add this to get the total length
+  final int totalItems;
   final String title;
   final String imgUrl;
   final String name;
@@ -216,7 +206,7 @@ class VideoTile extends StatelessWidget {
   const VideoTile({
     super.key,
     required this.index,
-    required this.totalItems, // Add this
+    required this.totalItems,
     required this.title,
     required this.imgUrl,
     required this.name,
@@ -253,8 +243,7 @@ class VideoTile extends StatelessWidget {
           logger.e('Error during navigation to video detail', e, stacktrace);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content:
-                  const Text('Failed to load video details. Please try again.'),
+              content: Text('Failed to load video details. Please try again.'),
             ),
           );
         }
@@ -282,7 +271,7 @@ class VideoTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(15.r),
             child: Image.network(
               imgUrl,
-              fit: BoxFit.fill,
+              fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 logger.e('Error loading image', error, stackTrace);
                 return const Icon(Icons.error, color: Colors.red);
@@ -320,7 +309,7 @@ class VideoTile extends StatelessWidget {
 
   Widget buildVideoInfo(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: TextDirection.rtl, // For right-to-left languages
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

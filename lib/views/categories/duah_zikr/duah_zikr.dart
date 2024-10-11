@@ -1,10 +1,37 @@
+import 'package:egtanem_application/views/categories/duah_zikr/counter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import '../../data/azkar_json.dart';
+import '../../../data/azkar_json.dart';
 
 class SupplicationsRemembrances extends StatelessWidget {
   const SupplicationsRemembrances({super.key});
+
+  String getArabicCount(int count) {
+    switch (count) {
+      case 1:
+        return 'مرة واحدة';
+      case 2:
+        return 'مرتين';
+      case 3:
+        return 'ثلاث مرات';
+      case 4:
+        return 'أربع مرات';
+      case 7:
+        return 'سبع مرات';
+      case 10:
+        return 'عشرة مرات';
+      case 33:
+        return 'مره 33';
+      case 34:
+        return 'مره 34';
+      case 100:
+        return 'مائة مرة';
+
+      default:
+        return '$count مرات';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +83,7 @@ class SupplicationsRemembrances extends StatelessWidget {
               itemCount: categories.length,
               itemBuilder: (context, index) {
                 final category = categories[index];
-                return ExpansionTile(
+                return ListTile(
                   title: Text(
                     textDirection: TextDirection.rtl,
                     category.category,
@@ -65,23 +92,22 @@ class SupplicationsRemembrances extends StatelessWidget {
                       color: Colors.white,
                     ),
                   ),
-                  children: category.array.map((dhikr) {
-                    return ListTile(
-                      title: Text(
-                        dhikr.text,
-                        style: TextStyle(color: Colors.white, fontSize: 18.sp),
-                      ),
-                      subtitle: Text(
-                        'عدد المرات: ${dhikr.count}',
-                        style: TextStyle(color: Colors.grey, fontSize: 14.sp),
+                  onTap: () {
+                    // Navigate to AzkarCounter screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AzkarCounter(
+                          category: category,
+                        ),
                       ),
                     );
-                  }).toList(),
+                  },
                 );
               },
             );
           } else {
-            return const Center(child: Text('No data found'));
+            return const Center(child: Text('جاري العمل علي بعض التحديثات'));
           }
         },
       ),
