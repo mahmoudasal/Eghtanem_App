@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../data/prophet_speech_json.dart';
 
@@ -28,7 +29,7 @@ class LikedHadithsState extends State<LikedHadiths> {
   }
 
   // Toggle the liked state of a hadith
-  void _toggleLike(int hadithNumber) {
+  void _toggleLike(int hadithNumber) async {
     setState(() {
       if (likedHadiths.contains(hadithNumber)) {
         likedHadiths.remove(hadithNumber);
@@ -36,6 +37,11 @@ class LikedHadithsState extends State<LikedHadiths> {
         likedHadiths.add(hadithNumber);
       }
     });
+
+    // Save the updated likedHadiths to SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setStringList(
+        'likedHadiths', likedHadiths.map((e) => e.toString()).toList());
   }
 
   @override
@@ -88,7 +94,7 @@ class LikedHadithsState extends State<LikedHadiths> {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(
               child: Text(
-                'No hadiths found.',
+                'هناك مشكله الرجاء التواصل مع المطور',
                 style: TextStyle(color: Colors.white, fontSize: 24.sp),
               ),
             );
@@ -100,7 +106,7 @@ class LikedHadithsState extends State<LikedHadiths> {
             if (hadiths.isEmpty) {
               return Center(
                 child: Text(
-                  'No liked hadiths.',
+                  'لا يوجد احاديث مفضلة',
                   style: TextStyle(color: Colors.white, fontSize: 24.sp),
                 ),
               );
@@ -143,7 +149,6 @@ class LikedHadithsState extends State<LikedHadiths> {
                           textDirection: TextDirection.rtl,
                           hadith.hadith,
                           style: TextStyle(
-                            fontFamily: 'Almarai',
                             fontSize: 18.sp,
                             color: const Color(0xFFFAFAFA),
                           ),
@@ -153,7 +158,6 @@ class LikedHadithsState extends State<LikedHadiths> {
                           textDirection: TextDirection.rtl,
                           hadith.description,
                           style: TextStyle(
-                            fontFamily: 'Almarai',
                             fontSize: 16.sp,
                             color: const Color(0xFFFAFAFA),
                           ),

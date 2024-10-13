@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,6 +6,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../controller/secure_token.dart';
 import '../widgets/custom_page_transition.dart';
@@ -24,6 +25,16 @@ class LoginPageState extends State<LoginPage> {
   final Logger logger = Logger();
 
   final storageService = SecureStorageService();
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Attempt to auto-login if cached data is available
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _autoLogin();
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -49,8 +60,72 @@ class LoginPageState extends State<LoginPage> {
     logger.i("Images pre-cached successfully.");
   }
 
-  Future<void> _signInWithGoogle(BuildContext context) async {
+  Future<void> _autoLogin() async {
     try {
+      // Check for internet connectivity
+      final connectivityResult = await Connectivity().checkConnectivity();
+      if (connectivityResult == ConnectivityResult.none) {
+        // No internet connection
+        logger.w("No internet connection. Proceeding offline.");
+        if (!mounted) return;
+        Navigator.of(context).pushReplacement(
+          createRoute(const NaviagionScreen(youtubeData: {})),
+        );
+        return;
+      }
+
+      // Check if user is already signed in
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // User is signed in, attempt to load youtubeData from cache
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        String? youtubeDataJson = prefs.getString('youtubeData');
+        Map<String, dynamic>? youtubeData;
+        if (youtubeDataJson != null) {
+          youtubeData = json.decode(youtubeDataJson);
+        }
+        // Navigate to main screen
+        if (!mounted) return;
+        Navigator.of(context).pushReplacement(
+          createRoute(NaviagionScreen(youtubeData: youtubeData ?? {})),
+        );
+      } else {
+        // User not signed in, proceed to main screen with empty data
+        if (!mounted) return;
+        Navigator.of(context).pushReplacement(
+          createRoute(const NaviagionScreen(youtubeData: {})),
+        );
+      }
+    } catch (e, stackTrace) {
+      logger.e("Error during auto-login: $e", e, stackTrace);
+      // Proceed into the app directly with empty data
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        createRoute(const NaviagionScreen(youtubeData: {})),
+      );
+    }
+  }
+
+  Future<void> _signInWithGoogle(BuildContext context) async {
+    Map<String, dynamic>? youtubeData;
+    try {
+      // Check for internet connectivity
+      final connectivityResult = await Connectivity().checkConnectivity();
+      if (connectivityResult == ConnectivityResult.none) {
+        // No internet connection
+        logger.w("No internet connection. Cannot sign in.");
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                "No internet connection. Please connect to the internet to sign in.",
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
       final GoogleSignInAccount? googleUser = await GoogleSignIn(
         scopes: [
           'https://www.googleapis.com/auth/youtube.force-ssl',
@@ -59,6 +134,10 @@ class LoginPageState extends State<LoginPage> {
 
       if (googleUser == null) {
         // User canceled the sign-in
+        // Proceed into the app
+        Navigator.of(context).pushReplacement(
+          createRoute(const NaviagionScreen(youtubeData: {})),
+        );
         return;
       }
 
@@ -79,9 +158,11 @@ class LoginPageState extends State<LoginPage> {
       logger.i("User Credential: ${userCredential.user}");
 
       // Fetch YouTube channel information
-      Map<String, dynamic>? youtubeData;
       try {
         youtubeData = await _fetchYouTubeChannelInfo();
+        // Save youtubeData to cache
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('youtubeData', json.encode(youtubeData));
       } catch (e, stackTrace) {
         // Handle the exception and proceed
         logger.e("Failed to fetch YouTube channel info: $e", e, stackTrace);
@@ -97,7 +178,19 @@ class LoginPageState extends State<LoginPage> {
           );
         }
       }
-
+    } catch (e, stackTrace) {
+      logger.e("Error during sign-in or data fetching: $e", e, stackTrace);
+      // Optionally, show a message to the user
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "An error occurred during sign-in. Proceeding to the app.",
+            ),
+          ),
+        );
+      }
+    } finally {
       // Ensure the context is still valid
       if (!context.mounted) return;
 
@@ -105,28 +198,6 @@ class LoginPageState extends State<LoginPage> {
       Navigator.of(context).pushReplacement(
         createRoute(NaviagionScreen(youtubeData: youtubeData ?? {})),
       );
-    } on FirebaseAuthException catch (e) {
-      logger.e("Firebase Auth Error: $e");
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Authentication error: ${e.message}")),
-        );
-      }
-    } on SocketException {
-      logger.e("Network Error: Check your internet connection");
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text("Network error. Please check your connection.")),
-        );
-      }
-    } catch (e) {
-      logger.e("Error during Google Sign-In: $e");
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to sign in with Google: $e")),
-        );
-      }
     }
   }
 
@@ -135,6 +206,12 @@ class LoginPageState extends State<LoginPage> {
 
     if (accessToken == null) {
       throw Exception('Access token is missing');
+    }
+
+    // Check for internet connectivity before making the API request
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      throw Exception('No internet connection');
     }
 
     final response = await _retryHttpRequest(() => http.get(
@@ -156,6 +233,11 @@ class LoginPageState extends State<LoginPage> {
       logger.e(
           'Failed to fetch YouTube channel info. Status Code: ${response.statusCode}');
       logger.e('Response body: ${response.body}');
+      // Check if quota exceeded
+      if (response.statusCode == 403 &&
+          response.body.contains('quotaExceeded')) {
+        throw Exception('YouTube API quota exceeded.');
+      }
       throw Exception('Failed to fetch YouTube channel info');
     }
   }

@@ -8,6 +8,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../data/prophet_speech_json.dart';
 import 'liked_hadith.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class Prophetspeech extends StatefulWidget {
   const Prophetspeech({super.key});
 
@@ -23,6 +25,7 @@ class ProphetspeechState extends State<Prophetspeech> {
   void initState() {
     super.initState();
     futureHadiths = _loadHadiths();
+    _loadLikedHadiths();
   }
 
   Future<List<Hadith>> _loadHadiths() async {
@@ -32,7 +35,19 @@ class ProphetspeechState extends State<Prophetspeech> {
     return data.map((json) => Hadith.fromJson(json)).toList();
   }
 
-  void _toggleLike(int hadithNumber) {
+  void _loadLikedHadiths() async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String>? likedHadithStrings =
+        prefs.getStringList('likedHadiths');
+
+    if (likedHadithStrings != null) {
+      setState(() {
+        likedHadiths.addAll(likedHadithStrings.map(int.parse));
+      });
+    }
+  }
+
+  void _toggleLike(int hadithNumber) async {
     setState(() {
       if (likedHadiths.contains(hadithNumber)) {
         likedHadiths.remove(hadithNumber);
@@ -40,6 +55,11 @@ class ProphetspeechState extends State<Prophetspeech> {
         likedHadiths.add(hadithNumber);
       }
     });
+
+    // Save the updated likedHadiths to SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setStringList(
+        'likedHadiths', likedHadiths.map((e) => e.toString()).toList());
   }
 
   void _navigateToLikedHadiths() {
@@ -51,7 +71,9 @@ class ProphetspeechState extends State<Prophetspeech> {
           allHadiths: futureHadiths,
         ),
       ),
-    );
+    ).then((_) {
+      setState(() {}); // Refresh the state when coming back
+    });
   }
 
   @override

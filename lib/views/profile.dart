@@ -6,6 +6,11 @@ import 'dart:ui' as ui;
 import 'package:asset_cache/asset_cache.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:social_share/social_share.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:logger/logger.dart';
+import 'package:http/http.dart' as http;
+
+import '../controller/secure_token.dart'; // Import your storage service
 
 final imageAssets = ImageAssetCache(basePath: '');
 
@@ -30,7 +35,7 @@ class Hadith {
 }
 
 class ProfilePage extends StatefulWidget {
-  final Map<String, dynamic> youtubeData;
+  final Map<String, dynamic>? youtubeData;
 
   const ProfilePage({super.key, required this.youtubeData});
 
@@ -39,12 +44,51 @@ class ProfilePage extends StatefulWidget {
 }
 
 class ProfilePageState extends State<ProfilePage> {
+  Map<String, dynamic>? youtubeData;
   late Future<Hadith?> futureRandomHadith;
+  bool isOfflineMode = false; // Flag to indicate offline mode
+  final Logger logger = Logger();
+  final storageService = SecureStorageService(); // Access storage service
 
   @override
   void initState() {
     super.initState();
+    youtubeData = widget.youtubeData;
     futureRandomHadith = _loadRandomHadith();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (youtubeData == null || youtubeData!.isEmpty) {
+      // Delay the call to ensure the platform channels are ready
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadYoutubeDataFromCache();
+      });
+    }
+  }
+
+  Future<void> _loadYoutubeDataFromCache() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? youtubeDataJson = prefs.getString('youtubeData');
+      if (youtubeDataJson != null) {
+        setState(() {
+          youtubeData = json.decode(youtubeDataJson);
+        });
+      } else {
+        // Handle case where no cached data is available
+        // Set isOfflineMode to true to indicate that the app is in offline mode
+        setState(() {
+          isOfflineMode = true;
+        });
+      }
+    } catch (e) {
+      logger.e('Error loading YouTube data from cache: $e');
+      setState(() {
+        isOfflineMode = true;
+      });
+    }
   }
 
   Future<Hadith?> _loadRandomHadith() async {
@@ -64,9 +108,11 @@ class ProfilePageState extends State<ProfilePage> {
       // Log error and stacktrace for further analysis
 
       // Optionally, notify the user
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading Hadith: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading Hadith: $e')),
+        );
+      }
       return null;
     }
   }
@@ -76,7 +122,7 @@ class ProfilePageState extends State<ProfilePage> {
       return await imageAssets.load(path);
     } catch (e) {
       // Log the error for the image loading issue
-
+      logger.e('Error loading image: $e');
       rethrow;
     }
   }
@@ -89,6 +135,7 @@ class ProfilePageState extends State<ProfilePage> {
       );
     } catch (e) {
       // Handle sharing errors and notify the user
+      logger.e('Error sharing Hadith: $e');
     }
   }
 
@@ -102,9 +149,11 @@ class ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final String channelName = widget.youtubeData['snippet']['title'];
-    final String channelPhotoUrl =
-        widget.youtubeData['snippet']['thumbnails']['default']['url'];
+    final String channelName =
+        youtubeData?['snippet']?['title'] ?? 'وضع عدم الاتصال';
+    final String channelPhotoUrl = youtubeData?['snippet']?['thumbnails']
+            ?['default']?['url'] ??
+        'assets/default_profile.png';
 
     return Scaffold(
       backgroundColor: const Color(0xff1D1D1B),
@@ -117,7 +166,21 @@ class ProfilePageState extends State<ProfilePage> {
                 SizedBox(height: 0.173.sh, width: 1.sw),
                 buildProfilePicture(channelPhotoUrl),
                 buildProfileName(channelName),
-                SizedBox(height: 0.02.sh),
+                if (isOfflineMode)
+                  Padding(
+                    padding: EdgeInsets.all(10.w),
+                    child: Text(
+                      'وضع عدم الاتصال: بعض الميزات قد تكون غير متوفرة',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Almarai',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 18.sp,
+                        color: Colors.redAccent,
+                      ),
+                    ),
+                  ),
+                SizedBox(height: 0.01.sh),
                 _buildRandomHadithSection(),
               ],
             ),
@@ -246,8 +309,6 @@ class ProfilePageState extends State<ProfilePage> {
     );
   }
 
-// Function to handle app support (you can customize it to open a payment page, etc.)
-
   Widget buildBackground() {
     return ClipPath(
       clipper: CurveUpClipper(),
@@ -306,7 +367,9 @@ class ProfilePageState extends State<ProfilePage> {
       child: CircleAvatar(
         backgroundColor: Colors.transparent,
         radius: 47.r,
-        backgroundImage: NetworkImage(photoUrl),
+        backgroundImage: photoUrl.startsWith('assets/')
+            ? AssetImage(photoUrl) as ImageProvider
+            : NetworkImage(photoUrl),
       ),
     );
   }
@@ -327,6 +390,65 @@ class ProfilePageState extends State<ProfilePage> {
         ),
       ],
     );
+  }
+
+  void _retryFetchingData() async {
+    setState(() {
+      isOfflineMode = false;
+    });
+    // Attempt to fetch youtubeData again
+    try {
+      final String? accessToken = await storageService.read('accessToken');
+      if (accessToken != null) {
+        youtubeData = await _fetchYouTubeChannelInfo(accessToken);
+        // Save to cache
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('youtubeData', json.encode(youtubeData));
+        setState(() {});
+      } else {
+        // User needs to sign in again
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('الرجاء تسجيل الدخول مرة أخرى')),
+          );
+          // Optionally, navigate to login page
+          // Navigator.of(context).pushReplacementNamed('/login');
+        }
+      }
+    } catch (e) {
+      // Handle exception and set offline mode back to true
+      setState(() {
+        isOfflineMode = true;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('خطأ في جلب البيانات: $e')),
+        );
+      }
+    }
+  }
+
+  Future<Map<String, dynamic>> _fetchYouTubeChannelInfo(
+      String accessToken) async {
+    final response = await http.get(
+      Uri.parse(
+          'https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&mine=true'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['items'].isNotEmpty) {
+        return data['items'][0];
+      } else {
+        throw Exception('No channel found for the user.');
+      }
+    } else {
+      // Handle error responses
+      throw Exception('Failed to fetch YouTube channel info');
+    }
   }
 }
 

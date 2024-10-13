@@ -19,6 +19,8 @@ class FirstPageState extends State<FirstPage> {
 
   // Add references to other images to pre-cache
   final ImageProvider _secondPageImage = const AssetImage("assets/photo2.webp");
+  final ImageProvider _logoImage = const AssetImage("assets/photo3.webp");
+  final ImageProvider _googlepngImage = const AssetImage("assets/google.png");
   final ImageProvider _loginPageImage =
       const AssetImage("assets/thirdphoto.webp");
 
@@ -43,6 +45,8 @@ class FirstPageState extends State<FirstPage> {
       await precacheImage(_backgroundImage, context);
       await precacheImage(_secondPageImage, context);
       await precacheImage(_loginPageImage, context);
+      await precacheImage(_logoImage, context);
+      await precacheImage(_googlepngImage, context);
 
       setState(() {
         _isImageLoaded = true;

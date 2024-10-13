@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:egtanem_application/data/qra2at_json_parse.dart';
 import 'package:egtanem_application/data/surah_json_parse.dart' as surah_data;
 import 'package:egtanem_application/widgets/surah_card.dart';
@@ -10,6 +9,69 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../widgets/reciter_audio.dart';
 import 'package:http/http.dart' as http;
 
+final Map<String, Map<String, String>> desiredReciters = {
+  "مشاري العفاسي": {
+    "moshaf": "حفص عن عاصم - مرتل",
+    "serverUrl": "https://server8.mp3quran.net/afs/",
+  },
+  "سعد الغامدي": {
+    "moshaf": "حفص عن عاصم - مرتل",
+    "serverUrl": "https://server7.mp3quran.net/s_gmd/",
+  },
+  "عبدالباسط عبدالصمد": {
+    "moshaf": "المصحف المجود - المصحف المجود",
+    "serverUrl": "https://server7.mp3quran.net/basit/Almusshaf-Al-Mojawwad/",
+  },
+  "عبدالرحمن السديس": {
+    "moshaf": "حفص عن عاصم - مرتل",
+    "serverUrl": "https://server11.mp3quran.net/sds/",
+  },
+  "عبدالعزيز الزهراني": {
+    "moshaf": "حفص عن عاصم - مرتل",
+    "serverUrl": "https://server9.mp3quran.net/zahrani/",
+  },
+  "عبدالله عواد الجهني": {
+    "moshaf": "حفص عن عاصم - مرتل",
+    "serverUrl": "https://server13.mp3quran.net/jhn/",
+  },
+  "عبدالله غيلان": {
+    "moshaf": "حفص عن عاصم - مرتل",
+    "serverUrl": "https://server8.mp3quran.net/gulan/",
+  },
+  "علي جابر": {
+    "moshaf": "حفص عن عاصم - مرتل",
+    "serverUrl": "https://server11.mp3quran.net/a_jbr/",
+  },
+  "ماهر المعيقلي": {
+    "moshaf": "حفص عن عاصم - مرتل",
+    "serverUrl": "https://server12.mp3quran.net/maher/",
+  },
+  "محمد ايوب": {
+    "moshaf": "حفص عن عاصم - مرتل",
+    "serverUrl": "https://server8.mp3quran.net/ayyub/",
+  },
+  "محمود علي البنا": {
+    "moshaf": "حفص عن عاصم - مرتل",
+    "serverUrl": "https://server8.mp3quran.net/bna/",
+  },
+  "منصور السالمي": {
+    "moshaf": "حفص عن عاصم - مرتل",
+    "serverUrl": "https://server14.mp3quran.net/mansor/",
+  },
+  "ناصر القطامي": {
+    "moshaf": "حفص عن عاصم - مرتل",
+    "serverUrl": "https://server6.mp3quran.net/qtm/",
+  },
+  "ياسر الدوسري": {
+    "moshaf": "حفص عن عاصم - مرتل",
+    "serverUrl": "https://server11.mp3quran.net/yasser/",
+  },
+  "محمد صديق المنشاوي": {
+    "moshaf": "المصحف المجود - المصحف المجود",
+    "serverUrl": "https://server10.mp3quran.net/minsh/Almusshaf-Al-Mojawwad/",
+  },
+};
+
 Future<List<Reciter>> fetchReciters() async {
   final response =
       await http.get(Uri.parse('https://mp3quran.net/api/v3/reciters'));
@@ -18,35 +80,31 @@ Future<List<Reciter>> fetchReciters() async {
     final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
     final recitersJson = jsonResponse['reciters'] as List<dynamic>;
 
-    // List of reciter names and their corresponding server URLs you want to include
-    final Map<String, String> desiredReciters = {
-      "مشاري العفاسي": "https://server8.mp3quran.net/afs/",
-      "سعد الغامدي": "https://server7.mp3quran.net/s_gmd/",
-      "عبدالباسط عبدالصمد":
-          "https://server7.mp3quran.net/basit/Almusshaf-Al-Mojawwad/",
-      "عبدالرحمن السديس": "https://server11.mp3quran.net/sds/",
-      "عبدالعزيز الزهراني": "https://server9.mp3quran.net/zahrani/",
-      "عبدالله عواد الجهني": "https://server13.mp3quran.net/jhn/",
-      "عبدالله غيلان": "https://server8.mp3quran.net/gulan/",
-      "علي جابر": "https://server11.mp3quran.net/a_jbr/",
-      "ماهر المعيقلي": "https://server12.mp3quran.net/maher/",
-      "محمد ايوب": "https://server8.mp3quran.net/ayyub/",
-      "محمد صديق المنشاوي": "https://server10.mp3quran.net/minsh/",
-      "محمود علي البنا": "https://server8.mp3quran.net/bna/",
-      "منصور السالمي": "https://server14.mp3quran.net/mansor/",
-      "ناصر القطامي": "https://server6.mp3quran.net/qtm/",
-      "ياسر الدوسري": "https://server11.mp3quran.net/yasser/",
-    };
-
-    // Filter reciters based on the desiredReciters list
-    final filteredReciters = recitersJson
-        .where((reciterJson) {
-          final reciter = Reciter.fromJson(reciterJson);
-          return desiredReciters.containsKey(reciter.name) &&
-              reciter.serverUrl.startsWith(desiredReciters[reciter.name]!);
-        })
-        .map((json) => Reciter.fromJson(json))
+    final List<Reciter> reciters = recitersJson
+        .map((reciterJson) => Reciter.fromJson(reciterJson))
         .toList();
+
+    // Filter reciters based on the desiredReciters map
+    final filteredReciters = reciters.where((reciter) {
+      // Check if this reciter is in the desiredReciters map
+      final desiredReciter = desiredReciters[reciter.name];
+
+      if (desiredReciter != null) {
+        // Find the desired moshaf within the reciter's moshaf list
+        final desiredMoshafList = reciter.moshaf
+            .where((moshaf) => moshaf.name == desiredReciter['moshaf'])
+            .toList();
+
+        if (desiredMoshafList.isNotEmpty) {
+          final desiredMoshaf = desiredMoshafList.first;
+          // Replace the reciter's moshaf list with only the desired moshaf
+          reciter.moshaf.clear();
+          reciter.moshaf.add(desiredMoshaf);
+          return true;
+        }
+      }
+      return false;
+    }).toList();
 
     return filteredReciters;
   } else {
@@ -58,7 +116,7 @@ Future<List<String>> fetchReciterSurahs(int reciterId) async {
   try {
     final response = await http.get(
       Uri.parse(
-          'https://mp3quran.net/api/v3/reciters?language=eng&rewaya=2&reciter=$reciterId'),
+          'https://mp3quran.net/api/v3/reciters?language=eng&rewaya=1&reciter=$reciterId'),
     );
 
     if (response.statusCode == 200) {
@@ -143,6 +201,7 @@ class QuranSubCat extends StatelessWidget {
             indicatorColor: Color.fromARGB(255, 192, 158, 119),
             labelColor: Color(0xFFFAFAFA),
             unselectedLabelColor: Color(0xFF888888),
+            splashFactory: NoSplash.splashFactory,
             labelStyle: TextStyle(
               fontFamily: 'Almarai',
               fontWeight: FontWeight.w700,
@@ -228,7 +287,9 @@ class QuranSubCat extends StatelessWidget {
           child: ReciterSurahs(
             title: reciters[index].name,
             reciterId: reciters[index].id,
-            serverUrl: reciters[index].serverUrl, // Pass the serverUrl here
+            serverUrl: reciters[index]
+                .moshaf[0]
+                .server, // Use the server from the desired moshaf
           ),
         ),
       ),

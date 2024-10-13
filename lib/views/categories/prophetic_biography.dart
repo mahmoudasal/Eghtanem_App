@@ -1,11 +1,8 @@
-import 'package:egtanem_application/cubits/prophet_stories/prophet_cubit.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import '../../cubits/prophet_stories/video_player_cubit.dart';
 
-// ignore: must_be_immutable
 class PropheticBiography extends StatefulWidget {
   const PropheticBiography({super.key});
 
@@ -125,207 +122,101 @@ class PropheticBiographyState extends State<PropheticBiography> {
     },
   ];
 
-  late VideoPlayerCubit _videoPlayerCubit;
-
-  @override
-  void initState() {
-    super.initState();
-    _videoPlayerCubit = VideoPlayerCubit();
-  }
+  final ValueNotifier<int?> _currentlyPlayingIndex = ValueNotifier<int?>(null);
 
   @override
   void dispose() {
-    _videoPlayerCubit.close();
+    _currentlyPlayingIndex.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _videoPlayerCubit,
-      child: WillPopScope(
-        onWillPop: () async {
-          _videoPlayerCubit.stopVideo();
-          return true;
-        },
-        child: Scaffold(
-          backgroundColor: const Color(0xff1D1D1B),
-          appBar: AppBar(
-            scrolledUnderElevation: 0.0,
-            toolbarHeight: 100.h,
-            centerTitle: true,
-            backgroundColor: const Color(0xff1D1D1B),
-            shadowColor: const Color(0xff1D1D1B),
-            foregroundColor: const Color(0xff1D1D1B),
-            title: Text(
-              'السيره النبوية',
-              style: TextStyle(
-                fontFamily: 'Almarai',
-                fontWeight: FontWeight.w700,
-                fontSize: 25.sp,
-                height: 1.2,
-                color: const Color(0xFFFAFAFA),
+    return Scaffold(
+      backgroundColor: const Color(0xff1D1D1B),
+      appBar: AppBar(
+        scrolledUnderElevation: 0.0,
+        toolbarHeight: 100.h,
+        centerTitle: true,
+        backgroundColor: const Color(0xff1D1D1B),
+        shadowColor: const Color(0xff1D1D1B),
+        foregroundColor: const Color(0xff1D1D1B),
+        title: Text(
+          'السيره النبوية',
+          style: TextStyle(
+            fontFamily: 'Almarai',
+            fontWeight: FontWeight.w700,
+            fontSize: 25.sp,
+            height: 1.2,
+            color: const Color(0xFFFAFAFA),
+          ),
+        ),
+        leading: const SizedBox(width: 0.0),
+        actions: [
+          Row(
+            children: [
+              IconButton(
+                icon: SvgPicture.asset("assets/ui icons/BackButton.svg"),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
               ),
-            ),
-            leading: const SizedBox(width: 0.0),
-            actions: [
-              Row(
-                children: [
-                  IconButton(
-                    icon: SvgPicture.asset("assets/ui icons/BackButton.svg"),
-                    onPressed: () {
-                      _videoPlayerCubit.stopVideo();
-                      Navigator.pop(context);
-                    },
-                  ),
-                  SizedBox(width: 35.w),
-                ],
-              ),
+              SizedBox(width: 35.w),
             ],
           ),
-          body: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
-            child: ListView.builder(
-              itemCount: videos.length,
-              itemBuilder: (context, index) {
-                final video = videos[index];
-                final ExpansionTileController controller =
-                    ExpansionTileController();
+        ],
+      ),
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        child: ListView.builder(
+          itemCount: videos.length,
+          itemBuilder: (context, index) {
+            final video = videos[index];
 
-                return Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8.h),
-                  child: Card(
-                    color: const Color(0xff2A2A2A),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.r),
-                    ),
-                    child: Theme(
-                      data: ThemeData(
-                        splashColor: Colors.transparent,
-                        hoverColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        dividerColor: Colors.transparent,
-                        expansionTileTheme: const ExpansionTileThemeData(
-                          backgroundColor: Colors.transparent,
-                          collapsedBackgroundColor: Colors.transparent,
-                        ),
-                      ),
-                      child: ExpansionTile(
-                        controller: controller,
-                        key: PageStorageKey<int>(index),
-                        iconColor: Colors.white,
-                        collapsedIconColor: Colors.white,
-                        title: Text(
-                          video["title"]!,
-                          textDirection: TextDirection.rtl,
-                          style: TextStyle(
-                            fontFamily: 'Almarai',
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                        onExpansionChanged: (bool expanded) {
-                          final cubit = _videoPlayerCubit;
-                          if (expanded) {
-                            // Collapse the previously expanded tile
-                            if (cubit.currentlyExpandedIndex != null &&
-                                cubit.currentlyExpandedIndex != index) {
-                              cubit.collapseTile(cubit.currentlyExpandedIndex!);
-                            }
-
-                            // Play the video for the current tile
-                            cubit.playVideo(video["url"]!, index);
-                          } else {
-                            // Stop the video if the tile is collapsed
-                            if (cubit.currentlyExpandedIndex == index) {
-                              cubit.stopVideo();
-                            }
-                          }
-                        },
-                        children: [
-                          BlocBuilder<VideoPlayerCubit, VideoPlayerState>(
-                            bloc:
-                                _videoPlayerCubit, // Ensure we use the correct cubit instance
-                            builder: (context, state) {
-                              final cubit = _videoPlayerCubit;
-                              if (state is VideoLoading &&
-                                  cubit.currentlyExpandedIndex == index) {
-                                return const Center(
-                                    child: CircularProgressIndicator());
-                              } else if ((state is VideoPlaying ||
-                                      state is VideoPaused) &&
-                                  cubit.currentlyExpandedIndex == index) {
-                                final controller = state.controller;
-                                return Column(
-                                  children: [
-                                    YoutubePlayer(
-                                      controller: controller,
-                                      showVideoProgressIndicator: true,
-                                      progressIndicatorColor: Colors.red,
-                                      progressColors: const ProgressBarColors(
-                                        playedColor: Colors.red,
-                                        handleColor: Colors.redAccent,
-                                      ),
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.replay_5,
-                                              color: Colors.white),
-                                          onPressed: () {
-                                            cubit.skipBackward();
-                                          },
-                                        ),
-                                        IconButton(
-                                          icon: Icon(
-                                            controller.value.isPlaying
-                                                ? Icons.pause
-                                                : Icons.play_arrow,
-                                            color: Colors.white,
-                                          ),
-                                          onPressed: () {
-                                            if (controller.value.isPlaying) {
-                                              cubit.pauseVideo();
-                                            } else {
-                                              cubit.resumeVideo();
-                                            }
-                                          },
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.forward_5,
-                                              color: Colors.white),
-                                          onPressed: () {
-                                            cubit.skipForward();
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                );
-                              } else if (state is VideoError &&
-                                  cubit.currentlyExpandedIndex == index) {
-                                return Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    state.error,
-                                    style: const TextStyle(color: Colors.red),
-                                  ),
-                                );
-                              }
-                              return const SizedBox.shrink();
-                            },
-                          ),
-                        ],
-                      ),
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.h),
+              child: Card(
+                color: const Color(0xff2A2A2A),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.r),
+                ),
+                child: Theme(
+                  data: ThemeData(
+                    splashColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    dividerColor: Colors.transparent,
+                    expansionTileTheme: const ExpansionTileThemeData(
+                      backgroundColor: Colors.transparent,
+                      collapsedBackgroundColor: Colors.transparent,
                     ),
                   ),
-                );
-              },
-            ),
-          ),
+                  child: ExpansionTile(
+                    key: PageStorageKey<int>(index),
+                    iconColor: Colors.white,
+                    collapsedIconColor: Colors.white,
+                    title: Text(
+                      video["title"]!,
+                      textDirection: TextDirection.rtl,
+                      style: TextStyle(
+                        fontFamily: 'Almarai',
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                    children: [
+                      VideoPlayerItem(
+                        videoUrl: video["url"]!,
+                        index: index,
+                        currentlyPlayingIndex: _currentlyPlayingIndex,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

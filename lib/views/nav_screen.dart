@@ -11,14 +11,14 @@ import 'home_screen.dart';
 
 class NaviagionScreen extends StatelessWidget {
   static const String id = 'ShortsScreen';
-  final Map<String, dynamic> youtubeData;
+  final Map<String, dynamic>? youtubeData;
 
   const NaviagionScreen({super.key, required this.youtubeData});
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> pages = [
-      ProfilePage(youtubeData: youtubeData),
+    List<Widget> pages = [
+      ProfilePage(youtubeData: youtubeData!),
       const LongVids(),
       const CategoriesPage(),
       ShortsListPage(youtubeData: youtubeData),
@@ -96,7 +96,7 @@ class NaviagionScreen extends StatelessWidget {
 }
 
 class ShortsListPage extends StatefulWidget {
-  final Map<String, dynamic> youtubeData;
+  final Map<String, dynamic>? youtubeData;
 
   const ShortsListPage({super.key, required this.youtubeData});
 

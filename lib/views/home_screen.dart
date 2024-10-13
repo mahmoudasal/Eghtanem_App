@@ -18,7 +18,7 @@ class ShortsList extends StatefulWidget {
   final String caption;
   final int likes;
   final int comments;
-  final Map<String, dynamic> youtubeData;
+  final Map<String, dynamic>? youtubeData;
 
   const ShortsList({
     super.key,
@@ -44,7 +44,7 @@ class _ShortsListState extends State<ShortsList> {
     super.initState();
     _videoPlayerCubit = VideoPlayerCubit()..loadVideo(widget.vid);
     _interactionCubit = InteractionCubit(
-      youtubeData: widget.youtubeData,
+      youtubeData: widget.youtubeData!,
       videoId: widget.vid,
     );
   }

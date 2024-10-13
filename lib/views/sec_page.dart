@@ -76,7 +76,8 @@ class SecondPage extends StatelessWidget {
                     height: 50.h,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.of(context).push(createRoute(LoginPage()));
+                        Navigator.of(context)
+                            .push(createRoute(const LoginPage()));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF94795B),

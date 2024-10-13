@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -25,6 +27,12 @@ class TelawahState extends State<Telawah> {
   final AudioPlayer _audioPlayer = AudioPlayer();
   String? _currentSurah;
   bool _isPlaying = false;
+  Duration _duration = Duration.zero;
+  Duration _position = Duration.zero;
+  StreamSubscription<Duration>? _durationSubscription;
+  StreamSubscription<Duration>? _positionSubscription;
+  StreamSubscription<PlayerState>? _playerStateSubscription;
+  StreamSubscription<void>? _playerCompleteSubscription;
 
   static const List<String> suraNames = [
     "الفاتحة",
@@ -144,25 +152,84 @@ class TelawahState extends State<Telawah> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+
+    // Listen for duration changes
+    _durationSubscription = _audioPlayer.onDurationChanged.listen((Duration d) {
+      if (mounted) {
+        setState(() {
+          _duration = d;
+        });
+      }
+    });
+
+    // Listen for position changes
+    _positionSubscription = _audioPlayer.onPositionChanged.listen((Duration p) {
+      if (mounted) {
+        setState(() {
+          _position = p;
+        });
+      }
+    });
+
+    // Listen for state changes
+    _playerStateSubscription =
+        _audioPlayer.onPlayerStateChanged.listen((PlayerState state) {
+      if (mounted) {
+        setState(() {
+          _isPlaying = state == PlayerState.playing;
+        });
+      }
+    });
+
+    // Listen for completion of playback
+    _playerCompleteSubscription = _audioPlayer.onPlayerComplete.listen((event) {
+      if (mounted) {
+        setState(() {
+          _position = Duration.zero;
+        });
+        _playNextSurah();
+      }
+    });
+  }
+
+  @override
   void dispose() {
+    _durationSubscription?.cancel();
+    _positionSubscription?.cancel();
+    _playerStateSubscription?.cancel();
+    _playerCompleteSubscription?.cancel();
     _audioPlayer.dispose();
     super.dispose();
   }
 
-  void _playPauseSurah(String surahNumber) async {
-    if (_currentSurah == surahNumber && _isPlaying) {
-      await _audioPlayer.pause();
-      setState(() {
-        _isPlaying = false;
-      });
-    } else {
-      final url = '${widget.serverUrl}${surahNumber.padLeft(3, '0')}.mp3';
+  // Function to format duration into mm:ss
+  String formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$minutes:$seconds';
+  }
 
+  // Function to play or pause a Surah
+  void _playPauseSurah(String surahNumber) async {
+    if (_currentSurah == surahNumber) {
+      if (_isPlaying) {
+        await _audioPlayer.pause();
+      } else {
+        await _audioPlayer.resume();
+      }
+    } else {
+      // Stop current Surah if different
+      if (_isPlaying) {
+        await _audioPlayer.stop();
+      }
+      final url = '${widget.serverUrl}${surahNumber.padLeft(3, '0')}.mp3';
       try {
         await _audioPlayer.play(UrlSource(url));
         setState(() {
           _currentSurah = surahNumber;
-          _isPlaying = true;
         });
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -172,10 +239,106 @@ class TelawahState extends State<Telawah> {
     }
   }
 
+  // Function to play the next Surah
+  void _playNextSurah() {
+    final currentIndex = widget.surahs.indexOf('Surah $_currentSurah');
+    if (currentIndex >= 0 && currentIndex < widget.surahs.length - 1) {
+      final nextSurahNumber = widget.surahs[currentIndex + 1].split(' ')[1];
+      _playPauseSurah(nextSurahNumber);
+    }
+  }
+
+  // Function to play the previous Surah
+  void _playPreviousSurah() {
+    final currentIndex = widget.surahs.indexOf('Surah $_currentSurah');
+    if (currentIndex > 0) {
+      final prevSurahNumber = widget.surahs[currentIndex - 1].split(' ')[1];
+      _playPauseSurah(prevSurahNumber);
+    }
+  }
+
+  // Build the media control bar
+  Widget buildMediaControlBar() {
+    final surahIndex = int.tryParse(_currentSurah ?? '') ?? 1;
+    final surahName = surahIndex > 0 && surahIndex <= suraNames.length
+        ? suraNames[surahIndex - 1]
+        : "Surah $_currentSurah";
+
+    return Container(
+      color: Colors.black54,
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            surahName,
+            style: const TextStyle(
+              fontFamily: 'Almarai',
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
+              color: Color(0xFFFAFAFA),
+            ),
+          ),
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(
+                  Icons.skip_previous,
+                  color: Colors.white,
+                ),
+                onPressed: _playPreviousSurah,
+              ),
+              IconButton(
+                icon: Icon(
+                  _isPlaying ? Icons.pause : Icons.play_arrow,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  if (_currentSurah != null) {
+                    _playPauseSurah(_currentSurah!);
+                  }
+                },
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.skip_next,
+                  color: Colors.white,
+                ),
+                onPressed: _playNextSurah,
+              ),
+              Expanded(
+                child: Slider(
+                  activeColor: const Color.fromARGB(255, 182, 151, 115),
+                  inactiveColor: Colors.grey,
+                  min: 0.0,
+                  max: _duration.inSeconds.toDouble(),
+                  value: _position.inSeconds
+                      .toDouble()
+                      .clamp(0.0, _duration.inSeconds.toDouble()),
+                  onChanged: (double value) async {
+                    final position = Duration(seconds: value.toInt());
+                    await _audioPlayer.seek(position);
+                    if (!_isPlaying) {
+                      await _audioPlayer.resume();
+                    }
+                  },
+                ),
+              ),
+              Text(
+                '${formatDuration(_position)} / ${formatDuration(_duration)}',
+                style: const TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: false,
       backgroundColor: const Color(0xff1D1D1B),
       appBar: AppBar(
         scrolledUnderElevation: 0.0,
@@ -209,53 +372,72 @@ class TelawahState extends State<Telawah> {
           ),
         ],
       ),
-      body: Directionality(
-        textDirection: TextDirection.rtl,
-        child: ListView.builder(
-          itemCount: widget.surahs.length,
-          itemBuilder: (context, index) {
-            final surahNumber = widget.surahs[index].split(' ')[1];
-            final surahIndex = int.tryParse(surahNumber) ?? 1;
-
-            // Ensure the surahIndex is within bounds
-            final surahName = surahIndex > 0 && surahIndex <= suraNames.length
-                ? suraNames[surahIndex - 1]
-                : "Surah $surahNumber";
-
-            return Padding(
-              padding:
-                  EdgeInsets.symmetric(horizontal: 0.03.sw, vertical: 0.01.sh),
-              child: ListTile(
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(8)),
-                ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 0.055.sw),
-                tileColor: const Color(0XFF171715),
-                title: Text(
-                  surahName,
-                  style: TextStyle(
-                    fontFamily: 'Almarai',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 0.02.sh,
-                    color: const Color(0xFFFAFAFA),
-                  ),
-                ),
-                trailing: _currentSurah == surahNumber
-                    ? const Icon(
-                        Icons.pause,
-                        color: Color.fromARGB(255, 182, 151, 115),
-                      )
-                    : const Icon(
-                        Icons.play_arrow,
-                        color: Color.fromARGB(255, 182, 151, 115),
-                      ),
-                onTap: () {
-                  _playPauseSurah(surahNumber);
-                },
+      body: Stack(
+        children: [
+          // Main content (ListView)
+          Directionality(
+            textDirection: TextDirection.rtl,
+            child: ListView.builder(
+              itemCount: widget.surahs.length,
+              padding: EdgeInsets.only(
+                bottom: _isPlaying
+                    ? 80.0
+                    : 0.0, // Add padding if media control bar is visible
               ),
-            );
-          },
-        ),
+              itemBuilder: (context, index) {
+                final surahNumber = widget.surahs[index].split(' ')[1];
+                final surahIndex = int.tryParse(surahNumber) ?? 1;
+
+                // Ensure the surahIndex is within bounds
+                final surahName =
+                    surahIndex > 0 && surahIndex <= suraNames.length
+                        ? suraNames[surahIndex - 1]
+                        : "Surah $surahNumber";
+
+                return Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 0.03.sw, vertical: 0.01.sh),
+                  child: ListTile(
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 0.055.sw),
+                    tileColor: const Color(0XFF171715),
+                    title: Text(
+                      surahName,
+                      style: TextStyle(
+                        fontFamily: 'Almarai',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 0.02.sh,
+                        color: const Color(0xFFFAFAFA),
+                      ),
+                    ),
+                    trailing: (_currentSurah == surahNumber && _isPlaying)
+                        ? const Icon(
+                            Icons.pause,
+                            color: Color.fromARGB(255, 182, 151, 115),
+                          )
+                        : const Icon(
+                            Icons.play_arrow,
+                            color: Color.fromARGB(255, 182, 151, 115),
+                          ),
+                    onTap: () {
+                      _playPauseSurah(surahNumber);
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+          // Media control bar
+          if (_isPlaying && _currentSurah != null)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: buildMediaControlBar(),
+            ),
+        ],
       ),
     );
   }

@@ -1,20 +1,3 @@
-class Reciter {
-  final int id;
-  final String name;
-  final String serverUrl;
-
-  Reciter({required this.id, required this.name, required this.serverUrl});
-
-  factory Reciter.fromJson(Map<String, dynamic> json) {
-    return Reciter(
-      id: json['id'],
-      name: json['name'],
-      serverUrl: json['moshaf'][0]
-          ['server'], // Assuming first moshaf is the desired one
-    );
-  }
-}
-
 class Moshaf {
   final int id;
   final String name;
@@ -40,6 +23,31 @@ class Moshaf {
       surahTotal: json['surah_total'],
       moshafType: json['moshaf_type'],
       surahList: json['surah_list'],
+    );
+  }
+}
+
+class Reciter {
+  final int id;
+  final String name;
+  final String letter;
+  final List<Moshaf> moshaf;
+
+  Reciter({
+    required this.id,
+    required this.name,
+    required this.letter,
+    required this.moshaf,
+  });
+
+  factory Reciter.fromJson(Map<String, dynamic> json) {
+    return Reciter(
+      id: json['id'],
+      name: json['name'],
+      letter: json['letter'],
+      moshaf: (json['moshaf'] as List)
+          .map((moshafJson) => Moshaf.fromJson(moshafJson))
+          .toList(),
     );
   }
 }

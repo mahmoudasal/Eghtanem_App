@@ -45,8 +45,10 @@ class MediaCubit extends Cubit<MediaState> {
     if (isLoading) return;
 
     isLoading = true;
-    emit(MediaLoading());
-
+    if (!loadMore) {
+      if (isClosed) return;
+      emit(MediaLoading());
+    }
     try {
       List<Map<String, dynamic>> newMediaItems = [];
 
@@ -122,12 +124,19 @@ class MediaCubit extends Cubit<MediaState> {
         // Check if more data is available
         hasMoreData =
             _channelNextPageTokens.values.any((token) => token != null);
+
+        // **Start preloading next batch if more data is available**
+        if (hasMoreData) {
+          _preloadNextBatch();
+        }
       } else {
         // No items found after retries
+        if (isClosed) return;
         emit(MediaError(errorMessage: 'Check your internet connection'));
       }
     } catch (e, stacktrace) {
       logger.e('An error occurred while fetching media', e, stacktrace);
+      if (isClosed) return;
       emit(MediaError(errorMessage: 'An error occurred. Please try again.'));
     } finally {
       isLoading = false;
@@ -135,7 +144,20 @@ class MediaCubit extends Cubit<MediaState> {
     }
   }
 
-  // Helper method to get multiple random channel IDs
+  // New method to preload next batch
+  void _preloadNextBatch() {
+    // Delay the preload slightly to prevent overlapping fetches
+    Future.delayed(const Duration(milliseconds: 500), () async {
+      if (isClosed) return;
+      if (!isLoading && hasMoreData) {
+        logger.d('Preloading next batch of media items...');
+        await fetchMedia(loadMore: true);
+      }
+    });
+  }
+
+  // Rest of the methods remain the same...
+
   List<String> _getRandomChannelIds(int count) {
     final channelIds = dotenv.env['CHANNEL_IDS']?.split(',');
 
@@ -169,7 +191,7 @@ class MediaCubit extends Cubit<MediaState> {
       'part': 'snippet',
       'channelId': channelId,
       'type': 'video',
-      'maxResults': '8',
+      'maxResults': '2',
       'key': apiKey,
     };
 
