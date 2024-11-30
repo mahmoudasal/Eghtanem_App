@@ -5,10 +5,11 @@ import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:asset_cache/asset_cache.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:social_share/social_share.dart';
+// import 'package:social_share/social_share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logger/logger.dart';
 import 'package:http/http.dart' as http;
+// import 'package:social_share/social_share.dart';
 
 import '../controller/secure_token.dart'; // Import your storage service
 
@@ -127,17 +128,17 @@ class ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  void _shareHadith(String hadithText) async {
-    try {
-      await SocialShare.shareOptions(hadithText);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Hadith shared successfully')),
-      );
-    } catch (e) {
-      // Handle sharing errors and notify the user
-      logger.e('Error sharing Hadith: $e');
-    }
-  }
+  // void _shareHadith(String hadithText) async {
+  //   try {
+  //     await SocialShare.shareOptions(hadithText);
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Hadith shared successfully')),
+  //     );
+  //   } catch (e) {
+  //     // Handle sharing errors and notify the user
+  //     logger.e('Error sharing Hadith: $e');
+  //   }
+  // }
 
   void _supportApp() {
     // Implement the functionality to support the app here
@@ -153,7 +154,7 @@ class ProfilePageState extends State<ProfilePage> {
         youtubeData?['snippet']?['title'] ?? 'وضع عدم الاتصال';
     final String channelPhotoUrl = youtubeData?['snippet']?['thumbnails']
             ?['default']?['url'] ??
-        'assets/default_profile.png';
+        'assets/photo1.webp';
 
     return Scaffold(
       backgroundColor: const Color(0xff1D1D1B),
@@ -252,28 +253,28 @@ class ProfilePageState extends State<ProfilePage> {
     return Column(
       children: [
         // Wide button to share Hadith
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF94795B),
-              padding: EdgeInsets.symmetric(vertical: 10.h),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            onPressed: () => _shareHadith(hadithText),
-            child: Text(
-              'شارك الحديث',
-              style: TextStyle(
-                fontFamily: 'Almarai',
-                fontWeight: FontWeight.w700,
-                fontSize: 20.sp,
-                color: const Color(0xFFF2EEEB),
-              ),
-            ),
-          ),
-        ),
+        // SizedBox(
+        //   width: double.infinity,
+        //   child: ElevatedButton(
+        //     style: ElevatedButton.styleFrom(
+        //       backgroundColor: const Color(0xFF94795B),
+        //       padding: EdgeInsets.symmetric(vertical: 10.h),
+        //       shape: RoundedRectangleBorder(
+        //         borderRadius: BorderRadius.circular(10),
+        //       ),
+        //     ),
+        //     onPressed: () => _shareHadith(hadithText),
+        //     child: Text(
+        //       'شارك الحديث',
+        //       style: TextStyle(
+        //         fontFamily: 'Almarai',
+        //         fontWeight: FontWeight.w700,
+        //         fontSize: 20.sp,
+        //         color: const Color(0xFFF2EEEB),
+        //       ),
+        //     ),
+        //   ),
+        // ),
         SizedBox(height: 10.h),
 
         // Add Support button

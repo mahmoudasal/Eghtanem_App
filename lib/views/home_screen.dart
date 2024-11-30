@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:social_share/social_share.dart';
+// import 'package:social_share/social_share.dart';
+// import 'package:social_share/social_share.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../cubits/video_player_cubit/video_player_cubit.dart';
@@ -175,7 +176,7 @@ class _ShortsListState extends State<ShortsList> {
       String shareText =
           'Check out this video: https://www.youtube.com/watch?v=${widget.vid}';
 
-      await SocialShare.shareOptions(shareText);
+      // await SocialShare.shareOptions(shareText);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Video shared successfully')),

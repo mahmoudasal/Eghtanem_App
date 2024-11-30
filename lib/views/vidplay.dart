@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-import 'package:social_share/social_share.dart'; // Import the package
+// import 'package:social_share/social_share.dart'; // Import the package
 
 import '../cubits/cubit/media_cubit.dart'; // Import MediaCubit
 
@@ -77,7 +77,7 @@ class VideoDetailScreenState extends State<VideoDetailScreen> {
       String shareText =
           'Check out this video "${widget.title}" on YouTube: https://www.youtube.com/watch?v=${widget.videoUrl}';
 
-      await SocialShare.shareOptions(shareText);
+      // await SocialShare.shareOptions(shareText);
     } catch (e) {
       // Handle sharing errors and notify the user
     }

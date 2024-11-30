@@ -8,7 +8,6 @@ import 'package:logger/logger.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-
 import '../controller/secure_token.dart';
 import '../widgets/custom_page_transition.dart';
 import 'nav_screen.dart';
