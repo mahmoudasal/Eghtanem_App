@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-// import 'package:social_share/social_share.dart';
-// import 'package:social_share/social_share.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
-import '../cubits/video_player_cubit/video_player_cubit.dart';
-import '../cubits/video_player_cubit/video_player_state.dart';
-import '../cubits/interaction_button_cubit/interaction_cubit.dart';
+import '../services/video_player_cubit.dart';
+import '../services/video_player_state.dart';
+import '../services/interaction_cubit.dart';
+import '../theme/app_text_styles.dart';
+import '../widgets/auto_scrolling_text.dart';
 import '../widgets/build_icon_text.dart';
 import '../widgets/comment_bottom_sheet.dart';
 
@@ -33,10 +33,10 @@ class ShortsList extends StatefulWidget {
   });
 
   @override
-  _ShortsListState createState() => _ShortsListState();
+  ShortsListState createState() => ShortsListState();
 }
 
-class _ShortsListState extends State<ShortsList> {
+class ShortsListState extends State<ShortsList> {
   late VideoPlayerCubit _videoPlayerCubit;
   late InteractionCubit _interactionCubit;
 
@@ -158,35 +158,12 @@ class _ShortsListState extends State<ShortsList> {
         children: [
           AutoScrollingText(
             text: widget.name,
-            style: TextStyle(
-              fontFamily: 'Almarai',
-              fontWeight: FontWeight.w700,
-              fontSize: 16.sp,
-              color: const Color(0xFFFAFAFA),
-            ),
+            style: AppTextSytle.headingsH5,
             maxWidth: 175.w,
           ),
         ],
       ),
     );
-  }
-
-  void _shareContent() async {
-    try {
-      String shareText =
-          'Check out this video: https://www.youtube.com/watch?v=${widget.vid}';
-
-      // await SocialShare.shareOptions(shareText);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Video shared successfully')),
-      );
-    } catch (e) {
-      // Handle sharing errors and notify the user
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to share the video.')),
-      );
-    }
   }
 
   String formatNumber(int number) {
@@ -238,7 +215,7 @@ class _ShortsListState extends State<ShortsList> {
           SizedBox(height: 15.h),
           buildIconWithText(
             icon: 'assets/ui icons/Share.svg',
-            onTap: _shareContent,
+            onTap: () {},
             text: 'Share',
           ),
         ],
@@ -258,109 +235,12 @@ class _ShortsListState extends State<ShortsList> {
         textDirection: TextDirection.rtl,
         child: Text(
           widget.caption,
-          style: TextStyle(
-            fontFamily: 'Almarai',
-            fontWeight: FontWeight.w700,
-            fontSize: 12.sp,
-            color: const Color(0xFFFAFAFA),
-          ),
+          style: AppTextSytle.headingsH7,
         ),
       ),
     );
   }
 }
 
-class AutoScrollingText extends StatefulWidget {
-  final String text;
-  final TextStyle style;
-  final double maxWidth;
 
-  const AutoScrollingText({
-    super.key,
-    required this.text,
-    required this.style,
-    required this.maxWidth,
-  });
-
-  @override
-  AutoScrollingTextState createState() => AutoScrollingTextState();
-}
-
-class AutoScrollingTextState extends State<AutoScrollingText>
-    with SingleTickerProviderStateMixin {
-  late double textWidth;
-  late ScrollController _scrollController;
-  AnimationController? _animationController;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _measureTextWidth();
-    });
-  }
-
-  void _measureTextWidth() {
-    final TextPainter textPainter = TextPainter(
-      text: TextSpan(text: widget.text, style: widget.style),
-      maxLines: 1,
-      textDirection: TextDirection.rtl,
-    )..layout();
-
-    textWidth = textPainter.width;
-
-    if (textWidth > widget.maxWidth) {
-      _startScrolling();
-    }
-  }
-
-  void _startScrolling() {
-    if (!mounted) return;
-
-    final double maxScrollExtent = textWidth - widget.maxWidth;
-
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 10),
-    );
-
-    _animationController!.addListener(() {
-      if (_scrollController.hasClients) {
-        final double newScrollPosition =
-            _animationController!.value * maxScrollExtent;
-        _scrollController.jumpTo(newScrollPosition);
-      }
-    });
-
-    _animationController!.repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _animationController?.dispose();
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: widget.maxWidth,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        controller: _scrollController,
-        physics: const NeverScrollableScrollPhysics(),
-        child: Text(
-          widget.text,
-          style: widget.style,
-          textDirection: TextDirection.rtl,
-          maxLines: 1,
-          overflow: TextOverflow.visible,
-          softWrap: false,
-        ),
-      ),
-    );
-  }
-}
+// Utility function to format duration (if needed elsewhere)

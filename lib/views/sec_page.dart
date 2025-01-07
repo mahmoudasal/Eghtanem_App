@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
 import '../widgets/custom_page_transition.dart';
 import 'login_page.dart';
 
@@ -9,13 +11,11 @@ class SecondPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize ScreenUtil for responsive sizing
     ScreenUtil.init(context, designSize: const Size(360, 690));
 
     return Scaffold(
       body: Stack(
         children: [
-          // Background image
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -24,7 +24,6 @@ class SecondPage extends StatelessWidget {
               ),
             ),
           ),
-          // Gradient overlay
           Positioned.fill(
             child: Container(
               decoration: const BoxDecoration(
@@ -39,35 +38,20 @@ class SecondPage extends StatelessWidget {
               ),
             ),
           ),
-          // Content
           SafeArea(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // First Text
-                  Text(
-                    'زكاة الوقت تأديته في مرضاة الله',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Almarai',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 23.sp,
-                      color: const Color(0xFFF2EEEB),
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-                  // Second Text
+                  Text('زكاة الوقت تأديته في مرضاة الله',
+                      textAlign: TextAlign.center,
+                      style: AppTextSytle.headingsH1),
+                  SizedBox(height: 25.h),
                   Text(
                     'استمتع بمشاهدة و سماع ما ينفعك في دنياك و اخرتك',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Almarai',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 24.sp,
-                      color: const Color(0xFFFAFAFA),
-                    ),
+                    style: AppTextSytle.headingsH2,
                   ),
                   SizedBox(height: 120.h),
                   // Button
@@ -80,16 +64,11 @@ class SecondPage extends StatelessWidget {
                             .push(createRoute(const LoginPage()));
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF94795B),
+                        backgroundColor: AppColors.primary0,
                       ),
                       child: Text(
                         'ابدأ المشاهدة',
-                        style: TextStyle(
-                          fontFamily: 'Almarai',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 22.sp,
-                          color: const Color(0xFFFAFAFA),
-                        ),
+                        style: AppTextSytle.headingsH2,
                       ),
                     ),
                   ),

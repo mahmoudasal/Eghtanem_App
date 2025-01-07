@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../cubits/prophet_stories/video_player_cubit.dart';
+import '../../services/cat_video_player_cubit.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/app_text_styles.dart';
 
 class ProphetsStories extends StatefulWidget {
   const ProphetsStories({super.key});
@@ -205,24 +207,15 @@ class ProphetsStoriesState extends State<ProphetsStories> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xff1D1D1B),
+      backgroundColor: AppColors.primary1,
       appBar: AppBar(
         scrolledUnderElevation: 0.0,
         toolbarHeight: 100.h,
         centerTitle: true,
-        backgroundColor: const Color(0xff1D1D1B),
-        shadowColor: const Color(0xff1D1D1B),
-        foregroundColor: const Color(0xff1D1D1B),
-        title: Text(
-          'قصص الأنبياء',
-          style: TextStyle(
-            fontFamily: 'Almarai',
-            fontWeight: FontWeight.w700,
-            fontSize: 25.sp,
-            height: 1.2,
-            color: const Color(0xFFFAFAFA),
-          ),
-        ),
+        backgroundColor: AppColors.primary1,
+        shadowColor: AppColors.primary1,
+        foregroundColor: AppColors.primary1,
+        title: Text('قصص الأنبياء', style: AppTextSytle.headingsH1),
         leading: const SizedBox(width: 0.0),
         actions: [
           Row(
@@ -267,16 +260,9 @@ class ProphetsStoriesState extends State<ProphetsStories> {
                     key: PageStorageKey<int>(index),
                     iconColor: Colors.white,
                     collapsedIconColor: Colors.white,
-                    title: Text(
-                      video["title"]!,
-                      textDirection: TextDirection.rtl,
-                      style: TextStyle(
-                        fontFamily: 'Almarai',
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
+                    title: Text(video["title"]!,
+                        textDirection: TextDirection.rtl,
+                        style: AppTextSytle.headingsH4),
                     onExpansionChanged: (bool expanded) {
                       if (!expanded) {
                         // Pause the video when the tile is collapsed

@@ -7,6 +7,9 @@ import 'package:flutter_svg/svg.dart';
 
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../theme/app_colors.dart';
+import '../../../theme/app_text_styles.dart';
+
 class Telawah extends StatefulWidget {
   final String title;
   final List<String> surahs;
@@ -24,9 +27,75 @@ class Telawah extends StatefulWidget {
 }
 
 class TelawahState extends State<Telawah> {
+  // Add loading state
+  bool _isLoading = false;
+
+  // Add error state
+  String? _errorMessage;
+
+  // Method to handle loading state
+  Future<void> _setLoading(bool loading) async {
+    if (mounted) {
+      setState(() {
+        _isLoading = loading;
+      });
+    }
+  }
+
+  // Enhanced play/pause method with loading state
+  Future<void> _playPauseSurah(String surahNumber) async {
+    if (_isLoading) return; // Prevent multiple simultaneous requests
+
+    await _setLoading(true);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    try {
+      if (_currentSurah == surahNumber) {
+        if (_isPlaying) {
+          await _audioPlayer.pause();
+        } else {
+          await _audioPlayer.resume();
+        }
+      } else {
+        if (_isPlaying) {
+          await _audioPlayer.stop();
+        }
+        final url = '${widget.serverUrl}${surahNumber.padLeft(3, '0')}.mp3';
+        await _audioPlayer.play(UrlSource(url));
+
+        if (mounted) {
+          setState(() {
+            _currentSurah = surahNumber;
+            _errorMessage = null; // Clear any previous errors
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Failed to play Surah $surahNumber: $e';
+        });
+        scaffoldMessenger.showSnackBar(
+          SnackBar(
+            content: Text(_errorMessage!),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: 'Retry',
+              textColor: Colors.white,
+              onPressed: () => _playPauseSurah(surahNumber),
+            ),
+          ),
+        );
+      }
+    } finally {
+      await _setLoading(false);
+    }
+  }
+
   final AudioPlayer _audioPlayer = AudioPlayer();
   String? _currentSurah;
   bool _isPlaying = false;
+
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
   StreamSubscription<Duration>? _durationSubscription;
@@ -212,33 +281,6 @@ class TelawahState extends State<Telawah> {
     return '$minutes:$seconds';
   }
 
-  // Function to play or pause a Surah
-  void _playPauseSurah(String surahNumber) async {
-    if (_currentSurah == surahNumber) {
-      if (_isPlaying) {
-        await _audioPlayer.pause();
-      } else {
-        await _audioPlayer.resume();
-      }
-    } else {
-      // Stop current Surah if different
-      if (_isPlaying) {
-        await _audioPlayer.stop();
-      }
-      final url = '${widget.serverUrl}${surahNumber.padLeft(3, '0')}.mp3';
-      try {
-        await _audioPlayer.play(UrlSource(url));
-        setState(() {
-          _currentSurah = surahNumber;
-        });
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to play Surah $surahNumber: $e')),
-        );
-      }
-    }
-  }
-
   // Function to play the next Surah
   void _playNextSurah() {
     final currentIndex = widget.surahs.indexOf('Surah $_currentSurah');
@@ -270,15 +312,7 @@ class TelawahState extends State<Telawah> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            surahName,
-            style: const TextStyle(
-              fontFamily: 'Almarai',
-              fontWeight: FontWeight.w700,
-              fontSize: 18,
-              color: Color(0xFFFAFAFA),
-            ),
-          ),
+          Text(surahName, style: AppTextSytle.headingsH1),
           Row(
             children: [
               IconButton(
@@ -308,7 +342,7 @@ class TelawahState extends State<Telawah> {
               ),
               Expanded(
                 child: Slider(
-                  activeColor: const Color.fromARGB(255, 182, 151, 115),
+                  activeColor: AppColors.primary0,
                   inactiveColor: Colors.grey,
                   min: 0.0,
                   max: _duration.inSeconds.toDouble(),
@@ -335,27 +369,38 @@ class TelawahState extends State<Telawah> {
     );
   }
 
+  Widget _buildTrailingIcon(String surahNumber) {
+    if (_isLoading && _currentSurah == surahNumber) {
+      return const SizedBox(
+        width: 24,
+        height: 24,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary0),
+        ),
+      );
+    }
+
+    if (_currentSurah == surahNumber && _isPlaying) {
+      return const Icon(Icons.pause, color: AppColors.primary0);
+    }
+
+    return const Icon(Icons.play_arrow, color: AppColors.primary0);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: false,
-      backgroundColor: const Color(0xff1D1D1B),
+      backgroundColor: AppColors.primary1,
       appBar: AppBar(
         scrolledUnderElevation: 0.0,
         toolbarHeight: 55.h,
         centerTitle: true,
-        backgroundColor: const Color(0xff1D1D1B),
-        shadowColor: const Color(0xff1D1D1B),
-        foregroundColor: const Color(0xff1D1D1B),
-        title: Text(
-          widget.title,
-          style: const TextStyle(
-            fontFamily: 'Almarai',
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-            color: Color(0xFFFAFAFA),
-          ),
-        ),
+        backgroundColor: AppColors.primary1,
+        shadowColor: AppColors.primary1,
+        foregroundColor: AppColors.primary1,
+        title: Text(widget.title, style: AppTextSytle.headingsH4),
         leading: const SizedBox(width: 0.0),
         actions: [
           Row(
@@ -412,15 +457,7 @@ class TelawahState extends State<Telawah> {
                         color: const Color(0xFFFAFAFA),
                       ),
                     ),
-                    trailing: (_currentSurah == surahNumber && _isPlaying)
-                        ? const Icon(
-                            Icons.pause,
-                            color: Color.fromARGB(255, 182, 151, 115),
-                          )
-                        : const Icon(
-                            Icons.play_arrow,
-                            color: Color.fromARGB(255, 182, 151, 115),
-                          ),
+                    trailing: _buildTrailingIcon(surahNumber),
                     onTap: () {
                       _playPauseSurah(surahNumber);
                     },

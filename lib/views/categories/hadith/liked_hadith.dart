@@ -3,7 +3,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../data/prophet_speech_json.dart';
+import '../../../models/prophet_speech_json.dart';
+import '../../../theme/app_colors.dart';
+import '../../../theme/app_text_styles.dart';
 
 class LikedHadiths extends StatefulWidget {
   final Set<int> likedHadiths;
@@ -48,23 +50,17 @@ class LikedHadithsState extends State<LikedHadiths> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      backgroundColor: const Color(0xff1D1D1B),
+      backgroundColor: AppColors.primary1,
       appBar: AppBar(
         scrolledUnderElevation: 0.0,
         toolbarHeight: 100.h,
         centerTitle: true,
-        backgroundColor: const Color(0xff1D1D1B),
-        shadowColor: const Color(0xff1D1D1B),
-        foregroundColor: const Color(0xff1D1D1B),
+        backgroundColor: AppColors.primary1,
+        shadowColor: AppColors.primary1,
+        foregroundColor: AppColors.primary1,
         title: Text(
           "الاحاديث المفضلة",
-          style: TextStyle(
-            fontFamily: 'Almarai',
-            fontWeight: FontWeight.w700,
-            fontSize: 25.sp,
-            height: 1.2,
-            color: const Color(0xFFFAFAFA),
-          ),
+          style: AppTextSytle.headingsH1,
         ),
         leading: const SizedBox(width: 0.0),
         actions: [

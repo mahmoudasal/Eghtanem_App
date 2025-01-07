@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../cubits/cubit/media_cubit.dart';
-import '../cubits/navigation_cubit/navigation_cubit.dart';
+import '../services/media_cubit.dart';
+import '../services/navigation_cubit.dart';
+import '../theme/app_colors.dart';
 import 'categories/categories.dart';
-import 'longvids.dart';
-import 'profile.dart';
+
 import 'home_screen.dart';
 
 class NaviagionScreen extends StatelessWidget {
@@ -18,10 +18,8 @@ class NaviagionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Widget> pages = [
-      ProfilePage(youtubeData: youtubeData!),
-      const LongVids(),
       const CategoriesPage(),
-      ShortsListPage(youtubeData: youtubeData),
+      ShortsListPage(youtubeData: youtubeData)
     ];
 
     return BlocProvider(
@@ -36,7 +34,7 @@ class NaviagionScreen extends StatelessWidget {
         bottomNavigationBar: BlocBuilder<NavigationCubit, int>(
           builder: (context, currentIndex) {
             return BottomNavigationBar(
-              selectedFontSize: 12,
+              selectedFontSize: 12.5,
               unselectedFontSize: 11,
               currentIndex: currentIndex,
               onTap: (index) {
@@ -44,30 +42,12 @@ class NaviagionScreen extends StatelessWidget {
               },
               selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700),
               backgroundColor:
-                  currentIndex == 3 ? Colors.black : const Color(0xff1D1D1B),
+                  currentIndex == 1 ? Colors.black : AppColors.primary1,
               type: BottomNavigationBarType.fixed,
               items: [
                 BottomNavigationBarItem(
                   icon: SvgPicture.asset(
                     currentIndex == 0
-                        ? "assets/ui icons/profile_selected.svg"
-                        : "assets/ui icons/profile.svg",
-                    height: 24,
-                  ),
-                  label: 'الملف الشخصي',
-                ),
-                BottomNavigationBarItem(
-                  icon: SvgPicture.asset(
-                    currentIndex == 1
-                        ? "assets/ui icons/video-play_selected.svg"
-                        : "assets/ui icons/video-play.svg",
-                    height: 24,
-                  ),
-                  label: 'طويلة',
-                ),
-                BottomNavigationBarItem(
-                  icon: SvgPicture.asset(
-                    currentIndex == 2
                         ? "assets/ui icons/category_selected.svg"
                         : "assets/ui icons/category.svg",
                     height: 24,
@@ -76,7 +56,7 @@ class NaviagionScreen extends StatelessWidget {
                 ),
                 BottomNavigationBarItem(
                   icon: SvgPicture.asset(
-                    currentIndex == 3
+                    currentIndex == 1
                         ? "assets/ui icons/home.svg"
                         : "assets/ui icons/home_unselected.svg",
                     height: 24,
@@ -84,7 +64,7 @@ class NaviagionScreen extends StatelessWidget {
                   label: 'الرئيسية',
                 ),
               ],
-              selectedItemColor: const Color.fromARGB(255, 192, 158, 119),
+              selectedItemColor: AppColors.primary0,
               unselectedItemColor: const Color(0xffF2EEEB),
               showUnselectedLabels: true,
             );

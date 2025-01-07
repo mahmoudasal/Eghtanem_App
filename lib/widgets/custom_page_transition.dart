@@ -9,7 +9,7 @@ Route createRoute(Widget page) {
       // Slide transition
       const begin = Offset(1.0, 0.0);
       const end = Offset.zero;
-      final curve = Curves.easeOutQuad;
+      const curve = Curves.easeOutQuad;
 
       var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
       var slideAnimation = animation.drive(tween);

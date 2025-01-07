@@ -1,8 +1,10 @@
+import 'package:egtanem_application/theme/app_colors.dart';
 import 'package:egtanem_application/views/sec_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../theme/app_text_styles.dart';
 import '../widgets/custom_page_transition.dart';
 
 class FirstPage extends StatefulWidget {
@@ -40,24 +42,38 @@ class FirstPageState extends State<FirstPage> {
   }
 
   void _precacheImages() async {
-    try {
-      // Pre-cache images
-      await precacheImage(_backgroundImage, context);
-      await precacheImage(_secondPageImage, context);
-      await precacheImage(_loginPageImage, context);
-      await precacheImage(_logoImage, context);
-      await precacheImage(_googlepngImage, context);
+    // Check if widget is still mounted before starting
+    if (!mounted) return;
 
-      setState(() {
-        _isImageLoaded = true;
-      });
+    try {
+      // Create a list of Future<void> for all precache operations
+      final List<Future<void>> precacheFutures = [
+        precacheImage(_backgroundImage, context),
+        precacheImage(_secondPageImage, context),
+        precacheImage(_loginPageImage, context),
+        precacheImage(_logoImage, context),
+        precacheImage(_googlepngImage, context),
+      ];
+
+      // Wait for all images to be precached
+      await Future.wait(precacheFutures);
+
+      // Check again if widget is still mounted before updating state
+      if (mounted) {
+        setState(() {
+          _isImageLoaded = true;
+        });
+      }
     } catch (e) {
       if (kDebugMode) {
         print("Error pre-caching images: $e");
       }
-      setState(() {
-        _isImageLoaded = false;
-      });
+      // Check if mounted before updating state
+      if (mounted) {
+        setState(() {
+          _isImageLoaded = false;
+        });
+      }
     }
   }
 
@@ -95,12 +111,7 @@ class FirstPageState extends State<FirstPage> {
                     Text(
                       '!مرحباً بك في إغتنم',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: "Almarai",
-                        fontWeight: FontWeight.w800,
-                        fontSize: 24.sp,
-                        color: const Color(0xFFFAFAFA),
-                      ),
+                      style: AppTextSytle.headingsH1,
                     ),
                     SizedBox(
                       height: 15.h,
@@ -111,12 +122,7 @@ class FirstPageState extends State<FirstPage> {
                       child: Text(
                         'قال رسولُ اللهِ صلَّى اللهُ عليه وسلَّم لرجلٍ وهو يَعِظُه : اغتنِمْ خمسًا قبل خمسٍ : شبابَك قبل هَرَمِك، وصِحَّتَك قبل سَقَمِك، وغناك قبل فقرِك، وفراغَك قبل شُغلِك، وحياتَك قبل موتِك.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: "Almarai",
-                          fontWeight: FontWeight.w700,
-                          fontSize: 20.sp,
-                          color: const Color(0xFFFAFAFA),
-                        ),
+                        style: AppTextSytle.headingsH2,
                       ),
                     ),
                     SizedBox(height: 0.12.sh),
@@ -130,7 +136,7 @@ class FirstPageState extends State<FirstPage> {
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF94795B),
+                          backgroundColor: AppColors.primary0,
                         ),
                         child: Text(
                           'إستمرار',

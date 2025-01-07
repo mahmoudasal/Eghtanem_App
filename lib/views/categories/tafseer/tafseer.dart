@@ -4,7 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'tafseer_json_decoder.dart';
+import '../../../models/tafseer_json_decoder.dart';
+import '../../../theme/app_colors.dart';
+import '../../../theme/app_text_styles.dart';
 
 class Tafseer extends StatefulWidget {
   const Tafseer({super.key});
@@ -170,24 +172,15 @@ class TafseerState extends State<Tafseer> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      backgroundColor: const Color(0xff1D1D1B),
+      backgroundColor: AppColors.primary1,
       appBar: AppBar(
         scrolledUnderElevation: 0.0,
         toolbarHeight: 100.h,
         centerTitle: true,
-        backgroundColor: const Color(0xff1D1D1B),
-        shadowColor: const Color(0xff1D1D1B),
-        foregroundColor: const Color(0xff1D1D1B),
-        title: Text(
-          "التفسير",
-          style: TextStyle(
-            fontFamily: 'Almarai',
-            fontWeight: FontWeight.w700,
-            fontSize: 25.sp,
-            height: 1.2,
-            color: const Color(0xFFFAFAFA),
-          ),
-        ),
+        backgroundColor: AppColors.primary1,
+        shadowColor: AppColors.primary1,
+        foregroundColor: AppColors.primary1,
+        title: Text("التفسير", style: AppTextSytle.headingsH1),
         leading: const SizedBox(width: 0.0),
         actions: [
           Row(
@@ -221,7 +214,7 @@ class TafseerState extends State<Tafseer> {
               onTap: () {
                 if (suraInterpretations.isNotEmpty) {
                   showModalBottomSheet(
-                    backgroundColor: const Color(0xff1D1D1B),
+                    backgroundColor: AppColors.primary1,
                     context: context,
                     shape: const RoundedRectangleBorder(
                       borderRadius:
@@ -267,8 +260,7 @@ class TafseerState extends State<Tafseer> {
                                       fontFamily: 'Almarai',
                                       fontWeight: FontWeight.w600,
                                       fontSize: 16.sp,
-                                      color: const Color.fromARGB(
-                                          255, 255, 255, 255),
+                                      color: Colors.white,
                                     ),
                                   ),
                                   subtitle: Text(
@@ -277,8 +269,7 @@ class TafseerState extends State<Tafseer> {
                                       fontFamily: 'Almarai',
                                       fontWeight: FontWeight.w400,
                                       fontSize: 14.sp,
-                                      color: const Color.fromARGB(
-                                          255, 255, 255, 255),
+                                      color: Colors.white,
                                     ),
                                   ),
                                 );

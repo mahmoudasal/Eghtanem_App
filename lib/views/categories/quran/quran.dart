@@ -1,159 +1,13 @@
-import 'dart:convert';
-import 'package:egtanem_application/data/qra2at_json_parse.dart';
-import 'package:egtanem_application/data/surah_json_parse.dart' as surah_data;
+import 'package:egtanem_application/models/qra2at_json_parse.dart';
+import 'package:egtanem_application/models/surah_json_parse.dart' as surah_data;
 import 'package:egtanem_application/widgets/surah_card.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../models/quran_logic.dart';
+import '../../../theme/app_colors.dart';
+import '../../../theme/app_text_styles.dart';
 import '../../../widgets/reciter_audio.dart';
-import 'package:http/http.dart' as http;
-
-final Map<String, Map<String, String>> desiredReciters = {
-  "مشاري العفاسي": {
-    "moshaf": "حفص عن عاصم - مرتل",
-    "serverUrl": "https://server8.mp3quran.net/afs/",
-  },
-  "سعد الغامدي": {
-    "moshaf": "حفص عن عاصم - مرتل",
-    "serverUrl": "https://server7.mp3quran.net/s_gmd/",
-  },
-  "عبدالباسط عبدالصمد": {
-    "moshaf": "المصحف المجود - المصحف المجود",
-    "serverUrl": "https://server7.mp3quran.net/basit/Almusshaf-Al-Mojawwad/",
-  },
-  "عبدالرحمن السديس": {
-    "moshaf": "حفص عن عاصم - مرتل",
-    "serverUrl": "https://server11.mp3quran.net/sds/",
-  },
-  "عبدالعزيز الزهراني": {
-    "moshaf": "حفص عن عاصم - مرتل",
-    "serverUrl": "https://server9.mp3quran.net/zahrani/",
-  },
-  "عبدالله عواد الجهني": {
-    "moshaf": "حفص عن عاصم - مرتل",
-    "serverUrl": "https://server13.mp3quran.net/jhn/",
-  },
-  "عبدالله غيلان": {
-    "moshaf": "حفص عن عاصم - مرتل",
-    "serverUrl": "https://server8.mp3quran.net/gulan/",
-  },
-  "علي جابر": {
-    "moshaf": "حفص عن عاصم - مرتل",
-    "serverUrl": "https://server11.mp3quran.net/a_jbr/",
-  },
-  "ماهر المعيقلي": {
-    "moshaf": "حفص عن عاصم - مرتل",
-    "serverUrl": "https://server12.mp3quran.net/maher/",
-  },
-  "محمد ايوب": {
-    "moshaf": "حفص عن عاصم - مرتل",
-    "serverUrl": "https://server8.mp3quran.net/ayyub/",
-  },
-  "محمود علي البنا": {
-    "moshaf": "حفص عن عاصم - مرتل",
-    "serverUrl": "https://server8.mp3quran.net/bna/",
-  },
-  "منصور السالمي": {
-    "moshaf": "حفص عن عاصم - مرتل",
-    "serverUrl": "https://server14.mp3quran.net/mansor/",
-  },
-  "ناصر القطامي": {
-    "moshaf": "حفص عن عاصم - مرتل",
-    "serverUrl": "https://server6.mp3quran.net/qtm/",
-  },
-  "ياسر الدوسري": {
-    "moshaf": "حفص عن عاصم - مرتل",
-    "serverUrl": "https://server11.mp3quran.net/yasser/",
-  },
-  "محمد صديق المنشاوي": {
-    "moshaf": "المصحف المجود - المصحف المجود",
-    "serverUrl": "https://server10.mp3quran.net/minsh/Almusshaf-Al-Mojawwad/",
-  },
-};
-
-Future<List<Reciter>> fetchReciters() async {
-  final response =
-      await http.get(Uri.parse('https://mp3quran.net/api/v3/reciters'));
-
-  if (response.statusCode == 200) {
-    final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
-    final recitersJson = jsonResponse['reciters'] as List<dynamic>;
-
-    final List<Reciter> reciters = recitersJson
-        .map((reciterJson) => Reciter.fromJson(reciterJson))
-        .toList();
-
-    // Filter reciters based on the desiredReciters map
-    final filteredReciters = reciters.where((reciter) {
-      // Check if this reciter is in the desiredReciters map
-      final desiredReciter = desiredReciters[reciter.name];
-
-      if (desiredReciter != null) {
-        // Find the desired moshaf within the reciter's moshaf list
-        final desiredMoshafList = reciter.moshaf
-            .where((moshaf) => moshaf.name == desiredReciter['moshaf'])
-            .toList();
-
-        if (desiredMoshafList.isNotEmpty) {
-          final desiredMoshaf = desiredMoshafList.first;
-          // Replace the reciter's moshaf list with only the desired moshaf
-          reciter.moshaf.clear();
-          reciter.moshaf.add(desiredMoshaf);
-          return true;
-        }
-      }
-      return false;
-    }).toList();
-
-    return filteredReciters;
-  } else {
-    throw Exception('Failed to load reciters');
-  }
-}
-
-Future<List<String>> fetchReciterSurahs(int reciterId) async {
-  try {
-    final response = await http.get(
-      Uri.parse(
-          'https://mp3quran.net/api/v3/reciters?language=eng&rewaya=1&reciter=$reciterId'),
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-
-      if (data['reciters'] == null || data['reciters'].isEmpty) {
-        throw StateError("No reciters found in the API response");
-      }
-
-      final reciterData = data['reciters'].firstWhere(
-        (reciter) => reciter['id'] == reciterId,
-        orElse: () {
-          throw StateError("No reciter found with id $reciterId");
-        },
-      );
-
-      if (reciterData['moshaf'] == null || reciterData['moshaf'].isEmpty) {
-        throw StateError("No moshaf found for the reciter with id $reciterId");
-      }
-
-      final List<String> surahList =
-          (reciterData['moshaf'][0]['surah_list'] as String)
-              .split(',')
-              .map((e) => 'Surah $e')
-              .toList();
-
-      return surahList;
-    } else {
-      throw Exception('Failed to load surahs: ${response.reasonPhrase}');
-    }
-  } catch (e) {
-    if (kDebugMode) {
-      print("Error fetching reciter surahs: $e");
-    }
-    rethrow;
-  }
-}
 
 class QuranSubCat extends StatelessWidget {
   final String title;
@@ -166,24 +20,15 @@ class QuranSubCat extends StatelessWidget {
       length: 2,
       child: Scaffold(
         extendBodyBehindAppBar: true,
-        backgroundColor: const Color(0xff1D1D1B),
+        backgroundColor: AppColors.primary1,
         appBar: AppBar(
           scrolledUnderElevation: 0.0,
           toolbarHeight: 55.h,
           centerTitle: true,
-          backgroundColor: const Color(0xff1D1D1B),
-          shadowColor: const Color(0xff1D1D1B),
-          foregroundColor: const Color(0xff1D1D1B),
-          title: Text(
-            title,
-            style: TextStyle(
-              fontFamily: 'Almarai',
-              fontWeight: FontWeight.w700,
-              fontSize: 25.sp,
-              height: 1.2,
-              color: const Color(0xFFFAFAFA),
-            ),
-          ),
+          backgroundColor: AppColors.primary1,
+          shadowColor: AppColors.primary1,
+          foregroundColor: AppColors.primary1,
+          title: Text(title, style: AppTextSytle.headingsH1),
           leading: const SizedBox(width: 0.0),
           actions: [
             Row(
@@ -198,7 +43,7 @@ class QuranSubCat extends StatelessWidget {
           ],
           bottom: const TabBar(
             dividerColor: Colors.transparent,
-            indicatorColor: Color.fromARGB(255, 192, 158, 119),
+            indicatorColor: AppColors.primary0,
             labelColor: Color(0xFFFAFAFA),
             unselectedLabelColor: Color(0xFF888888),
             splashFactory: NoSplash.splashFactory,

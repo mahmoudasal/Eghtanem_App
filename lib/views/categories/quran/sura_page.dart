@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../cubits/quran_page_slider/cubit/quran_cubit.dart';
-import '../../../cubits/quran_page_slider/cubit/quran_state.dart';
+import '../../../services/quran_cubit.dart';
+import '../../../services/quran_state.dart';
 
 class SurahPage extends StatelessWidget {
   final String initialPage;
