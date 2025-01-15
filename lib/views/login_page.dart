@@ -1,7 +1,6 @@
-import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../services/secure_token.dart';
+
 import '../theme/app_text_styles.dart';
 import '../widgets/custom_page_transition.dart';
 import 'nav_screen.dart';
@@ -14,8 +13,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
-  final storageService = SecureStorageService();
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -94,12 +91,9 @@ class LoginPageState extends State<LoginPage> {
                     // Button container with padding instead of fixed width
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 0.1.sw),
-                      child: BlurryContainer(
-                        blur: 20,
-                        elevation: 0,
+                      child: Container(
                         color: const Color.fromARGB(118, 0, 0, 0),
                         padding: const EdgeInsets.all(18),
-                        borderRadius: BorderRadius.circular(20),
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
@@ -110,7 +104,7 @@ class LoginPageState extends State<LoginPage> {
                           onPressed: () {
                             Navigator.of(context).pushReplacement(
                               createRoute(
-                                  const NaviagionScreen(youtubeData: {})),
+                                  const NavigationScreen(youtubeData: {})),
                             );
                           },
                           child: Padding(

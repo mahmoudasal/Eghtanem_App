@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
-import '../services/video_player_cubit.dart';
-import '../services/video_player_state.dart';
-import '../services/interaction_cubit.dart';
+
 import '../theme/app_text_styles.dart';
 import '../widgets/auto_scrolling_text.dart';
 import '../widgets/build_icon_text.dart';
@@ -37,84 +33,59 @@ class ShortsList extends StatefulWidget {
 }
 
 class ShortsListState extends State<ShortsList> {
-  late VideoPlayerCubit _videoPlayerCubit;
-  late InteractionCubit _interactionCubit;
+ 
+  bool isPlaying = true;
+  bool isLiked = false;
 
   @override
   void initState() {
     super.initState();
-    _videoPlayerCubit = VideoPlayerCubit()..loadVideo(widget.vid);
-    _interactionCubit = InteractionCubit(
-      youtubeData: widget.youtubeData!,
-      videoId: widget.vid,
-    );
+   
+    
   }
 
   @override
   void dispose() {
-    _videoPlayerCubit.close();
-    _interactionCubit.close();
+   
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider<VideoPlayerCubit>.value(value: _videoPlayerCubit),
-        BlocProvider<InteractionCubit>.value(value: _interactionCubit),
-      ],
-      child: BlocBuilder<VideoPlayerCubit, VideoPlayerState>(
-        builder: (context, state) {
-          if (state is VideoPlayerLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is VideoPlayerLoaded) {
-            return GestureDetector(
-              onTap: () {
-                _videoPlayerCubit.playPauseVideo(!state.isPlaying);
-              },
-              child: Stack(
-                children: [
-                  // Video Player
-                  SizedBox.expand(
-                    child: YoutubePlayerBuilder(
-                      player: YoutubePlayer(
-                        controller: state.videoController,
-                        showVideoProgressIndicator: false,
-                        controlsTimeOut: const Duration(seconds: 1),
-                      ),
-                      builder: (context, player) {
-                        return player;
-                      },
-                    ),
-                  ),
-                  // Overlay Content
-                  buildOverlayContent(),
-                  // Interaction Buttons
-                  buildInteractionButtons(),
-                  // Profile Section and Text Content
-                  Positioned(
-                    bottom: 55.h,
-                    left: 0,
-                    right: 0,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        buildProfileSection(),
-                        SizedBox(height: 23.h),
-                        buildTextContent(),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          } else if (state is VideoPlayerError) {
-            return Center(child: Text(state.errorMessage));
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          isPlaying = !isPlaying;
+          if (isPlaying) {
+           
           } else {
-            return const Center(child: Text('Unknown error'));
+         
           }
-        },
+        });
+      },
+      child: Stack(
+        children: [
+          // Video Player
+         
+          // Overlay Content
+          buildOverlayContent(),
+          // Interaction Buttons
+          buildInteractionButtons(),
+          // Profile Section and Text Content
+          Positioned(
+            bottom: 55.h,
+            left: 0,
+            right: 0,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                buildProfileSection(),
+                SizedBox(height: 23.h),
+                buildTextContent(),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -184,19 +155,15 @@ class ShortsListState extends State<ShortsList> {
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          BlocBuilder<InteractionCubit, InteractionState>(
-            builder: (context, state) {
-              bool isLiked = false;
-              if (state is LikeToggledState) {
-                isLiked = state.isLiked;
-              }
-              return buildIconWithText(
-                icon: isLiked
-                    ? 'assets/ui icons/like on.svg'
-                    : 'assets/ui icons/Like off.svg',
-                text: formatNumber(widget.likes),
-                onTap: () => _interactionCubit.toggleLike(),
-              );
+          buildIconWithText(
+            icon: isLiked
+                ? 'assets/ui icons/like on.svg'
+                : 'assets/ui icons/Like off.svg',
+            text: formatNumber(widget.likes),
+            onTap: () {
+              setState(() {
+                isLiked = !isLiked;
+              });
             },
           ),
           SizedBox(height: 15.h),
@@ -241,6 +208,3 @@ class ShortsListState extends State<ShortsList> {
     );
   }
 }
-
-
-// Utility function to format duration (if needed elsewhere)

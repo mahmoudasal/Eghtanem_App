@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../services/cat_video_player_cubit.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
 
@@ -271,12 +270,12 @@ class ProphetsStoriesState extends State<ProphetsStories> {
                         }
                       }
                     },
-                    children: [
-                      VideoPlayerItem(
-                        videoUrl: video["url"]!,
-                        index: index,
-                        currentlyPlayingIndex: _currentlyPlayingIndex,
-                      ),
+                    children: const [
+                      // VideoPlayerItem(
+                      //   videoUrl: video["url"]!,
+                      //   index: index,
+                      //   currentlyPlayingIndex: _currentlyPlayingIndex,
+                      // ),
                     ],
                   ),
                 ),

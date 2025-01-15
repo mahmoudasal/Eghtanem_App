@@ -1,19 +1,16 @@
 name: egtanem_application
 description: "A new Flutter project."
 
-publish_to: 'none' 
-
+publish_to: "none"
 
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.3.4 <4.0.0'
-
+  sdk: ">=3.3.4 <4.0.0"
 
 dependencies:
   asset_cache: ^2.1.0
-  bloc: ^8.1.4
-  blurrycontainer: 2.1.0
+
   # firebase_auth: ^5.2.1
   # firebase_core: ^3.4.1
   flutter:
@@ -22,33 +19,20 @@ dependencies:
   flutter_screenutil: ^5.9.3
   flutter_svg: ^2.0.10+1
   http: ^1.2.2
-  video_player: ^2.9.2
-  youtube_player_flutter: ^8.1.2
-  logger: ^1.1.0
-  flutter_secure_storage: ^9.2.2
   equatable: ^2.0.5
   audioplayers: ^5.2.1
-  dio: ^5.6.0
 
   flutter_dotenv: ^5.1.0
-  shared_preferences: ^2.3.3
- 
- 
-  
+  shared_preferences: ^2.3.5
 
 dev_dependencies:
-
-  flutter_lints: ^4.0.0
+  # flutter_lints: ^4.0.0
   flutter_test:
     sdk: flutter
 
-
 flutter:
-
-  
   uses-material-design: true
 
- 
   assets:
     - assets/
     - images/
@@ -57,7 +41,6 @@ flutter:
     - assets/ui icons/
     - assets/.env
 
-  
   fonts:
     - family: Almarai
       fonts:
@@ -69,4 +52,3 @@ flutter:
           weight: 400
         - asset: assets/fonts/Almarai-Light.ttf
           weight: 300
-  
