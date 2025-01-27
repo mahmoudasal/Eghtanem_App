@@ -131,22 +131,14 @@ class FirstPageState extends State<FirstPage> {
                       height: 50.h,
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.of(context).push(
+                          Navigator.of(context).pushReplacement(
                             createRoute(const SecondPage()),
                           );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary0,
                         ),
-                        child: Text(
-                          'إستمرار',
-                          style: TextStyle(
-                            fontFamily: "Almarai",
-                            fontWeight: FontWeight.w700,
-                            fontSize: 22.sp,
-                            color: const Color(0xFFFAFAFA),
-                          ),
-                        ),
+                        child: Text('إستمرار', style: AppTextSytle.headingsH3),
                       ),
                     ),
                     SizedBox(height: 20.h),

@@ -10,23 +10,21 @@ environment:
 
 dependencies:
   asset_cache: ^2.1.0
-
-  # firebase_auth: ^5.2.1
-  # firebase_core: ^3.4.1
+  audioplayers: ^5.2.1
+  equatable: ^2.0.5
   flutter:
     sdk: flutter
   flutter_bloc: ^8.1.6
-  flutter_screenutil: ^5.9.3
-  flutter_svg: ^2.0.10+1
-  http: ^1.2.2
-  equatable: ^2.0.5
-  audioplayers: ^5.2.1
-
   flutter_dotenv: ^5.1.0
+  flutter_screenutil: ^5.9.3
+  flutter_secure_storage: ^9.2.4
+  flutter_svg: ^2.0.17
+  http: ^1.2.2
+  logger: ^2.5.0
   shared_preferences: ^2.3.5
+  video_player: ^2.9.2
 
 dev_dependencies:
-  # flutter_lints: ^4.0.0
   flutter_test:
     sdk: flutter
 
@@ -38,8 +36,8 @@ flutter:
     - images/
     - assets/quran_images/
     - assets/quran_metadata/
-    - assets/ui icons/
-    - assets/.env
+    - assets/ui_icons/
+    - assets/Laravel-Islamic.postman_collection.json
 
   fonts:
     - family: Almarai
