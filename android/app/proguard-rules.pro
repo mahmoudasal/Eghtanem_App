@@ -1,0 +1,8 @@
+-dontwarn android.window.BackEvent
+-keep class com.egtanem_application.auth.** { *; }
+-keep class com.egtanem_application.models.** { *; }
+-keep class com.dio.** { *; }
+-keep class retrofit2.** { *; }
+-keep class dio.** { *; }
+-keepattributes Signature
+-keepattributes Exceptions

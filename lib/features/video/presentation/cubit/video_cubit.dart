@@ -1,6 +1,6 @@
-import 'package:bloc/bloc.dart';
 import 'package:egtanem_application/features/video/data/models/video_model.dart';
 import 'package:egtanem_application/features/video/data/repositories/video_repository.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 
 part 'video_state.dart';

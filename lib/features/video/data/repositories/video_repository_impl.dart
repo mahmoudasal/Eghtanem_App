@@ -53,17 +53,20 @@ class VideoRepositoryImpl implements VideoRepository {
     }
   }
 
-  void _handleDioError(DioException e) {
-    final statusCode = e.response?.statusCode;
-    final errorData = e.response?.data;
+  dynamic _handleDioError(DioException e) {
+  final statusCode = e.response?.statusCode;
+  final errorData = e.response?.data as Map<String, dynamic>?; // تأكد من التحويل الصريح
 
-    if (statusCode == 422) {
-      throw ValidationException(errorData['errors']);
-    }
-
-    throw ServerException(
-      message: errorData['message'] ?? 'Failed to connect to the server',e,
-      statusCode: statusCode,
-    );
+  if (statusCode == 422) {
+    final errors = errorData?['errors'] ?? 'Validation error';
+    throw ValidationException(errors);
   }
+
+  final message = errorData?['message'] ?? 'Failed to connect to server';
+  throw ServerException(
+    message: message,
+    statusCode: statusCode,
+    dioException: e, // تأكد من تطابق معلمات الباني
+  );
+}
 }

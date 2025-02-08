@@ -57,8 +57,6 @@ class SecondPage extends StatelessWidget {
                     width: double.infinity,
                     height: 50.h,
                     child: ElevatedButton(
-                      // In SecondPage's onPressed handler:
-                      // In SecondPage.dart update the navigation:
                       onPressed: () {
                         Navigator.of(context)
                             .pushReplacementNamed("/page_three");
