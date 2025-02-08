@@ -1,10 +1,10 @@
-import 'package:egtanem_application/models/azkar_json.dart';
+import 'package:egtanem_application/features/dhikr/data/models/azkar_json.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 
-import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_text_styles.dart';
 
 class AzkarCounter extends StatefulWidget {
   final Category category; // Accept the entire category with its dhikr
@@ -76,7 +76,7 @@ class AzkarCounterState extends State<AzkarCounter> {
           Row(
             children: [
               IconButton(
-                icon: SvgPicture.asset("assets/ui icons/BackButton.svg"),
+                icon: SvgPicture.asset("assets/icons/BackButton.svg"),
                 onPressed: () => Navigator.pop(context),
               ),
               SizedBox(
@@ -129,7 +129,7 @@ class AzkarCounterState extends State<AzkarCounter> {
             child: Text(
               getArabicCount(widget.category.array[_currentPage]
                   .count), // Show updated count in Arabic
-              style: AppTextSytle.headingsH4,
+              style: AppTextStyles.headingsH4,
             ),
           ),
           // Positioned FAB at the bottom-center

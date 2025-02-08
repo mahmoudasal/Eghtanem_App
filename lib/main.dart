@@ -1,46 +1,49 @@
-// main.dart
-
+import 'package:egtanem_application/features/home/presentation/navigation_cubit/navigation_cubit.dart';
+import 'package:egtanem_application/features/video/presentation/cubit/video_cubit.dart';
+import 'package:egtanem_application/views/onboarding_two.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import 'package:flutter_dotenv/flutter_dotenv.dart'; // Import flutter_dotenv
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-import 'views/first_page.dart';
-import 'views/login_page.dart';
-import 'views/nav_screen.dart';
-import 'views/sec_page.dart';
+import 'package:egtanem_application/injection.dart';
+import 'package:egtanem_application/features/auth/presentation/cubit/login_cuibit.dart';
+import 'package:egtanem_application/features/auth/presentation/screens/login_page.dart';
+import 'package:egtanem_application/views/onboarding_one.dart';
+import 'package:egtanem_application/features/home/presentation/screens/navigation_page.dart';
 
 void main() async {
-  try {
-    // Load environment variables
-    await dotenv.load(fileName: ".env");
+  WidgetsFlutterBinding.ensureInitialized();
+  await setupDependencies();
 
-    // Initialize secure storage
-    const storage = FlutterSecureStorage();
-    await storage.deleteAll(); // Optional: Clear storage for testing
-
-    // Configure system UI
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.transparent,
-      ),
-    );
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-
-    runApp(const MyApp());
-  } catch (e) {
-    print("Application initialization failed: $e");
-    runApp(const MyApp());
+  void logFlutterError(FlutterErrorDetails details) {
+    debugPrint('M.a.H.m.O.u.D Flutter Error: ${details.exception}');
+    debugPrint('M.a.H.m.O.u.D Stack trace: ${details.stack}');
   }
+
+  void logDartError(Object error, StackTrace stackTrace) {
+    debugPrint('M.a.H.m.O.u.D Dart Error: $error');
+    debugPrint('M.a.H.m.O.u.D Stack trace: $stackTrace');
+  }
+
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.dumpErrorToConsole(details);
+    logFlutterError(details);
+  };
+
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: Colors.transparent,
+    ),
+  );
+
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  // Initialize the Cubits
 
   @override
   Widget build(BuildContext context) {
@@ -55,10 +58,17 @@ class MyApp extends StatelessWidget {
           routes: {
             "/page_one": (context) => const FirstPage(),
             "/page_two": (context) => const SecondPage(),
-            "/page_three": (context) => const LoginPage(),
-            "/page_4": (context) => const NavigationScreen(
-                  youtubeData: {},
-                ), // Removed Map
+            "/page_three": (context) => BlocProvider(
+                  create: (context) => getIt<LoginCubit>(),
+                  child: const LoginPage(),
+                ),
+            "/page_4": (context) => MultiBlocProvider(
+                  providers: [
+                    BlocProvider(create: (_) => getIt<NavigationCubit>()),
+                    BlocProvider(create: (_) => getIt<VideoCubit>()),
+                  ],
+                  child: const AppNavigationBar(),
+                ),
           },
         );
       },

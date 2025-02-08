@@ -25,17 +25,17 @@
 							"formdata": [
 								{
 									"key": "name",
-									"value": "new user",
+									"value": "",
 									"type": "text"
 								},
 								{
 									"key": "email",
-									"value": "email@email.com",
+									"value": "",
 									"type": "text"
 								},
 								{
 									"key": "password",
-									"value": "12345678",
+									"value": "",
 									"type": "text"
 								}
 							]
@@ -67,12 +67,12 @@
 							"formdata": [
 								{
 									"key": "email",
-									"value": "email@email.com",
+									"value": "",
 									"type": "text"
 								},
 								{
 									"key": "password",
-									"value": "12345678",
+									"value": "",
 									"type": "text"
 								}
 							]
@@ -89,6 +89,38 @@
 								"public",
 								"api",
 								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "https://eghtanem.testworks.top/public/api/logout",
+							"protocol": "https",
+							"host": [
+								"eghtanem",
+								"testworks",
+								"top"
+							],
+							"path": [
+								"public",
+								"api",
+								"logout"
 							]
 						}
 					},
@@ -177,7 +209,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "3|Ly2viVKhyKmcESuSN8Yf0AZWmIavBSZCxX9ieVmedab8e915",
+									"value": "",
 									"type": "string"
 								}
 							]
@@ -232,7 +264,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "3|Ly2viVKhyKmcESuSN8Yf0AZWmIavBSZCxX9ieVmedab8e915",
+									"value": "",
 									"type": "string"
 								}
 							]
