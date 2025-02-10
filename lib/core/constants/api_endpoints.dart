@@ -1,5 +1,5 @@
 class ApiEndpoints {
-  static const baseUrl = 'https://eghtanem.testworks.top/api/';
+  static const baseUrl = 'https://eghtanem.testworks.top/public/api/';
 
   static const register = '$baseUrl/register';
   static const login = '$baseUrl/login';

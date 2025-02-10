@@ -42,7 +42,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
  dynamic _handleDioError(DioException e) {
   final statusCode = e.response?.statusCode;
-  final errorData = e.response?.data as Map<String, dynamic>?; // تأكد من التحويل الصريح
+  final errorData = e.response?.data as Map<String, dynamic>?; 
 
   if (statusCode == 422) {
     final errors = errorData?['errors'] ?? 'Validation error';
@@ -53,7 +53,7 @@ class AuthRepositoryImpl implements AuthRepository {
   throw ServerException(
     message: message,
     statusCode: statusCode,
-    dioException: e, // تأكد من تطابق معلمات الباني
+    dioException: e, 
   );
 }
 

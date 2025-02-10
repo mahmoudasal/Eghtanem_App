@@ -29,15 +29,16 @@ dependencies:
   pretty_dio_logger: ^1.4.0
   retrofit: ^4.4.2
   retrofit_generator: ^9.1.7
+  sentry_flutter: ^8.13.0
   shared_preferences: ^2.5.1
   shimmer: ^3.0.0
   video_player: ^2.9.2
   visibility_detector: ^0.4.0+2
 
 dev_dependencies:
+  flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
 
 flutter:
   uses-material-design: true
@@ -66,4 +67,3 @@ flutter:
       fonts:
         - asset: assets/fonts/HafsSmart_08.ttf
           weight: 400
-        

@@ -10,7 +10,7 @@ part of 'video_service.dart';
 
 class _VideoService implements VideoService {
   _VideoService(this._dio, {this.baseUrl, this.errorLogger}) {
-    baseUrl ??= 'https://eghtanem.testworks.top/api/';
+    baseUrl ??= 'https://eghtanem.testworks.top/public/api/';
   }
 
   final Dio _dio;

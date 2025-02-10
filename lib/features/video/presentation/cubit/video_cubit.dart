@@ -23,7 +23,7 @@ class VideoCubit extends Cubit<VideoState> {
   Future<void> likeVideo(int videoId) async {
     try {
       await _repository.likeVideo(videoId);
-      // Update local state
+      
       if (state is VideoLoaded) {
         final updatedVideos = (state as VideoLoaded)
             .videos

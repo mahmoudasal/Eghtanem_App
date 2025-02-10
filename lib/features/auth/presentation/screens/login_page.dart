@@ -28,7 +28,8 @@ class LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true;
   bool _isLoading = false;
 
-  final Logger _logger = Logger(printer: PrettyPrinter(colors: true, printEmojis: true));
+  final Logger _logger =
+      Logger(printer: PrettyPrinter(colors: true, printEmojis: true));
 
   @override
   void didChangeDependencies() {
@@ -55,22 +56,22 @@ class LoginPageState extends State<LoginPage> {
     _logger.d('Image precaching completed');
   }
 
- void _navigateToMainScreen() {
-  _logger.i('Navigating to main screen');
-  Navigator.pushAndRemoveUntil(
-    context,
-    createRoute(
-      MultiBlocProvider(
-        providers: [
-          BlocProvider(create: (context) => getIt<NavigationCubit>()),
-          BlocProvider(create: (context) => getIt<VideoCubit>()),
-        ],
-        child: const AppNavigationBar(),
+  void _navigateToMainScreen() {
+    _logger.i('Navigating to main screen');
+    Navigator.pushAndRemoveUntil(
+      context,
+      createRoute(
+        MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (context) => getIt<NavigationCubit>()),
+            BlocProvider(create: (context) => getIt<VideoCubit>()),
+          ],
+          child: const AppNavigationBar(),
+        ),
       ),
-    ),
-    (route) => false,
-  );
-}
+      (route) => false,
+    );
+  }
 
   @override
   void dispose() {
@@ -118,7 +119,7 @@ class LoginPageState extends State<LoginPage> {
                       end: Alignment.bottomCenter,
                       colors: [
                         const Color.fromARGB(160, 0, 0, 0),
-                        Colors.black.withValues(alpha:1),
+                        Colors.black.withValues(alpha: 1),
                       ],
                     ),
                   ),
@@ -197,7 +198,7 @@ class LoginPageState extends State<LoginPage> {
             borderSide: const BorderSide(color: Colors.white),
           ),
           filled: true,
-          fillColor: Colors.black.withValues(alpha:0.3),
+          fillColor: Colors.black.withValues(alpha: 0.3),
         ),
         validator: (value) {
           if (value == null || value.isEmpty) return 'البريد الإلكتروني مطلوب';
@@ -231,13 +232,14 @@ class LoginPageState extends State<LoginPage> {
             borderSide: const BorderSide(color: Colors.white),
           ),
           filled: true,
-          fillColor: Colors.black.withValues(alpha:0.3),
+          fillColor: Colors.black.withValues(alpha: 0.3),
           suffixIcon: IconButton(
             icon: Icon(
               _obscurePassword ? Icons.visibility_off : Icons.visibility,
               color: Colors.white70,
             ),
-            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+            onPressed: () =>
+                setState(() => _obscurePassword = !_obscurePassword),
           ),
         ),
         validator: (value) =>
@@ -253,7 +255,8 @@ class LoginPageState extends State<LoginPage> {
         width: double.infinity,
         height: 50.h,
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator(color: Colors.white))
+            ? const Center(
+                child: CircularProgressIndicator(color: Colors.white))
             : ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary0,
@@ -267,6 +270,7 @@ class LoginPageState extends State<LoginPage> {
                           email: _emailController.text,
                           password: _passwordController.text,
                         );
+                    throw Exception('🔥 This is a test exception for Sentry!');
                   }
                 },
                 child: Text(

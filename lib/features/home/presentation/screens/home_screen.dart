@@ -4,9 +4,6 @@ import 'package:egtanem_application/features/video/presentation/cubit/video_cubi
 import 'package:egtanem_application/features/video/presentation/widgets/video_card.dart';
 import 'package:flutter/material.dart';
 
-
-// shorts_list.dart
-// shorts_screen.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ShortsScreen extends StatelessWidget {
