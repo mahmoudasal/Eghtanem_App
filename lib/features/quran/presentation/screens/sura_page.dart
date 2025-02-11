@@ -1,9 +1,10 @@
+import 'package:egtanem_application/core/constants/constant.dart';
 import 'package:egtanem_application/core/theme/app_colors.dart';
+import 'package:egtanem_application/core/utilities/string_utils.dart';
 
 import 'package:egtanem_application/features/quran/data/models/surah_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class SurahPage extends StatefulWidget {
   final Surah surah;
@@ -64,11 +65,7 @@ class SurahPageState extends State<SurahPage> {
           ),
         ),
         actions: [
-          IconButton(
-            icon: SvgPicture.asset("assets/icons/BackButton.svg"),
-            onPressed: () => Navigator.pop(context),
-          ),
-          SizedBox(width: 16.w),
+         Constants.backButton(context)
         ],
       ),
       body: _buildContent(),
@@ -121,7 +118,7 @@ class SurahPageState extends State<SurahPage> {
           ),
         ),
         TextSpan(
-          text: ' ﴿${_convertToIndic(verse.number)}﴾ ',
+          text: ' ﴿${convertToArabicNumeral(verse.number)}﴾ ',
           style: TextStyle(
             fontSize: 13.sp,
             color: AppColors.primary0,
@@ -132,14 +129,7 @@ class SurahPageState extends State<SurahPage> {
     return spans;
   }
 
-  String _convertToIndic(int number) {
-    final arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-    return number
-        .toString()
-        .split('')
-        .map((digit) => arabicNumbers[int.parse(digit)])
-        .join('');
-  }
+ 
 
   Widget _buildVerseList() {
     return Padding(
@@ -163,7 +153,7 @@ class SurahPageState extends State<SurahPage> {
                   ),
                   alignment: Alignment.center,
                   child: Text(
-                    _convertToIndic(verse.number),
+                    convertToArabicNumeral(verse.number),
                     style: TextStyle(
                       fontSize: 22.sp,
                       color: AppColors.primary0,

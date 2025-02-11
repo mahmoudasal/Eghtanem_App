@@ -1,5 +1,6 @@
+
+import 'package:egtanem_application/core/constants/constant.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../core/theme/app_colors.dart';
@@ -148,13 +149,7 @@ class PropheticBiographyState extends State<PropheticBiography> {
           actions: [
             Row(
               children: [
-                IconButton(
-                  icon: SvgPicture.asset("assets/icons/BackButton.svg"),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                SizedBox(width: 35.w),
+              Constants.backButton(context)
               ],
             ),
           ],

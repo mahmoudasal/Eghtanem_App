@@ -1,7 +1,8 @@
 import 'dart:convert';
+import 'package:egtanem_application/core/constants/constant.dart';
+import 'package:egtanem_application/core/utilities/string_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../models/tafseer_model.dart';
@@ -151,16 +152,7 @@ class TafseerState extends State<Tafseer> {
     });
   }
 
-  // Function to convert numbers to Arabic-Indic numerals
-  String convertToArabicNumeral(int number) {
-    const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-    return number
-        .toString()
-        .split('')
-        .map((digit) => arabicNumerals[int.parse(digit)])
-        .join();
-  }
-
+ 
   // Updated function to filter out interpretations with empty 'text'
   List<Interpretation> _getInterpretationsForSura(int suraNumber) {
     return interpretations
@@ -185,13 +177,7 @@ class TafseerState extends State<Tafseer> {
         actions: [
           Row(
             children: [
-              IconButton(
-                icon: SvgPicture.asset("assets/icons/BackButton.svg"),
-                onPressed: () => Navigator.pop(context),
-              ),
-              SizedBox(
-                width: 35.w,
-              ),
+             Constants.backButton(context)
             ],
           ),
         ],

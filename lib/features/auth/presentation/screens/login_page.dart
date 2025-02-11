@@ -171,7 +171,8 @@ class LoginPageState extends State<LoginPage> {
     _logger.w('Showing error snackbar: $message');
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: Directionality(
+            textDirection: TextDirection.rtl, child: Text(message)),
         backgroundColor: Colors.red.shade700,
       ),
     );
@@ -270,7 +271,6 @@ class LoginPageState extends State<LoginPage> {
                           email: _emailController.text,
                           password: _passwordController.text,
                         );
-                    throw Exception('🔥 This is a test exception for Sentry!');
                   }
                 },
                 child: Text(

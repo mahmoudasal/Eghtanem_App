@@ -1,9 +1,9 @@
 // supplications_remembrances.dart
+import 'package:egtanem_application/core/constants/constant.dart';
 import 'package:egtanem_application/features/dhikr/data/models/azkar_json.dart';
 import 'package:egtanem_application/models/counter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -45,11 +45,7 @@ class _SupplicationsView extends StatelessWidget {
         actions: [
           Row(
             children: [
-              IconButton(
-                icon: SvgPicture.asset("assets/icons/BackButton.svg"),
-                onPressed: () => Navigator.pop(context),
-              ),
-              SizedBox(width: 35.w),
+             Constants.backButton(context)
             ],
           ),
         ],
@@ -73,18 +69,21 @@ class _SupplicationsView extends StatelessWidget {
 
   Widget _buildShimmerLoading() {
     return ListView.builder(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-      itemCount: 10,
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 47.h),
+      itemCount: 15,
       itemBuilder: (_, index) => Shimmer.fromColors(
         baseColor: Colors.grey[800]!,
         highlightColor: Colors.grey[700]!,
-        child: ListTile(
-          title: Container(
-            height: 24.h,
-            width: 200.w,
-            color: Colors.white,
+        child: Card(
+          color: AppColors.primary2,
+          margin: EdgeInsets.symmetric(vertical: 8.h),
+          child: ListTile(
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+            
+           
+           
           ),
-        ),
+        )
       ),
     );
   }

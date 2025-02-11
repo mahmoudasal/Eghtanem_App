@@ -11,6 +11,7 @@ environment:
 dependencies:
   asset_cache: ^2.1.0
   audioplayers: ^6.1.1
+  bloc: ^9.0.0
   build_runner: ^2.4.14
   dio: ^5.8.0+1
   equatable: ^2.0.7
@@ -27,6 +28,7 @@ dependencies:
   json_serializable: ^6.9.3
   logger: ^2.5.0
   pretty_dio_logger: ^1.4.0
+  provider: ^6.1.2
   retrofit: ^4.4.2
   retrofit_generator: ^9.1.7
   sentry_flutter: ^8.13.0

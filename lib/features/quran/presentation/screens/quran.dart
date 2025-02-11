@@ -2,13 +2,13 @@ import 'dart:convert';
 
 
 
+import 'package:egtanem_application/core/constants/constant.dart';
 import 'package:egtanem_application/features/quran/data/models/surah_model.dart'as surah_data;
 import 'package:egtanem_application/features/quran/presentation/screens/sura_page.dart';
 import 'package:egtanem_application/features/quran/data/models/qra2at_model.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../data/repositories/quran_repo.dart';
@@ -52,11 +52,7 @@ Future<List<surah_data.Surah>> fetchSurahs() async {
           actions: [
             Row(
               children: [
-                IconButton(
-                  icon: SvgPicture.asset("assets/icons/BackButton.svg"),
-                  onPressed: () => Navigator.pop(context),
-                ),
-                SizedBox(width: 35.w),
+                Constants.backButton(context)
               ],
             ),
           ],
@@ -97,7 +93,7 @@ Future<List<surah_data.Surah>> fetchSurahs() async {
               Icon(Icons.error_outline, color: Colors.white, size: 40.sp),
               SizedBox(height: 16.h),
               Text(
-                'Failed to load Quran content',
+                'حدث خطأ و سيتم حله في اسرع وقت',
                 style: AppTextStyles.headingsH3,
               ),
             ],
@@ -109,6 +105,45 @@ Future<List<surah_data.Surah>> fetchSurahs() async {
     },
   );
 }
+Widget buildListeningTab() {
+    return FutureBuilder<List<Reciter>>(
+      future: fetchReciters(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return _buildShimmerLoadingListening();
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          List<Reciter> reciters = snapshot.data ?? [];
+          return ListView(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 130.h),
+            children: [
+              SizedBox(height: 0.02.sh),
+              buildQuranCardList(reciters),
+            ],
+          );
+        }
+      },
+    );
+  }
+
+   Widget _buildShimmerLoadingListening() {
+    return ListView.builder(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 150.h),
+      itemCount: 15,
+      itemBuilder: (_, index) => Shimmer.fromColors(
+          baseColor: Colors.grey[800]!,
+          highlightColor: Colors.grey[700]!,
+          child: Card(
+            color: AppColors.primary2,
+            margin: EdgeInsets.symmetric(vertical: 8.h),
+            child: ListTile(
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 25.w, vertical: 0.005.sh),
+            ),
+          )),
+    );
+  }
 
 Widget _buildSurahList(List<surah_data.Surah> surahs) {
   return Padding(
@@ -173,53 +208,40 @@ Widget _buildShimmerLoading() {
   return Shimmer.fromColors(
     baseColor: Colors.grey[800]!,
     highlightColor: Colors.grey[700]!,
-    child: Padding(
-      padding: EdgeInsets.only(top: 100.h, bottom: 30.h),
-      child: ListView.separated(
-        itemCount: 10,
-        separatorBuilder: (context, index) => Divider(
-          color: Colors.white.withValues(alpha:0.1),
-          height: 1.h,
-        ),
-        itemBuilder: (context, index) => ListTile(
-          contentPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
-          leading: CircleAvatar(radius: 20.w),
-          title: Container(
-            width: 100.w,
-            height: 24.h,
-            color: Colors.white,
+    child: Directionality(textDirection: TextDirection.rtl,
+      child: Padding(
+        padding: EdgeInsets.only(top: 20.h, bottom: 30.h),
+        child: ListView.separated(
+          itemCount: 10,
+          separatorBuilder: (context, index) => Divider(
+            color: Colors.white.withValues(alpha:0.1),
+            height: 1.h,
           ),
-          trailing: Container(
-            width: 16.w,
-            height: 16.w,
-            color: Colors.white,
+          itemBuilder: (context, index) => ListTile(
+            contentPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+            leading: CircleAvatar(radius: 20.w),
+            title: ClipRRect(
+               borderRadius: const BorderRadius.all(Radius.circular(16.0)),
+              child: Container(
+                width: 40.w,
+                height: 40.h,
+                color: Colors.white,
+              ),
+            ),
+            trailing: Container(
+              width: 16.w,
+              height: 16.w,
+              color: Colors.white,
+            ),
           ),
         ),
       ),
     ),
   );
 }
-  Widget buildListeningTab() {
-    return FutureBuilder<List<Reciter>>(
-      future: fetchReciters(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else {
-          List<Reciter> reciters = snapshot.data ?? [];
-          return ListView(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 130.h),
-            children: [
-              SizedBox(height: 0.02.sh),
-              buildQuranCardList(reciters),
-            ],
-          );
-        }
-      },
-    );
-  }
+
+
+  
 
   Widget buildQuranCardList(List<Reciter> reciters) {
     return Column(

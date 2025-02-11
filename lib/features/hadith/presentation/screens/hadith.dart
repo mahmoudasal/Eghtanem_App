@@ -1,31 +1,30 @@
-// prophetspeech.dart
-import 'package:egtanem_application/features/hadith/data/presentation/cubit/hadith_cubit.dart';
-import 'package:egtanem_application/features/hadith/data/presentation/cubit/hadith_state.dart';
+// Hadith.dart
+import 'package:egtanem_application/core/constants/constant.dart';
+import 'package:egtanem_application/features/hadith/presentation/cubit/hadith_cubit.dart';
+import 'package:egtanem_application/features/hadith/presentation/cubit/hadith_state.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
 
-
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import 'liked_hadith.dart';
 
-class Prophetspeech extends StatelessWidget {
-  const Prophetspeech({super.key});
+class Hadith extends StatelessWidget {
+  const Hadith({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => HadithCubit()..loadHadiths(),
-      child: const _ProphetspeechView(),
+      create: (context) => HadithCubit(),
+      child: const _HadithView(),
     );
   }
 }
 
-class _ProphetspeechView extends StatelessWidget {
-  const _ProphetspeechView();
+class _HadithView extends StatelessWidget {
+  const _HadithView();
 
   void _navigateToLikedHadiths(BuildContext context) {
     final cubit = context.read<HadithCubit>();
@@ -34,9 +33,12 @@ class _ProphetspeechView extends StatelessWidget {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => LikedHadiths(
-            likedHadiths: state.likedHadiths,
-            allHadiths: Future.value(state.hadiths),
+          builder: (context) => BlocProvider.value(
+            value: cubit, // ✅ Provide the existing HadithCubit
+            child: LikedHadiths(
+              likedHadiths: state.likedHadiths,
+              allHadiths: cubit.loadAllHadiths(), // ✅ Correctly fetch hadiths
+            ),
           ),
         ),
       );
@@ -63,15 +65,7 @@ class _ProphetspeechView extends StatelessWidget {
             icon: const Icon(Icons.favorite, color: Colors.red),
             onPressed: () => _navigateToLikedHadiths(context),
           ),
-          Row(
-            children: [
-              IconButton(
-                icon: SvgPicture.asset("assets/icons/BackButton.svg"),
-                onPressed: () => Navigator.pop(context),
-              ),
-              SizedBox(width: 35.w),
-            ],
-          ),
+          Row(children: [Constants.backButton(context)]),
         ],
       ),
       body: BlocBuilder<HadithCubit, HadithState>(
@@ -141,22 +135,21 @@ class _ProphetspeechView extends StatelessWidget {
                         isLiked ? Icons.favorite : Icons.favorite_border,
                         color: isLiked ? Colors.red : Colors.grey,
                       ),
-                      onPressed: () => context.read<HadithCubit>().toggleLike(hadith.number),
+                      onPressed: () =>
+                          context.read<HadithCubit>().toggleLike(hadith.number),
                     ),
                   ],
                 ),
                 SizedBox(height: 10.h),
                 Text(
-                  textDirection: TextDirection.rtl,
-                  hadith.hadith,
-                  style: AppTextStyles.headingsH4
-                ),
+                    textDirection: TextDirection.rtl,
+                    hadith.hadith,
+                    style: AppTextStyles.headingsH4.copyWith(height: 1.8)),
                 SizedBox(height: 10.h),
                 Text(
-                  textDirection: TextDirection.rtl,
-                  hadith.description,
-                  style: AppTextStyles.headingsH5
-                ),
+                    textDirection: TextDirection.rtl,
+                    hadith.description,
+                    style: AppTextStyles.headingsH5.copyWith(height: 1.8)),
               ],
             ),
           ),

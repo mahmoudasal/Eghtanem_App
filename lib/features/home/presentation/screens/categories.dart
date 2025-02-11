@@ -9,7 +9,7 @@ import '../../../dhikr/presentation/screens/duah_zikr_page.dart';
 import '../../../categories/prophets_stories.dart';
 
 import '../../../tafseer/data/tafseer.dart';
-import '../../../hadith/data/presentation/screens/hadith.dart';
+import '../../../hadith/presentation/screens/hadith.dart';
 import '../../../categories/prophetic_biography.dart';
 import '../../../quran/presentation/screens/quran.dart';
 
@@ -42,7 +42,7 @@ class CategoriesPage extends StatelessWidget {
           CustomCard(
             imagePath: 'assets/cards_photos/احاديث.webp',
             cardName: 'أحاديث',
-            pageBuilder: () => const Prophetspeech(),
+            pageBuilder: () => const Hadith(),
           ),
           CustomCard(
             imagePath: 'assets/cards_photos/المصحف.webp',

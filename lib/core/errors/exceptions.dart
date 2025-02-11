@@ -1,18 +1,10 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 
-/// Base exception class for all app-related exceptions.
 class AppException implements Exception {
   final String message;
 
-  AppException([this.message = "An unknown error occurred"]) {
-    _logToSentry();
-  }
-
-  void _logToSentry() {
-    Sentry.captureMessage(message);
-  }
+  AppException([this.message = "An unknown error occurred"]);
 
   @override
   String toString() => message;
@@ -27,9 +19,7 @@ class ServerException extends AppException {
     required String message,
     this.statusCode,
     this.dioException,
-  }) : super(message) {
-    _logToSentry();
-  }
+  }) : super(message);
 
   @override
   String toString() {
@@ -44,14 +34,6 @@ class ServerException extends AppException {
       }
     }
     return buffer.toString();
-  }
-
-  @override
-  void _logToSentry() {
-    Sentry.captureException(
-      this,
-      stackTrace: dioException?.stackTrace,
-    );
   }
 
   String _convertDataToString(dynamic data) {
@@ -74,9 +56,7 @@ class UnauthorizedException extends AppException {
 class ValidationException extends AppException {
   final Map<String, dynamic>? errors;
 
-  ValidationException([this.errors, super.message = "Validation error"]) {
-    _logToSentry();
-  }
+  ValidationException([this.errors, super.message = "Validation error"]);
 
   @override
   String toString() {
@@ -89,11 +69,6 @@ class ValidationException extends AppException {
       buffer.write(" [Details: $errorMessages]");
     }
     return buffer.toString();
-  }
-
-  @override
-  void _logToSentry() {
-    Sentry.captureException(this);
   }
 }
 

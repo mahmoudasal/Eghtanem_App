@@ -1,11 +1,10 @@
 import 'dart:async';
 
+import 'package:egtanem_application/core/constants/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -405,14 +404,7 @@ class TelawahState extends State<Telawah> {
         actions: [
           Row(
             children: [
-              IconButton(
-                icon: SvgPicture.asset("assets/icons/BackButton.svg"),
-                onPressed: () {
-                  _audioPlayer.stop();
-                  Navigator.pop(context);
-                },
-              ),
-              SizedBox(width: 35.w),
+              Constants.backButton(context)
             ],
           ),
         ],
