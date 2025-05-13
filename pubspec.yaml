@@ -18,7 +18,6 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^9.0.0
-  flutter_cache_manager: ^3.4.1
   flutter_screenutil: ^5.9.3
   flutter_secure_storage: ^9.2.4
   flutter_svg: ^2.0.17
@@ -44,11 +43,11 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-
   assets:
     - assets/
     - assets/cards_photos/
     - assets/quran_metadata/
+    - assets/data/
     - assets/logo/
     - assets/icons/
     - assets/onboarding/

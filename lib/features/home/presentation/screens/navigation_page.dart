@@ -1,6 +1,5 @@
 import 'package:egtanem_application/core/theme/app_colors.dart';
 import 'package:egtanem_application/features/video/data/models/video_model.dart';
-import 'package:egtanem_application/core/utilities/cache_manger.dart';
 import 'package:egtanem_application/features/home/presentation/navigation_cubit/navigation_cubit.dart';
 import 'package:egtanem_application/features/video/presentation/cubit/video_cubit.dart';
 import 'package:egtanem_application/features/home/presentation/screens/categories.dart';
@@ -132,8 +131,7 @@ class _VideoContent extends StatelessWidget {
   Widget build(BuildContext context) {
     if (videos.isEmpty) return const _EmptyContent();
 
-    return 
-        PageView.builder(
+    return PageView.builder(
       scrollDirection: Axis.vertical,
       itemCount: videos.length,
       onPageChanged: (index) {
@@ -149,10 +147,8 @@ class _VideoContent extends StatelessWidget {
     for (var i = 1; i <= 2; i++) {
       final nextIndex = currentIndex + i;
       if (nextIndex < videos.length) {
-        final videoUrl = videos[nextIndex].videoUrl;
-        if (videoUrl?.isNotEmpty ?? false) {
-          customVideoCacheManager.downloadFile(videoUrl!);
-        }
+        // Removed cache manager pre-loading
+        // No need to pre-download files anymore as we're using direct asset paths
       }
     }
   }

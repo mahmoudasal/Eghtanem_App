@@ -1,4 +1,3 @@
-
 import 'package:egtanem_application/core/theme/app_colors.dart';
 import 'package:egtanem_application/features/auth/presentation/cubit/registration_state.dart';
 import 'package:egtanem_application/features/auth/presentation/cubit/registration_cubit.dart';
@@ -45,7 +44,7 @@ class RegistrationPageState extends State<RegistrationPage> {
             Expanded(
               child: Text(
                 'تم انشاء الحساب بنجاح الرجاء التوجه لتسجيل الدخول',
-                style: AppTextStyles.headingsH6.copyWith(color: Colors.white),
+                style: AppTextStyles.headingsH6,
               ),
             ),
           ],
@@ -88,7 +87,6 @@ class RegistrationPageState extends State<RegistrationPage> {
       if (state is RegistrationError) {
         _showError(state.message);
       }
-      
     }, builder: (context, state) {
       _isLoading = state is RegistrationLoading;
       return Scaffold(
@@ -113,10 +111,7 @@ class RegistrationPageState extends State<RegistrationPage> {
         icon: const Icon(Icons.arrow_back, color: Colors.white),
         onPressed: () => Navigator.pop(context),
       ),
-      title: Text(
-        'إنشاء حساب جديد',
-        style: AppTextStyles.headingsH4.copyWith(color: Colors.white),
-      ),
+      title: Text('إنشاء حساب جديد', style: AppTextStyles.headingsH3White54),
     );
   }
 
@@ -137,8 +132,8 @@ class RegistrationPageState extends State<RegistrationPage> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Colors.black.withValues(alpha:0.5),
-              Colors.black.withValues(alpha:0.8),
+              Colors.black.withValues(alpha: 0.5),
+              Colors.black.withValues(alpha: 0.8),
             ],
           ),
         ),
@@ -216,10 +211,10 @@ class RegistrationPageState extends State<RegistrationPage> {
       textDirection: TextDirection.rtl,
       textAlign: TextAlign.center,
       autofillHints: const [AutofillHints.newPassword],
-      style: AppTextStyles.headingsH6.copyWith(color: Colors.white),
+      style: AppTextStyles.headingsH6,
       decoration: InputDecoration(
         hintText: 'أدخل كلمة المرور',
-        hintStyle: AppTextStyles.headingsH6.copyWith(color: Colors.white54),
+        hintStyle: AppTextStyles.headingsH6White54,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8.r),
           borderSide: const BorderSide(color: Colors.white),
@@ -229,7 +224,7 @@ class RegistrationPageState extends State<RegistrationPage> {
           borderSide: const BorderSide(color: Colors.white),
         ),
         filled: true,
-        fillColor: Colors.black.withValues(alpha:0.3),
+        fillColor: Colors.black.withValues(alpha: 0.3),
         suffixIcon: IconButton(
           icon: Icon(
             _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -255,10 +250,10 @@ class RegistrationPageState extends State<RegistrationPage> {
       textDirection: TextDirection.rtl,
       textAlign: TextAlign.center,
       autofillHints: autofillHints,
-      style: AppTextStyles.headingsH6.copyWith(color: Colors.white),
+      style: AppTextStyles.headingsH6,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: AppTextStyles.headingsH6.copyWith(color: Colors.white54),
+        hintStyle: AppTextStyles.headingsH6White54,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8.r),
           borderSide: const BorderSide(color: Colors.white),
@@ -268,12 +263,11 @@ class RegistrationPageState extends State<RegistrationPage> {
           borderSide: const BorderSide(color: Colors.white),
         ),
         filled: true,
-        fillColor: Colors.black.withValues(alpha:0.3),
+        fillColor: Colors.black.withValues(alpha: 0.3),
       ),
       validator: validator,
     );
   }
-
 
   Widget _buildSubmitButton() {
     return SizedBox(
@@ -301,7 +295,7 @@ class RegistrationPageState extends State<RegistrationPage> {
                     },
               child: Text(
                 'تسجيل',
-                style: AppTextStyles.headingsH3.copyWith(color: Colors.white),
+                style: AppTextStyles.headingsH3,
               ),
             ),
     );

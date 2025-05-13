@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:egtanem_application/features/auth/data/repositories/auth_repository.dart';
 import 'package:egtanem_application/features/auth/presentation/cubit/login_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,30 +7,32 @@ class LoginCubit extends Cubit<LoginState> {
 
   LoginCubit({required this.authRepository}) : super(LoginInitial());
 
-  void loginUser({required String email, required String password}) async {
+  // Auto login function that doesn't require credentials
+  void autoLogin() async {
     emit(LoginLoading());
     try {
-      await authRepository.login(email: email, password: password);
+      // Define a default test account or use hardcoded values
+      const defaultEmail = 'test@example.com';
+      const defaultPassword = 'password123';
+
+      // Use the existing login method with default credentials
+      await authRepository.login(
+          email: defaultEmail, password: defaultPassword);
+
+      // Alternatively, you could bypass the repository call entirely
+      // and directly store a fake token
+      // await SecureStorage.storeToken('fake_auto_login_token');
+
       emit(LoginSuccess());
     } catch (error) {
-      String errorMessage = "هذه البيانات غير صحيحه";
-
-      if (error is DioException && error.response != null) {
-        final responseData = error.response?.data;
-
-        if (responseData is Map<String, dynamic> &&
-            responseData.containsKey('message')) {
-          final messageData = responseData['message'];
-
-          if (messageData is List) {
-            errorMessage = messageData.join("\n"); // Convert list to string
-          } else if (messageData is String) {
-            errorMessage = messageData;
-          }
-        }
-      }
-
-      emit(LoginError(errorMessage));
+      // In case of error, show a generic message
+      emit(LoginError("تعذر تسجيل الدخول التلقائي"));
     }
+  }
+
+  // Modified login method still available if needed
+  void loginUser({required String email, required String password}) async {
+    // Skip actual credentials and use auto login instead
+    autoLogin();
   }
 }

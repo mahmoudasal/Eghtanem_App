@@ -12,7 +12,6 @@ import '../../../../core/theme/app_text_styles.dart';
 
 import '../cubit/dhikr_cubit.dart';
 
-
 class SupplicationsRemembrances extends StatelessWidget {
   const SupplicationsRemembrances({super.key});
 
@@ -44,9 +43,7 @@ class _SupplicationsView extends StatelessWidget {
         leading: const SizedBox(width: 0.0),
         actions: [
           Row(
-            children: [
-             Constants.backButton(context)
-            ],
+            children: [Constants.backButton(context)],
           ),
         ],
       ),
@@ -72,19 +69,16 @@ class _SupplicationsView extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 47.h),
       itemCount: 15,
       itemBuilder: (_, index) => Shimmer.fromColors(
-        baseColor: Colors.grey[800]!,
-        highlightColor: Colors.grey[700]!,
-        child: Card(
-          color: AppColors.primary2,
-          margin: EdgeInsets.symmetric(vertical: 8.h),
-          child: ListTile(
-            contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-            
-           
-           
-          ),
-        )
-      ),
+          baseColor: Colors.grey[800]!,
+          highlightColor: Colors.grey[700]!,
+          child: Card(
+            color: AppColors.primary2,
+            margin: EdgeInsets.symmetric(vertical: 8.h),
+            child: ListTile(
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+            ),
+          )),
     );
   }
 
@@ -98,11 +92,12 @@ class _SupplicationsView extends StatelessWidget {
           color: AppColors.primary2,
           margin: EdgeInsets.symmetric(vertical: 8.h),
           child: ListTile(
-            contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+            contentPadding:
+                EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
             title: Text(
               textDirection: TextDirection.rtl,
               category.category,
-              style: AppTextStyles.headingsH3.copyWith(color: Colors.white),
+              style: AppTextStyles.headingsH3,
             ),
             trailing: Icon(Icons.arrow_forward_ios, color: Colors.white),
             onTap: () => _navigateToAzkarCounter(context, category),

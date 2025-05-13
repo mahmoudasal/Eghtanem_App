@@ -144,12 +144,12 @@ class _HadithView extends StatelessWidget {
                 Text(
                     textDirection: TextDirection.rtl,
                     hadith.hadith,
-                    style: AppTextStyles.headingsH4.copyWith(height: 1.8)),
+                    style: AppTextStyles.headingsH4HigherHeight),
                 SizedBox(height: 10.h),
                 Text(
                     textDirection: TextDirection.rtl,
                     hadith.description,
-                    style: AppTextStyles.headingsH5.copyWith(height: 1.8)),
+                    style: AppTextStyles.headingsH5HigherHeight),
               ],
             ),
           ),

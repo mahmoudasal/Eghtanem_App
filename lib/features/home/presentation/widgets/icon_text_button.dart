@@ -24,7 +24,7 @@ class IconTextButton extends StatelessWidget {
         children: [
           SvgPicture.asset(iconPath, width: 24.w, height: 24.h),
           SizedBox(height: 4.h),
-          Text(label, style: AppTextStyles.headingsH7.copyWith(color: Colors.white)),
+          Text(label, style: AppTextStyles.headingsH7),
         ],
       ),
     );

@@ -32,6 +32,20 @@ class LoginPageState extends State<LoginPage> {
       Logger(printer: PrettyPrinter(colors: true, printEmojis: true));
 
   @override
+  void initState() {
+    super.initState();
+    // Auto login when page is loaded
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _autoLogin();
+    });
+  }
+
+  void _autoLogin() {
+    _logger.i('Performing automatic login');
+    context.read<LoginCubit>().autoLogin();
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _logger.i('LoginPage dependencies changed');
@@ -186,10 +200,10 @@ class LoginPageState extends State<LoginPage> {
         keyboardType: TextInputType.emailAddress,
         textDirection: TextDirection.rtl,
         textAlign: TextAlign.center,
-        style: AppTextStyles.headingsH6.copyWith(color: Colors.white),
+        style: AppTextStyles.headingsH6,
         decoration: InputDecoration(
           hintText: 'أدخل بريدك الإلكتروني',
-          hintStyle: AppTextStyles.headingsH6.copyWith(color: Colors.white54),
+          hintStyle: AppTextStyles.headingsH6White54,
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.r),
             borderSide: const BorderSide(color: AppColors.primary0),
@@ -220,10 +234,10 @@ class LoginPageState extends State<LoginPage> {
         obscureText: _obscurePassword,
         textDirection: TextDirection.rtl,
         textAlign: TextAlign.center,
-        style: AppTextStyles.headingsH6.copyWith(color: Colors.white),
+        style: AppTextStyles.headingsH6,
         decoration: InputDecoration(
           hintText: 'أدخل كلمة المرور',
-          hintStyle: AppTextStyles.headingsH6.copyWith(color: Colors.white54),
+          hintStyle: AppTextStyles.headingsH6White54,
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.r),
             borderSide: const BorderSide(color: AppColors.primary0),
@@ -266,15 +280,19 @@ class LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    context.read<LoginCubit>().loginUser(
-                          email: _emailController.text,
-                          password: _passwordController.text,
-                        );
-                  }
+                  // Comment out form validation
+                  // if (_formKey.currentState!.validate()) {
+                  //   context.read<LoginCubit>().loginUser(
+                  //         email: _emailController.text,
+                  //         password: _passwordController.text,
+                  //       );
+                  // }
+
+                  // Simply call autoLogin directly
+                  _autoLogin();
                 },
                 child: Text(
-                  "تسجيل الدخول",
+                  "تسجيل الدخول التلقائي",
                   style: AppTextStyles.headingsH4,
                 ),
               ),
@@ -295,7 +313,7 @@ class LoginPageState extends State<LoginPage> {
       ),
       child: Text(
         "ليس لديك حساب؟ إنشاء حساب جديد",
-        style: AppTextStyles.headingsH6.copyWith(color: Colors.white),
+        style: AppTextStyles.headingsH6,
       ),
     );
   }

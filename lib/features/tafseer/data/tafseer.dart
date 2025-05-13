@@ -152,7 +152,6 @@ class TafseerState extends State<Tafseer> {
     });
   }
 
- 
   // Updated function to filter out interpretations with empty 'text'
   List<Interpretation> _getInterpretationsForSura(int suraNumber) {
     return interpretations
@@ -176,9 +175,7 @@ class TafseerState extends State<Tafseer> {
         leading: const SizedBox(width: 0.0),
         actions: [
           Row(
-            children: [
-             Constants.backButton(context)
-            ],
+            children: [Constants.backButton(context)],
           ),
         ],
       ),
@@ -186,12 +183,12 @@ class TafseerState extends State<Tafseer> {
         textDirection: TextDirection.rtl,
         child: GridView.builder(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3, 
+            crossAxisCount: 3,
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
-            childAspectRatio: 3 / 2, 
+            childAspectRatio: 3 / 2,
           ),
-          itemCount: suraNames.length, 
+          itemCount: suraNames.length,
           itemBuilder: (context, index) {
             final suraNumber = index + 1;
             final suraInterpretations = _getInterpretationsForSura(suraNumber);
@@ -238,8 +235,8 @@ class TafseerState extends State<Tafseer> {
                                       style: AppTextStyles.headingsH4),
                                   subtitle: Text(
                                       suraInterpretations[index].text,
-                                      style: AppTextStyles.headingsH5
-                                          .copyWith(height: 1.8)),
+                                      style:
+                                          AppTextStyles.headingsH5HigherHeight),
                                 );
                               },
                             ),

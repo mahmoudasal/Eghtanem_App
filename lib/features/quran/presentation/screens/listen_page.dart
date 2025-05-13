@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
@@ -403,9 +402,7 @@ class TelawahState extends State<Telawah> {
         leading: const SizedBox(width: 0.0),
         actions: [
           Row(
-            children: [
-              Constants.backButton(context)
-            ],
+            children: [Constants.backButton(context)],
           ),
         ],
       ),
@@ -440,10 +437,7 @@ class TelawahState extends State<Telawah> {
                     ),
                     contentPadding: EdgeInsets.symmetric(horizontal: 0.055.sw),
                     tileColor: const Color(0XFF171715),
-                    title: Text(
-                      surahName,
-                      style: AppTextStyles.headingsH4
-                    ),
+                    title: Text(surahName, style: AppTextStyles.headingsH4),
                     trailing: _buildTrailingIcon(surahNumber),
                     onTap: () {
                       _playPauseSurah(surahNumber);

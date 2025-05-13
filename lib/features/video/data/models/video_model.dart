@@ -8,16 +8,16 @@ class Video {
   final int? id;
   final String? title;
   final String? description;
-  
+
   @JsonKey(name: 'video')
   final String? videoUrl;
-  
+
   @JsonKey(name: 'thumbnail')
   final String? thumbnailUrl;
-  
+
   @JsonKey(name: 'likes_count')
-   int likesCount;
-  
+  int likesCount;
+
   final List<Comment> comments;
 
   Video({
@@ -32,47 +32,4 @@ class Video {
 
   factory Video.fromJson(Map<String, dynamic> json) => _$VideoFromJson(json);
   Map<String, dynamic> toJson() => _$VideoToJson(this);
-
-  Video copyWith({
-    int? id,
-    String? title,
-    String? description,
-    String? videoUrl,
-    String? thumbnailUrl,
-    int? likesCount,
-    List<Comment>? comments,
-  }) {
-    return Video(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      description: description ?? this.description,
-      videoUrl: videoUrl ?? this.videoUrl,
-      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
-      likesCount: likesCount ?? this.likesCount,
-      comments: comments ?? this.comments,
-    );
-  }
-}
-
-// If you want to keep the extension separate (optional)
-extension VideoCopyWithExtension on Video {
-  Video copyWithExtension({
-    int? id,
-    String? title,
-    String? description,
-    String? videoUrl,
-    String? thumbnailUrl,
-    int? likesCount,
-    List<Comment>? comments,
-  }) {
-    return Video(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      description: description ?? this.description,
-      videoUrl: videoUrl ?? this.videoUrl,
-      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
-      likesCount: likesCount ?? this.likesCount,
-      comments: comments ?? this.comments,
-    );
-  }
 }

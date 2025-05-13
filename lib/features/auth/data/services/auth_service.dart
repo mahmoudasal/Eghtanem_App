@@ -5,7 +5,7 @@ import 'package:retrofit/http.dart';
 
 part 'auth_service.g.dart';
 
-@RestApi(baseUrl: "https://eghtanem.testworks.top/public/api/")
+@RestApi(baseUrl: "placeholder_base_url")
 abstract class AuthService {
   factory AuthService(Dio dio) = _AuthService;
 

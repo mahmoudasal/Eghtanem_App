@@ -70,9 +70,7 @@ class LikedHadithsState extends State<LikedHadiths> {
         foregroundColor: AppColors.primary1,
         title: Text("الأحاديث المفضلة", style: AppTextStyles.headingsH1),
         leading: const SizedBox(width: 0.0),
-        actions: [
-         Constants.backButton(context)
-        ],
+        actions: [Constants.backButton(context)],
       ),
       body: FutureBuilder<List<Hadith>>(
         future: allHadiths,
@@ -134,13 +132,13 @@ class LikedHadithsState extends State<LikedHadiths> {
                       Text(
                         hadith.hadith,
                         textDirection: TextDirection.rtl,
-                        style: AppTextStyles.headingsH4.copyWith(height: 1.8),
+                        style: AppTextStyles.headingsH4HigherHeight,
                       ),
                       SizedBox(height: 10.h),
                       Text(
                         hadith.description,
                         textDirection: TextDirection.rtl,
-                        style: AppTextStyles.headingsH5.copyWith(height: 1.8),
+                        style: AppTextStyles.headingsH5HigherHeight,
                       ),
                     ],
                   ),

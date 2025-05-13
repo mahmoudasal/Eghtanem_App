@@ -2,7 +2,6 @@ import 'package:egtanem_application/features/video/data/models/video_model.dart'
 import 'package:egtanem_application/features/video/data/repositories/video_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
 part 'video_state.dart';
 
 class VideoCubit extends Cubit<VideoState> {
@@ -23,12 +22,24 @@ class VideoCubit extends Cubit<VideoState> {
   Future<void> likeVideo(int videoId) async {
     try {
       await _repository.likeVideo(videoId);
-      
+
       if (state is VideoLoaded) {
-        final updatedVideos = (state as VideoLoaded)
-            .videos
-            .map((v) => v.id == videoId ? v.copyWith(likesCount: v.likesCount + 1) : v)
-            .toList();
+        final videos = (state as VideoLoaded).videos;
+        final updatedVideos = videos.map((v) {
+          if (v.id == videoId) {
+            return Video(
+              id: v.id,
+              title: v.title,
+              description: v.description,
+              videoUrl: v.videoUrl,
+              thumbnailUrl: v.thumbnailUrl,
+              likesCount: v.likesCount + 1,
+              comments: v.comments,
+            );
+          } else {
+            return v;
+          }
+        }).toList();
         emit(VideoLoaded(updatedVideos));
       }
     } catch (e) {

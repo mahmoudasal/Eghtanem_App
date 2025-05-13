@@ -1,5 +1,4 @@
 import 'package:egtanem_application/features/video/data/models/video_model.dart';
-import 'package:egtanem_application/core/utilities/cache_manger.dart';
 import 'package:egtanem_application/features/video/presentation/cubit/video_cubit.dart';
 import 'package:egtanem_application/features/video/presentation/widgets/video_card.dart';
 import 'package:flutter/material.dart';
@@ -60,15 +59,7 @@ class _VideoContent extends StatelessWidget {
   }
 
   void _preloadNextVideos(List<Video> videos, int currentIndex) {
-    for (var i = 1; i <= 2; i++) {
-      final nextIndex = currentIndex + i;
-      if (nextIndex < videos.length) {
-        final videoUrl = videos[nextIndex].videoUrl;
-        if (videoUrl?.isNotEmpty ?? false) {
-          customVideoCacheManager.downloadFile(videoUrl!);
-        }
-      }
-    }
+    // TODO
   }
 }
 

@@ -1,6 +1,5 @@
 import 'package:egtanem_application/features/home/data/models/comment_model.dart';
 import 'package:egtanem_application/features/video/data/models/video_model.dart';
-import 'package:egtanem_application/core/utilities/cache_manger.dart';
 import 'package:egtanem_application/features/home/presentation/widgets/icon_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -25,22 +24,34 @@ class _VideoPlayerCardState extends State<VideoPlayerCard> {
   bool _isInitialized = false;
   bool _isPlaying = true;
   bool _isSpeedUp = false;
-
   @override
   void initState() {
     super.initState();
     _initializeVideo();
   }
 
-  // Update _initializeVideo method
   Future<void> _initializeVideo() async {
     try {
-      final videoFile = await customVideoCacheManager
-          .getSingleFile(widget.video.videoUrl ?? '');
+      // Use asset-based or direct file path instead of cache manager
+      final videoUrl = widget.video.videoUrl ?? '';
 
-      _videoController = VideoPlayerController.file(videoFile);
+      // For asset files (local videos)
+      if (videoUrl.startsWith('assets/')) {
+        _videoController = VideoPlayerController.asset(videoUrl);
+      } else {
+        // For network URLs, use network controller directly
+        _videoController = VideoPlayerController.network(
+          videoUrl,
+          videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+        );
+      }
 
-      await _videoController?.initialize();
+      await _videoController?.initialize().timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          throw Exception('Video initialization timed out');
+        },
+      );
 
       if (mounted) {
         setState(() => _isInitialized = true);
@@ -141,10 +152,7 @@ class _SpeedIndicator extends StatelessWidget {
           color: Colors.black54,
           borderRadius: BorderRadius.circular(4.r),
         ),
-        child: Text(
-          '2x speed',
-          style: AppTextStyles.headingsH6
-        ),
+        child: Text('2x speed', style: AppTextStyles.headingsH6),
       ),
     );
   }
@@ -259,7 +267,7 @@ class _VideoCaption extends StatelessWidget {
         textDirection: TextDirection.rtl,
         child: Text(
           caption,
-          style: AppTextStyles.headingsH7.copyWith(color: Colors.white),
+          style: AppTextStyles.headingsH7,
         ),
       ),
     );

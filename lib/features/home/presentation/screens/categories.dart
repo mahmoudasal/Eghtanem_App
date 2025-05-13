@@ -15,7 +15,6 @@ import '../../../quran/presentation/screens/quran.dart';
 
 class CategoriesPage extends StatelessWidget {
   const CategoriesPage({super.key});
-  
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +25,7 @@ class CategoriesPage extends StatelessWidget {
         toolbarHeight: 100,
         title: Text(
           'اغتنم وقتك',
-          style: AppTextStyles.headingsH2.copyWith(color: Colors.white),
+          style: AppTextStyles.headingsH2,
         ),
         centerTitle: true,
         elevation: 0,
