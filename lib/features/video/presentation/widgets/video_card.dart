@@ -1,6 +1,6 @@
-import 'package:egtanem_application/features/home/data/models/comment_model.dart';
-import 'package:egtanem_application/features/video/data/models/video_model.dart';
-import 'package:egtanem_application/features/home/presentation/widgets/icon_text_button.dart';
+import 'package:eghtanem_app/features/home/data/models/comment_model.dart';
+import 'package:eghtanem_app/features/video/data/models/video_model.dart';
+import 'package:eghtanem_app/features/home/presentation/widgets/icon_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:video_player/video_player.dart';
@@ -40,8 +40,8 @@ class _VideoPlayerCardState extends State<VideoPlayerCard> {
         _videoController = VideoPlayerController.asset(videoUrl);
       } else {
         // For network URLs, use network controller directly
-        _videoController = VideoPlayerController.network(
-          videoUrl,
+        _videoController = VideoPlayerController.networkUrl(
+          Uri.parse(videoUrl),
           videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
         );
       }
@@ -97,21 +97,26 @@ class _VideoPlayerCardState extends State<VideoPlayerCard> {
           _togglePlayback();
         }
       },
-      child: GestureDetector(
-        onTap: _togglePlayback,
-        onLongPressStart: (_) => _handleSpeedChange(true),
-        onLongPressEnd: (_) => _handleSpeedChange(false),
-        child: Stack(
-          children: [
-            _buildVideoContent(),
-            if (_isSpeedUp) const _SpeedIndicator(),
-            if (!_isPlaying) const _PlayButton(),
-            _InteractionPanel(
-              video: widget.video,
-              onLike: () => widget.video.likesCount++,
-            ),
-            _VideoCaption(caption: widget.video.description ?? ''),
-          ],
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        child: GestureDetector(
+          onTap: _togglePlayback,
+          onLongPressStart: (_) => _handleSpeedChange(true),
+          onLongPressEnd: (_) => _handleSpeedChange(false),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              _buildVideoContent(),
+              if (_isSpeedUp) const _SpeedIndicator(),
+              if (!_isPlaying) const _PlayButton(),
+              _InteractionPanel(
+                video: widget.video,
+                onLike: () => widget.video.likesCount++,
+              ),
+              _VideoCaption(caption: widget.video.description ?? ''),
+            ],
+          ),
         ),
       ),
     );
@@ -121,18 +126,24 @@ class _VideoPlayerCardState extends State<VideoPlayerCard> {
   Widget _buildVideoContent() {
     return Container(
       color: Colors.black,
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
       child: Center(
-        child: AspectRatio(
-          aspectRatio: 9 / 16,
-          child: _isInitialized
-              ? VideoPlayer(_videoController!)
-              : const Center(
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
+        child: _isInitialized
+            ? FittedBox(
+                fit: BoxFit.cover,
+                child: SizedBox(
+                  width: _videoController!.value.size.width,
+                  height: _videoController!.value.size.height,
+                  child: VideoPlayer(_videoController!),
                 ),
-        ),
+              )
+            : const Center(
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              ),
       ),
     );
   }
