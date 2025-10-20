@@ -1,26 +1,37 @@
 import 'package:dio/dio.dart';
-import 'package:egtanem_application/features/auth/presentation/cubit/registration_cubit.dart';
-import 'package:egtanem_application/features/video/data/services/video_service.dart';
-import 'package:egtanem_application/features/home/presentation/navigation_cubit/navigation_cubit.dart';
-import 'package:egtanem_application/core/utilities/secure_storage.dart';
-import 'package:egtanem_application/features/video/data/repositories/video_repository.dart';
-import 'package:egtanem_application/features/auth/data/repositories/auth_repository.dart';
-import 'package:egtanem_application/features/auth/data/repositories/auth_repository_impl.dart';
-import 'package:egtanem_application/features/auth/presentation/cubit/login_cuibit.dart';
 import 'package:get_it/get_it.dart';
-
-import 'package:egtanem_application/features/auth/data/services/auth_service.dart';
-import 'package:egtanem_application/features/video/data/repositories/video_repository_impl.dart';
-import 'package:egtanem_application/features/video/presentation/cubit/video_cubit.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+
+import 'core/constants/api_endpoints.dart';
+import 'core/network/auth_interceptor.dart';
+import 'features/auth/data/repositories/auth_repository.dart';
+import 'features/auth/data/repositories/auth_repository_impl.dart';
+import 'features/auth/data/services/auth_service.dart';
+import 'features/auth/presentation/cubit/login_cuibit.dart';
+import 'features/auth/presentation/cubit/registration_cubit.dart';
+import 'features/home/presentation/navigation_cubit/navigation_cubit.dart';
+import 'features/video/data/repositories/video_repository.dart';
+import 'features/video/data/repositories/video_repository_impl.dart';
+import 'features/video/data/services/video_service.dart';
+import 'features/video/presentation/cubit/video_cubit.dart';
 
 final GetIt getIt = GetIt.instance;
 
 // Update injection.dart
 setupDependencies() {
   // Dio with interceptors
-  final dio = Dio()
-    ..interceptors.add(PrettyDioLogger(
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: ApiEndpoints.baseUrl,
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
+      sendTimeout: const Duration(seconds: 10),
+    ),
+  )..interceptors.add(AuthInterceptor());
+
+  // Add PrettyDioLogger only in debug mode
+  assert(() {
+    dio.interceptors.add(PrettyDioLogger(
       request: true,
       requestHeader: true,
       requestBody: true,
@@ -29,8 +40,9 @@ setupDependencies() {
       error: true,
       compact: true,
       maxWidth: 90,
-    ))
-    ..interceptors.add(AuthInterceptor()); // Keep authentication interceptor
+    ));
+    return true;
+  }());
 
   // Services
   getIt.registerSingleton<AuthService>(AuthService(dio));
@@ -49,18 +61,4 @@ setupDependencies() {
       () => RegistrationCubit(authRepository: getIt<AuthRepository>()));
   getIt.registerFactory(() => VideoCubit(getIt<VideoRepository>()));
   getIt.registerFactory(() => NavigationCubit());
-}
-
-class AuthInterceptor extends Interceptor {
-  @override
-  Future<void> onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) async {
-    final token = await SecureStorage.getToken();
-    if (token != null) {
-      options.headers['Authorization'] = 'Bearer $token';
-    }
-    super.onRequest(options, handler);
-  }
 }

@@ -1,12 +1,13 @@
-import 'package:egtanem_application/core/theme/app_colors.dart';
-import 'package:egtanem_application/features/video/data/models/video_model.dart';
-import 'package:egtanem_application/features/home/presentation/navigation_cubit/navigation_cubit.dart';
-import 'package:egtanem_application/features/video/presentation/cubit/video_cubit.dart';
-import 'package:egtanem_application/features/home/presentation/screens/categories.dart';
-import 'package:egtanem_application/features/video/presentation/widgets/video_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+
+import '../../../../core/theme/app_colors.dart';
+import '../../../video/data/models/video_model.dart';
+import '../../../video/presentation/cubit/video_cubit.dart';
+import '../../../video/presentation/widgets/video_card.dart';
+import '../navigation_cubit/navigation_cubit.dart';
+import 'categories.dart';
 
 class AppNavigationBar extends StatelessWidget {
   const AppNavigationBar({super.key});
@@ -134,23 +135,8 @@ class _VideoContent extends StatelessWidget {
     return PageView.builder(
       scrollDirection: Axis.vertical,
       itemCount: videos.length,
-      onPageChanged: (index) {
-        if (index < videos.length - 2) {
-          _preloadNextVideos(videos, index);
-        }
-      },
       itemBuilder: (context, index) => VideoPlayerCard(video: videos[index]),
     );
-  }
-
-  void _preloadNextVideos(List<Video> videos, int currentIndex) {
-    for (var i = 1; i <= 2; i++) {
-      final nextIndex = currentIndex + i;
-      if (nextIndex < videos.length) {
-        // Removed cache manager pre-loading
-        // No need to pre-download files anymore as we're using direct asset paths
-      }
-    }
   }
 }
 

@@ -1,13 +1,13 @@
-import 'package:egtanem_application/features/auth/presentation/cubit/login_state.dart';
-import 'package:egtanem_application/injection.dart';
-import 'package:egtanem_application/features/home/presentation/navigation_cubit/navigation_cubit.dart';
-import 'package:egtanem_application/features/auth/presentation/cubit/registration_cubit.dart';
-import 'package:egtanem_application/features/video/presentation/cubit/video_cubit.dart';
-import 'package:egtanem_application/features/auth/presentation/screens/register_page.dart';
+import 'package:eghtanem_app/features/auth/presentation/cubit/login_state.dart';
+import 'package:eghtanem_app/injection.dart';
+import 'package:eghtanem_app/features/home/presentation/navigation_cubit/navigation_cubit.dart';
+import 'package:eghtanem_app/features/auth/presentation/cubit/registration_cubit.dart';
+import 'package:eghtanem_app/features/video/presentation/cubit/video_cubit.dart';
+import 'package:eghtanem_app/features/auth/presentation/screens/register_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:egtanem_application/features/auth/presentation/cubit/login_cuibit.dart';
+import 'package:eghtanem_app/features/auth/presentation/cubit/login_cuibit.dart';
 import 'package:logger/logger.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -30,10 +30,13 @@ class LoginPageState extends State<LoginPage> {
 
   final Logger _logger =
       Logger(printer: PrettyPrinter(colors: true, printEmojis: true));
-
   @override
   void initState() {
     super.initState();
+    // Pre-fill with default credentials
+    _emailController.text = 'admin@app.com';
+    _passwordController.text = '123456';
+    
     // Auto login when page is loaded
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _autoLogin();

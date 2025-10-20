@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'package:egtanem_application/core/constants/constant.dart';
-import 'package:egtanem_application/core/utilities/string_utils.dart';
+import 'package:eghtanem_app/widgets/back_button.dart';
+import 'package:eghtanem_app/core/utilities/string_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../models/tafseer_model.dart';
+import 'models/tafseer_model.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
@@ -175,7 +175,7 @@ class TafseerState extends State<Tafseer> {
         leading: const SizedBox(width: 0.0),
         actions: [
           Row(
-            children: [Constants.backButton(context)],
+            children: [const CustomBackButton()],
           ),
         ],
       ),

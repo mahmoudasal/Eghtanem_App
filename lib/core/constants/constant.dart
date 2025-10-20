@@ -1,20 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
-
 class Constants {
-  static Widget backButton(BuildContext context) {
-    return Row(
-      children: [
-        IconButton(
-          icon: SvgPicture.asset("assets/icons/BackButton.svg"),
-          onPressed: () => Navigator.pop(context),
-        ),
-        SizedBox(width: 35.w),
-      ],
-    );
-  }
-
   static const List<String> suraNames = [
     "الفاتحة",
     "البقرة",

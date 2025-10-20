@@ -1,6 +1,6 @@
-import 'package:egtanem_application/core/theme/app_colors.dart';
-import 'package:egtanem_application/features/auth/presentation/cubit/registration_state.dart';
-import 'package:egtanem_application/features/auth/presentation/cubit/registration_cubit.dart';
+import 'package:eghtanem_app/core/theme/app_colors.dart';
+import 'package:eghtanem_app/features/auth/presentation/cubit/registration_state.dart';
+import 'package:eghtanem_app/features/auth/presentation/cubit/registration_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -324,9 +324,9 @@ class Validators {
   static String? validateName(String? value) {
     if (value == null || value.isEmpty) return 'الاسم مطلوب';
     final nameRegex = RegExp(
-      r"^([a-zA-Z]{2,}\s[a-zA-Z]{1,}'?-?[a-zA-Z]{2,}\s?([a-zA-Z]{1,})?)",
+      r"^([\u0600-\u06FFa-zA-Z\s]{2,})$",
     );
-    return nameRegex.hasMatch(value) ? null : 'اسم غير صحيح (الإنجليزية فقط)';
+    return nameRegex.hasMatch(value) ? null : 'اسم غير صحيح';
   }
 
   static String? validateEmail(String? value) {

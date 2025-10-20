@@ -1,11 +1,9 @@
 // data/repositories/tafseer_repository_impl.dart
 import 'dart:convert';
 
-import 'package:egtanem_application/features/tafseer/data/data_sources/tafseer_local_data_source.dart';
-import 'package:egtanem_application/features/tafseer/data/repositories/tafseer_repository.dart';
-import 'package:egtanem_application/models/tafseer_model.dart';
-
-
+import 'package:eghtanem_app/features/tafseer/data/data_sources/tafseer_local_data_source.dart';
+import 'package:eghtanem_app/features/tafseer/data/repositories/tafseer_repository.dart';
+import 'package:eghtanem_app/features/tafseer/data/models/tafseer_model.dart';
 
 // data/repositories/tafseer_repository_impl.dart
 class TafseerRepositoryImpl implements TafseerRepository {
@@ -21,3 +19,4 @@ class TafseerRepositoryImpl implements TafseerRepository {
     return data.map((item) => Interpretation.fromJson(item)).toList();
   }
 }
+

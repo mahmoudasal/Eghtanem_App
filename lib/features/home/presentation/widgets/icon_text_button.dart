@@ -1,5 +1,5 @@
 // Add this widget in your components
-import 'package:egtanem_application/core/theme/app_text_styles.dart';
+import 'package:eghtanem_app/core/theme/app_text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';

@@ -1,54 +1,56 @@
 import 'dart:async';
 
-import 'package:egtanem_application/views/onboarding_one.dart';
-import 'package:egtanem_application/views/onboarding_two.dart';
-import 'package:egtanem_application/widgets/custom_page_transition.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'core/constants/routes.dart';
+import 'core/utilities/logger.dart';
+import 'features/auth/presentation/cubit/login_cuibit.dart';
+import 'features/auth/presentation/screens/login_page.dart';
+import 'features/home/presentation/navigation_cubit/navigation_cubit.dart';
+import 'features/home/presentation/screens/navigation_page.dart';
+import 'features/video/presentation/cubit/video_cubit.dart';
+import 'injection.dart';
+import 'views/onboarding_one.dart';
+import 'views/onboarding_two.dart';
+import 'widgets/custom_page_transition.dart';
 
-import 'package:egtanem_application/injection.dart';
-import 'package:egtanem_application/features/auth/presentation/cubit/login_cuibit.dart';
-import 'package:egtanem_application/features/home/presentation/navigation_cubit/navigation_cubit.dart';
-import 'package:egtanem_application/features/video/presentation/cubit/video_cubit.dart';
-import 'package:egtanem_application/features/auth/presentation/screens/login_page.dart';
-import 'package:egtanem_application/features/home/presentation/screens/navigation_page.dart';
-
+/// Main entry point of the application.
+/// Initializes dependencies, sets up system UI, and runs the app.
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await setupDependencies();
-
- 
-  runApp(const MyApp());
-
-  FlutterError.onError = (FlutterErrorDetails details) {
-    FlutterError.dumpErrorToConsole(details);
-   
-  };
-
   runZonedGuarded(
-    () => runApp(const MyApp()),
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
+      await setupDependencies();
+
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          systemNavigationBarColor: Colors.transparent,
+        ),
+      );
+
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+      runApp(const MyApp());
+    },
     (error, stackTrace) {
+      // Handle any uncaught errors here
+      AppLogger.e('Uncaught error', error, stackTrace);
     },
   );
 
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      systemNavigationBarColor: Colors.transparent,
-    ),
-  );
-
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.dumpErrorToConsole(details);
+  };
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-   @override
+  @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       designSize: const Size(360, 690),
@@ -57,36 +59,39 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          initialRoute: "/page_one",
-          onGenerateRoute: (settings) {
-            switch (settings.name) {
-              case "/page_one":
-                return createRoute(const FirstPage());
-              case "/page_two":
-                return createRoute(const SecondPage());
-              case "/page_three":
-                return createRoute(
-                  BlocProvider(
-                    create: (context) => getIt<LoginCubit>(),
-                    child: const LoginPage(),
-                  ),
-                );
-              case "/page_4":
-                return createRoute(
-                  MultiBlocProvider(
-                    providers: [
-                      BlocProvider(create: (_) => getIt<NavigationCubit>()),
-                      BlocProvider(create: (_) => getIt<VideoCubit>()),
-                    ],
-                    child: const AppNavigationBar(),
-                  ),
-                );
-              default:
-                return createRoute(const FirstPage());
-            }
-          },
+          title: 'Eghtanem',
+          initialRoute: Routes.pageOne,
+          onGenerateRoute: _onGenerateRoute,
         );
       },
     );
+  }
+
+  Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
+    switch (settings.name) {
+      case Routes.pageOne:
+        return createRoute(const FirstPage());
+      case Routes.pageTwo:
+        return createRoute(const SecondPage());
+      case Routes.pageThree:
+        return createRoute(
+          BlocProvider(
+            create: (context) => getIt<LoginCubit>(),
+            child: const LoginPage(),
+          ),
+        );
+      case Routes.pageFour:
+        return createRoute(
+          MultiBlocProvider(
+            providers: [
+              BlocProvider(create: (_) => getIt<NavigationCubit>()),
+              BlocProvider(create: (_) => getIt<VideoCubit>()),
+            ],
+            child: const AppNavigationBar(),
+          ),
+        );
+      default:
+        return createRoute(const FirstPage());
+    }
   }
 }

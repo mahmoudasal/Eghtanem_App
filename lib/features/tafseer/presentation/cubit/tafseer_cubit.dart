@@ -1,7 +1,7 @@
 // presentation/cubit/tafseer_cubit.dart
 import 'package:bloc/bloc.dart';
-import 'package:egtanem_application/features/tafseer/data/repositories/tafseer_repository.dart';
-import 'package:egtanem_application/models/tafseer_model.dart';
+import 'package:eghtanem_app/features/tafseer/data/repositories/tafseer_repository.dart';
+import 'package:eghtanem_app/features/tafseer/data/models/tafseer_model.dart';
 import 'package:equatable/equatable.dart';
 
 part 'tafseer_state.dart';

@@ -1,14 +1,14 @@
 // supplications_remembrances.dart
-import 'package:egtanem_application/core/constants/constant.dart';
-import 'package:egtanem_application/features/dhikr/data/models/azkar_json.dart';
-import 'package:egtanem_application/models/counter.dart';
+import 'package:eghtanem_app/features/dhikr/data/models/azkar_json.dart';
 import 'package:flutter/material.dart';
+import 'azkar_counter.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../widgets/back_button.dart';
 
 import '../cubit/dhikr_cubit.dart';
 
@@ -42,9 +42,7 @@ class _SupplicationsView extends StatelessWidget {
         title: Text('الادعية و الاذكار', style: AppTextStyles.headingsH1),
         leading: const SizedBox(width: 0.0),
         actions: [
-          Row(
-            children: [Constants.backButton(context)],
-          ),
+          const CustomBackButton(),
         ],
       ),
       body: BlocBuilder<DhikrCubit, DhikrState>(
@@ -73,7 +71,7 @@ class _SupplicationsView extends StatelessWidget {
           highlightColor: Colors.grey[700]!,
           child: Card(
             color: AppColors.primary2,
-            margin: EdgeInsets.symmetric(vertical: 8.h),
+            margin: EdgeInsets.symmetric(vertical: 10.h),
             child: ListTile(
               contentPadding:
                   EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),

@@ -1,11 +1,11 @@
 import 'package:dio/dio.dart';
-import 'package:egtanem_application/features/auth/data/services/auth_response.dart';
+import 'package:eghtanem_app/features/auth/data/services/auth_response.dart';
 import 'package:retrofit/error_logger.dart';
 import 'package:retrofit/http.dart';
 
 part 'auth_service.g.dart';
 
-@RestApi(baseUrl: "placeholder_base_url")
+@RestApi()
 abstract class AuthService {
   factory AuthService(Dio dio) = _AuthService;
 

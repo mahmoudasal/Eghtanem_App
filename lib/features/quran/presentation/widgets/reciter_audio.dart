@@ -1,4 +1,4 @@
-import 'package:egtanem_application/core/theme/app_text_styles.dart';
+import 'package:eghtanem_app/core/theme/app_text_styles.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -6,7 +6,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../data/repositories/quran_repo.dart';
 import '../screens/listen_page.dart';
 import '../../../../widgets/custom_page_transition.dart';
-
 
 class ReciterSurahs extends StatefulWidget {
   final String title;
@@ -83,15 +82,12 @@ class _ReciterSurahsState extends State<ReciterSurahs> {
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 0.03.sw),
         child: ListTile(
-          shape:  RoundedRectangleBorder(
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(8)),
           ),
           contentPadding: EdgeInsets.symmetric(horizontal: 0.055.sw),
-          tileColor:  Color(0XFF171715),
-          title: Text(
-            widget.title,
-            style: AppTextStyles.headingsH5
-          ),
+          tileColor: Color(0XFF171715),
+          title: Text(widget.title, style: AppTextStyles.headingsH5),
           trailing: _isLoading
               ? const SizedBox(
                   width: 24,

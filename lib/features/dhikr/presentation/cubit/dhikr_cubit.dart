@@ -1,15 +1,18 @@
 // dhikr_cubit.dart
-import 'package:egtanem_application/features/dhikr/data/models/azkar_json.dart';
+import 'package:eghtanem_app/features/dhikr/data/models/azkar_json.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
 abstract class DhikrState {}
+
 class DhikrInitial extends DhikrState {}
+
 class DhikrLoading extends DhikrState {}
+
 class DhikrLoaded extends DhikrState {
   final List<Category> categories;
   DhikrLoaded(this.categories);
 }
+
 class DhikrError extends DhikrState {
   final String message;
   DhikrError(this.message);

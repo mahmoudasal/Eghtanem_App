@@ -1,7 +1,7 @@
-import 'package:egtanem_application/features/auth/presentation/cubit/login_cuibit.dart';
-import 'package:egtanem_application/features/auth/presentation/screens/login_page.dart';
-import 'package:egtanem_application/injection.dart';
-import 'package:egtanem_application/widgets/custom_page_transition.dart';
+import 'package:eghtanem_app/features/auth/presentation/cubit/login_cuibit.dart';
+import 'package:eghtanem_app/features/auth/presentation/screens/login_page.dart';
+import 'package:eghtanem_app/injection.dart';
+import 'package:eghtanem_app/widgets/custom_page_transition.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

@@ -1,5 +1,5 @@
-import 'package:egtanem_application/core/theme/app_colors.dart';
-import 'package:egtanem_application/views/onboarding_two.dart';
+import 'package:eghtanem_app/core/theme/app_colors.dart';
+import 'package:eghtanem_app/views/onboarding_two.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -20,15 +20,18 @@ class FirstPageState extends State<FirstPage> {
   bool _hasLoadedOnce = false;
 
   // Add references to other images to pre-cache
-  final ImageProvider _secondPageImage = const AssetImage("assets/onboarding/onboarding_two.webp");
-  final ImageProvider _logoImage = const AssetImage("assets/onboarding/onboarding_login.webp");
+  final ImageProvider _secondPageImage =
+      const AssetImage("assets/onboarding/onboarding_two.webp");
+  final ImageProvider _logoImage =
+      const AssetImage("assets/onboarding/onboarding_login.webp");
   final ImageProvider _loginPageImage =
       const AssetImage("assets/logo/logo.webp");
 
   @override
   void initState() {
     super.initState();
-    _backgroundImage = const AssetImage("assets/onboarding/onboarding_one.webp");
+    _backgroundImage =
+        const AssetImage("assets/onboarding/onboarding_one.webp");
   }
 
   @override
@@ -51,7 +54,6 @@ class FirstPageState extends State<FirstPage> {
         precacheImage(_secondPageImage, context),
         precacheImage(_loginPageImage, context),
         precacheImage(_logoImage, context),
-        
       ];
 
       // Wait for all images to be precached
@@ -98,7 +100,7 @@ class FirstPageState extends State<FirstPage> {
                         end: Alignment.bottomCenter,
                         colors: [
                           const Color.fromARGB(80, 0, 0, 0),
-                          Colors.black.withValues(alpha:0.999),
+                          Colors.black.withValues(alpha: 0.999),
                         ],
                       ),
                     ),

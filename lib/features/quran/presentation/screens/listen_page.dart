@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:egtanem_application/core/constants/constant.dart';
+import 'package:eghtanem_app/widgets/back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -44,8 +44,8 @@ class TelawahState extends State<Telawah> {
   Future<void> _playPauseSurah(String surahNumber) async {
     if (_isLoading) return; // Prevent multiple simultaneous requests
 
-    await _setLoading(true);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
+    await _setLoading(true);
 
     try {
       if (_currentSurah == surahNumber) {
@@ -402,7 +402,7 @@ class TelawahState extends State<Telawah> {
         leading: const SizedBox(width: 0.0),
         actions: [
           Row(
-            children: [Constants.backButton(context)],
+            children: [const CustomBackButton()],
           ),
         ],
       ),

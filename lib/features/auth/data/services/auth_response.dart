@@ -1,4 +1,4 @@
-import 'package:egtanem_application/features/auth/data/models/user_model.dart';
+import 'package:eghtanem_app/features/auth/data/models/user_model.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'auth_response.g.dart';

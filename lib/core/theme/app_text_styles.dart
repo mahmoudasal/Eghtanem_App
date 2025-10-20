@@ -1,5 +1,6 @@
-import 'package:egtanem_application/core/theme/app_fonts.dart';
-import 'package:egtanem_application/core/theme/app_colors.dart';
+import 'package:eghtanem_app/core/theme/app_colors.dart';
+import 'package:eghtanem_app/core/theme/app_fonts.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 

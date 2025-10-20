@@ -1,7 +1,7 @@
 // Hadith.dart
-import 'package:egtanem_application/core/constants/constant.dart';
-import 'package:egtanem_application/features/hadith/presentation/cubit/hadith_cubit.dart';
-import 'package:egtanem_application/features/hadith/presentation/cubit/hadith_state.dart';
+import 'package:eghtanem_app/widgets/back_button.dart';
+import 'package:eghtanem_app/features/hadith/presentation/cubit/hadith_cubit.dart';
+import 'package:eghtanem_app/features/hadith/presentation/cubit/hadith_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -65,7 +65,7 @@ class _HadithView extends StatelessWidget {
             icon: const Icon(Icons.favorite, color: Colors.red),
             onPressed: () => _navigateToLikedHadiths(context),
           ),
-          Row(children: [Constants.backButton(context)]),
+          Row(children: [const CustomBackButton()]),
         ],
       ),
       body: BlocBuilder<HadithCubit, HadithState>(

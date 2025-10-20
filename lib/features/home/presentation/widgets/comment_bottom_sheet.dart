@@ -1,4 +1,4 @@
-import 'package:egtanem_application/features/home/data/models/comment_model.dart';
+import 'package:eghtanem_app/features/home/data/models/comment_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -8,7 +8,8 @@ import '../../../../core/theme/app_text_styles.dart';
 class CommentBottomSheet extends StatelessWidget {
   final String videoId;
 
-  const CommentBottomSheet({super.key, required this.videoId, required List<Comment> comments});
+  const CommentBottomSheet(
+      {super.key, required this.videoId, required List<Comment> comments});
 
   @override
   Widget build(BuildContext context) {

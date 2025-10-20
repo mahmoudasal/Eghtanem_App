@@ -1,4 +1,4 @@
-import 'package:egtanem_application/core/constants/constant.dart';
+import 'package:eghtanem_app/widgets/back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -70,7 +70,7 @@ class LikedHadithsState extends State<LikedHadiths> {
         foregroundColor: AppColors.primary1,
         title: Text("الأحاديث المفضلة", style: AppTextStyles.headingsH1),
         leading: const SizedBox(width: 0.0),
-        actions: [Constants.backButton(context)],
+        actions: [const CustomBackButton()],
       ),
       body: FutureBuilder<List<Hadith>>(
         future: allHadiths,

@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:egtanem_application/core/constants/constant.dart';
-import 'package:egtanem_application/features/quran/data/models/surah_model.dart'
+import 'package:eghtanem_app/features/quran/data/models/surah_model.dart'
     as surah_data;
-import 'package:egtanem_application/features/quran/presentation/screens/sura_page.dart';
-import 'package:egtanem_application/features/quran/data/models/qra2at_model.dart';
+import 'package:eghtanem_app/features/quran/presentation/screens/sura_page.dart';
+import 'package:eghtanem_app/features/quran/data/models/qra2at_model.dart';
+import 'package:eghtanem_app/widgets/back_button.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -49,7 +49,7 @@ class QuranSubCat extends StatelessWidget {
           leading: const SizedBox(width: 0.0),
           actions: [
             Row(
-              children: [Constants.backButton(context)],
+              children: [const CustomBackButton()],
             ),
           ],
           bottom: TabBar(

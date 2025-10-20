@@ -1,38 +1,32 @@
-import 'package:egtanem_application/features/auth/data/repositories/auth_repository.dart';
-import 'package:egtanem_application/features/auth/presentation/cubit/login_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../data/repositories/auth_repository.dart';
+import 'login_state.dart';
 
 class LoginCubit extends Cubit<LoginState> {
   final AuthRepository authRepository;
 
   LoginCubit({required this.authRepository}) : super(LoginInitial());
 
-  // Auto login function that doesn't require credentials
-  void autoLogin() async {
+  Future<void> login({required String email, required String password}) async {
     emit(LoginLoading());
     try {
-      // Define a default test account or use hardcoded values
-      const defaultEmail = 'test@example.com';
-      const defaultPassword = 'password123';
-
-      // Use the existing login method with default credentials
-      await authRepository.login(
-          email: defaultEmail, password: defaultPassword);
-
-      // Alternatively, you could bypass the repository call entirely
-      // and directly store a fake token
-      // await SecureStorage.storeToken('fake_auto_login_token');
-
+      await authRepository.login(email: email, password: password);
       emit(LoginSuccess());
     } catch (error) {
-      // In case of error, show a generic message
-      emit(LoginError("تعذر تسجيل الدخول التلقائي"));
+      emit(LoginError(error.toString()));
     }
   }
-
-  // Modified login method still available if needed
-  void loginUser({required String email, required String password}) async {
-    // Skip actual credentials and use auto login instead
-    autoLogin();
+  Future<void> autoLogin() async {
+    emit(LoginLoading());
+    try {
+      await authRepository.login(
+        email: 'admin@app.com',
+        password: '123456',
+      );
+      emit(LoginSuccess());
+    } catch (error) {
+      emit(LoginError("تعذر تسجيل الدخول التلقائي"));
+    }
   }
 }

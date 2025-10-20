@@ -1,8 +1,8 @@
-import 'package:egtanem_application/core/constants/constant.dart';
-import 'package:egtanem_application/core/theme/app_colors.dart';
-import 'package:egtanem_application/core/utilities/string_utils.dart';
+import 'package:eghtanem_app/widgets/back_button.dart';
+import 'package:eghtanem_app/core/theme/app_colors.dart';
+import 'package:eghtanem_app/core/utilities/string_utils.dart';
 
-import 'package:egtanem_application/features/quran/data/models/surah_model.dart';
+import 'package:eghtanem_app/features/quran/data/models/surah_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -64,9 +64,7 @@ class SurahPageState extends State<SurahPage> {
             color: AppColors.primary0,
           ),
         ),
-        actions: [
-         Constants.backButton(context)
-        ],
+        actions: [const CustomBackButton()],
       ),
       body: _buildContent(),
     );
@@ -129,8 +127,6 @@ class SurahPageState extends State<SurahPage> {
     return spans;
   }
 
- 
-
   Widget _buildVerseList() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
@@ -157,7 +153,6 @@ class SurahPageState extends State<SurahPage> {
                     style: TextStyle(
                       fontSize: 22.sp,
                       color: AppColors.primary0,
-                      
                     ),
                   ),
                 ),

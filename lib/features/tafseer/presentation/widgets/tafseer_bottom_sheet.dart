@@ -1,12 +1,10 @@
 // presentation/widgets/tafseer_bottom_sheet.dart
-import 'package:egtanem_application/core/theme/app_colors.dart';
-import 'package:egtanem_application/core/theme/app_text_styles.dart';
-import 'package:egtanem_application/core/utilities/string_utils.dart';
-import 'package:egtanem_application/models/tafseer_model.dart';
+import 'package:eghtanem_app/core/theme/app_colors.dart';
+import 'package:eghtanem_app/core/theme/app_text_styles.dart';
+import 'package:eghtanem_app/core/utilities/string_utils.dart';
+import 'package:eghtanem_app/features/tafseer/data/models/tafseer_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-
 
 class TafseerBottomSheet extends StatelessWidget {
   final String suraName;

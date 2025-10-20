@@ -1,4 +1,4 @@
-import 'package:egtanem_application/core/constants/constant.dart';
+import 'package:eghtanem_app/widgets/back_button.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -219,9 +219,7 @@ class ProphetsStoriesState extends State<ProphetsStories> {
         leading: const SizedBox(width: 0.0),
         actions: [
           Row(
-            children: [
-             Constants.backButton(context)
-            ],
+            children: [const CustomBackButton()],
           ),
         ],
       ),

@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:egtanem_application/features/quran/data/models/qra2at_model.dart';
+import 'package:eghtanem_app/features/quran/data/models/qra2at_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 

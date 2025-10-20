@@ -1,6 +1,4 @@
-import 'package:egtanem_application/features/auth/data/services/auth_response.dart';
-
-
+import 'package:eghtanem_app/features/auth/data/services/auth_response.dart';
 
 abstract class AuthRepository {
   Future<AuthResponse> register({

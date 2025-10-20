@@ -1,15 +1,15 @@
 // presentation/screens/tafseer/tafseer_screen.dart
-import 'package:egtanem_application/core/constants/constant.dart';
-import 'package:egtanem_application/core/theme/app_colors.dart';
-import 'package:egtanem_application/features/tafseer/data/repositories/tafseer_repository_impl.dart';
-import 'package:egtanem_application/features/tafseer/presentation/cubit/tafseer_cubit.dart';
-import 'package:egtanem_application/features/tafseer/presentation/widgets/surah_card.dart';
-
-import 'package:egtanem_application/features/tafseer/presentation/widgets/tafseer_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'package:eghtanem_app/core/constants/constant.dart';
+import 'package:eghtanem_app/core/theme/app_colors.dart';
+import 'package:eghtanem_app/features/tafseer/data/repositories/tafseer_repository_impl.dart';
+import 'package:eghtanem_app/features/tafseer/presentation/cubit/tafseer_cubit.dart';
+import 'package:eghtanem_app/features/tafseer/presentation/widgets/surah_card.dart';
+import 'package:eghtanem_app/features/tafseer/presentation/widgets/tafseer_bottom_sheet.dart';
+import 'package:eghtanem_app/widgets/back_button.dart';
 
 // Updated TafseerScreen
 class TafseerScreen extends StatelessWidget {
@@ -27,14 +27,13 @@ class TafseerScreen extends StatelessWidget {
           toolbarHeight: 100.h,
           title: const Text("التفسير"),
           leading: const SizedBox(),
-          actions:  [Constants.backButton(context)],
+          actions: [const CustomBackButton()],
         ),
         body: const TafseerGrid(),
       ),
     );
   }
 }
-
 
 class TafseerGrid extends StatelessWidget {
   const TafseerGrid({super.key});
@@ -76,7 +75,7 @@ class TafseerGrid extends StatelessWidget {
 extension BottomSheetExtension on TafseerCubit {
   void showTafseerBottomSheet(BuildContext context, int suraIndex) {
     if (state is! TafseerLoaded) return;
-    
+
     final suraNumber = suraIndex + 1;
     final suraInterpretations = getSuraInterpretations(suraNumber);
 
