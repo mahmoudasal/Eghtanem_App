@@ -106,44 +106,43 @@ class FirstPageState extends State<FirstPage> {
                     ),
                   ),
                 ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      '!مرحباً بك في إغتنم',
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.headingsH1,
-                    ),
-                    SizedBox(
-                      height: 15.h,
-                      width: double.infinity,
-                    ),
-                    SizedBox(
-                      width: 0.8.sw,
-                      child: Text(
-                        'قال رسولُ اللهِ صلَّى اللهُ عليه وسلَّم لرجلٍ وهو يَعِظُه : اغتنِمْ خمسًا قبل خمسٍ : شبابَك قبل هَرَمِك، وصِحَّتَك قبل سَقَمِك، وغناك قبل فقرِك، وفراغَك قبل شُغلِك، وحياتَك قبل موتِك',
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.headingsH2,
-                      ),
-                    ),
-                    SizedBox(height: 0.12.sh),
-                    SizedBox(
-                      width: 0.9.sw,
-                      height: 50.h,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pushReplacement(
-                            createRoute(const SecondPage()),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary0,
+                SafeArea(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          '!مرحباً بك في إغتنم',
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.headingsH1,
                         ),
-                        child: Text('إستمرار', style: AppTextStyles.headingsH3),
-                      ),
+                        SizedBox(height: 15.h),
+                        Text(
+                          'قال رسولُ اللهِ صلَّى اللهُ عليه وسلَّم لرجلٍ وهو يَعِظُه : اغتنِمْ خمسًا قبل خمسٍ : شبابَك قبل هَرَمِك، وصِحَّتَك قبل سَقَمِك، وغناك قبل فقرِك، وفراغَك قبل شُغلِك، وحياتَك قبل موتِك',
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.headingsH2,
+                        ),
+                        SizedBox(height: 120.h),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50.h,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pushReplacement(
+                                createRoute(const SecondPage()),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary0,
+                            ),
+                            child: Text('إستمرار', style: AppTextStyles.headingsH3),
+                          ),
+                        ),
+                        SizedBox(height: 16.h),
+                      ],
                     ),
-                    SizedBox(height: 20.h),
-                  ],
+                  ),
                 ),
               ],
             )

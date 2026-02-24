@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -14,14 +16,20 @@ class AppNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.primary1,
-      body: BlocBuilder<NavigationCubit, AppTab>(
-        builder: (context, activeTab) {
-          return _getActiveScreen(activeTab);
-        },
-      ),
-      bottomNavigationBar: _buildBottomNavBar(context),
+    return BlocBuilder<NavigationCubit, AppTab>(
+      builder: (context, activeTab) {
+        final isShorts = activeTab == AppTab.shorts;
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle.light,
+          child: Scaffold(
+            extendBody: true,
+            backgroundColor: AppColors.primary1,
+            body: _getActiveScreen(activeTab),
+            bottomNavigationBar:
+                _buildBottomNavBar(context, activeTab, isShorts),
+          ),
+        );
+      },
     );
   }
 
@@ -32,23 +40,38 @@ class AppNavigationBar extends StatelessWidget {
     };
   }
 
-  Widget _buildBottomNavBar(BuildContext context) {
-    return BlocBuilder<NavigationCubit, AppTab>(
-      builder: (context, activeTab) {
-        return BottomNavigationBar(
-          currentIndex: activeTab.index,
-          onTap: (index) => context.read<NavigationCubit>().navigateTo(
-                AppTab.values[index],
-              ),
-          selectedItemColor: AppColors.primary0,
-          unselectedItemColor: Colors.grey,
-          backgroundColor: AppColors.primary1,
-          items: [
-            _buildCategoryItem(activeTab),
-            _buildHomeItem(activeTab),
-          ],
-        );
-      },
+  Widget _buildBottomNavBar(
+      BuildContext context, AppTab activeTab, bool isShorts) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: isShorts
+            ? LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.72),
+                ],
+              )
+            : null,
+        color: isShorts ? null : AppColors.primary1,
+      ),
+      child: BottomNavigationBar(
+        currentIndex: activeTab.index,
+        onTap: (index) => context.read<NavigationCubit>().navigateTo(
+              AppTab.values[index],
+            ),
+        selectedItemColor: AppColors.primary0,
+        unselectedItemColor: isShorts ? Colors.white70 : Colors.grey,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        selectedFontSize: 11.sp,
+        unselectedFontSize: 11.sp,
+        items: [
+          _buildCategoryItem(activeTab),
+          _buildHomeItem(activeTab),
+        ],
+      ),
     );
   }
 

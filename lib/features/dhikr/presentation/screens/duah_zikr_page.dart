@@ -34,7 +34,7 @@ class _SupplicationsView extends StatelessWidget {
       backgroundColor: AppColors.primary1,
       appBar: AppBar(
         scrolledUnderElevation: 0.0,
-        toolbarHeight: 100.h,
+        toolbarHeight: 70.h,
         centerTitle: true,
         backgroundColor: AppColors.primary1,
         shadowColor: AppColors.primary1,
