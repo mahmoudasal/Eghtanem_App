@@ -1,22 +1,20 @@
 import 'package:eghtanem_app/widgets/back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../data/models/hadith_model.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../cubit/hadith_cubit.dart';
+import 'package:eghtanem_app/features/hadith/data/models/hadith_model.dart';
+import 'package:eghtanem_app/core/theme/app_colors.dart';
+import 'package:eghtanem_app/core/theme/app_text_styles.dart';
 
 class LikedHadiths extends StatefulWidget {
   final Set<int> likedHadiths;
-  final Future<List<Hadith>> allHadiths;
+  final List<Hadith> allHadiths;
 
   const LikedHadiths({
     super.key,
     required this.likedHadiths,
-    required this.allHadiths, // ✅ Fix: Ensure this parameter exists
+    required this.allHadiths,
   });
 
   @override
@@ -25,12 +23,10 @@ class LikedHadiths extends StatefulWidget {
 
 class LikedHadithsState extends State<LikedHadiths> {
   late Set<int> likedHadiths;
-  late Future<List<Hadith>> allHadiths;
 
   @override
   void initState() {
     super.initState();
-    allHadiths = context.read<HadithCubit>().loadAllHadiths();
     _loadLikedHadiths();
   }
 
@@ -52,7 +48,7 @@ class LikedHadithsState extends State<LikedHadiths> {
     });
 
     final prefs = await SharedPreferences.getInstance();
-    prefs.setStringList(
+    await prefs.setStringList(
         'likedHadiths', likedHadiths.map((e) => e.toString()).toList());
   }
 
@@ -72,22 +68,11 @@ class LikedHadithsState extends State<LikedHadiths> {
         leading: const SizedBox(width: 0.0),
         actions: [const CustomBackButton()],
       ),
-      body: FutureBuilder<List<Hadith>>(
-        future: allHadiths,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}',
-                  style: AppTextStyles.headingsH3),
-            );
-          }
-
-          final hadiths = snapshot.data
-                  ?.where((h) => likedHadiths.contains(h.number))
-                  .toList() ??
-              [];
+      body: Builder(
+        builder: (context) {
+          final hadiths = widget.allHadiths
+              .where((h) => likedHadiths.contains(h.number))
+              .toList();
 
           if (hadiths.isEmpty) {
             return Center(

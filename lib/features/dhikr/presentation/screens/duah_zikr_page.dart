@@ -1,16 +1,17 @@
 // supplications_remembrances.dart
-import 'package:eghtanem_app/features/dhikr/data/models/azkar_json.dart';
+import 'package:eghtanem_app/injection.dart';
 import 'package:flutter/material.dart';
-import 'azkar_counter.dart';
+import 'package:eghtanem_app/features/dhikr/presentation/screens/azkar_counter.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../../../widgets/back_button.dart';
+import 'package:eghtanem_app/core/theme/app_colors.dart';
+import 'package:eghtanem_app/core/theme/app_text_styles.dart';
+import 'package:eghtanem_app/widgets/back_button.dart';
 
-import '../cubit/dhikr_cubit.dart';
+import 'package:eghtanem_app/features/dhikr/presentation/cubit/dhikr_cubit.dart';
+import 'package:eghtanem_app/features/dhikr/data/models/azkar_json.dart';
 
 class SupplicationsRemembrances extends StatelessWidget {
   const SupplicationsRemembrances({super.key});
@@ -18,7 +19,7 @@ class SupplicationsRemembrances extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => DhikrCubit(AdhkarService())..loadAdhkar(),
+      create: (_) => getIt<DhikrCubit>()..loadAdhkar(),
       child: const _SupplicationsView(),
     );
   }
@@ -97,7 +98,7 @@ class _SupplicationsView extends StatelessWidget {
               category.category,
               style: AppTextStyles.headingsH3,
             ),
-            trailing: Icon(Icons.arrow_forward_ios, color: Colors.white),
+            trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white),
             onTap: () => _navigateToAzkarCounter(context, category),
           ),
         );

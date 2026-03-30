@@ -18,32 +18,4 @@ class VideoCubit extends Cubit<VideoState> {
       emit(VideoError(e.toString()));
     }
   }
-
-  Future<void> likeVideo(int videoId) async {
-    try {
-      await _repository.likeVideo(videoId);
-
-      if (state is VideoLoaded) {
-        final videos = (state as VideoLoaded).videos;
-        final updatedVideos = videos.map((v) {
-          if (v.id == videoId) {
-            return Video(
-              id: v.id,
-              title: v.title,
-              description: v.description,
-              videoUrl: v.videoUrl,
-              thumbnailUrl: v.thumbnailUrl,
-              likesCount: v.likesCount + 1,
-              comments: v.comments,
-            );
-          } else {
-            return v;
-          }
-        }).toList();
-        emit(VideoLoaded(updatedVideos));
-      }
-    } catch (e) {
-      emit(VideoError('Failed to like video'));
-    }
-  }
 }

@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:eghtanem_app/core/constants/constant.dart';
 import 'package:eghtanem_app/core/theme/app_colors.dart';
-import 'package:eghtanem_app/features/tafseer/data/repositories/tafseer_repository_impl.dart';
+import 'package:eghtanem_app/injection.dart';
 import 'package:eghtanem_app/features/tafseer/presentation/cubit/tafseer_cubit.dart';
 import 'package:eghtanem_app/features/tafseer/presentation/widgets/surah_card.dart';
 import 'package:eghtanem_app/features/tafseer/presentation/widgets/tafseer_bottom_sheet.dart';
@@ -18,7 +18,7 @@ class TafseerScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => TafseerCubit(TafseerRepositoryImpl()),
+      create: (_) => getIt<TafseerCubit>(),
       child: Scaffold(
         extendBodyBehindAppBar: true,
         backgroundColor: AppColors.primary1,

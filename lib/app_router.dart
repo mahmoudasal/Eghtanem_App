@@ -1,6 +1,4 @@
 import 'package:eghtanem_app/core/constants/routes.dart';
-import 'package:eghtanem_app/features/auth/presentation/cubit/login_cuibit.dart';
-import 'package:eghtanem_app/features/auth/presentation/screens/login_page.dart';
 import 'package:eghtanem_app/features/home/presentation/navigation_cubit/navigation_cubit.dart';
 import 'package:eghtanem_app/features/home/presentation/screens/navigation_page.dart';
 import 'package:eghtanem_app/features/video/presentation/cubit/video_cubit.dart';
@@ -13,18 +11,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 Route<dynamic>? onGenerateRoute(RouteSettings settings) {
   switch (settings.name) {
-    case Routes.pageOne:
+    case Routes.onboardingOne:
       return createRoute(const FirstPage());
-    case Routes.pageTwo:
+    case Routes.onboardingTwo:
       return createRoute(const SecondPage());
-    case Routes.pageThree:
-      return createRoute(
-        BlocProvider(
-          create: (context) => getIt<LoginCubit>(),
-          child: const LoginPage(),
-        ),
-      );
-    case Routes.pageFour:
+    case Routes.home:
       return createRoute(
         MultiBlocProvider(
           providers: [

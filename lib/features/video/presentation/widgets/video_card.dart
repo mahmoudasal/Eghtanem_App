@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:eghtanem_app/features/home/data/models/comment_model.dart';
@@ -11,9 +12,9 @@ import 'package:video_player/video_player.dart';
 
 import 'package:visibility_detector/visibility_detector.dart';
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../../home/presentation/widgets/comment_bottom_sheet.dart';
+import 'package:eghtanem_app/core/theme/app_colors.dart';
+import 'package:eghtanem_app/core/theme/app_text_styles.dart';
+import 'package:eghtanem_app/features/home/presentation/widgets/comment_bottom_sheet.dart';
 
 class VideoPlayerCard extends StatefulWidget {
   final Video video;
@@ -31,6 +32,7 @@ class _VideoPlayerCardState extends State<VideoPlayerCard> {
   bool _isSpeedUp = false;
   bool _hasError = false;
   bool _isLiked = false;
+  bool _cancelled = false;
 
   // Matches youtube.com/watch, youtu.be, youtube.com/shorts
   static final _ytRegex = RegExp(
@@ -55,6 +57,7 @@ class _VideoPlayerCardState extends State<VideoPlayerCard> {
         final yt = YoutubeExplode();
         try {
           final manifest = await yt.videos.streamsClient.getManifest(videoId);
+          if (_cancelled) return;
           // Prefer muxed (video+audio), fall back to highest-quality video-only
           final muxed = manifest.muxed;
           if (muxed.isNotEmpty) {
@@ -66,6 +69,8 @@ class _VideoPlayerCardState extends State<VideoPlayerCard> {
           yt.close();
         }
       }
+
+      if (_cancelled) return;
 
       if (streamUrl.startsWith('assets/')) {
         _videoController = VideoPlayerController.asset(streamUrl);
@@ -83,23 +88,25 @@ class _VideoPlayerCardState extends State<VideoPlayerCard> {
         },
       );
 
-      if (mounted) {
-        setState(() => _isInitialized = true);
-        _videoController
-          ?..play()
-          ..setLooping(true);
+      if (_cancelled || !mounted) {
+        unawaited(_videoController?.dispose());
+        _videoController = null;
+        return;
       }
+
+      setState(() => _isInitialized = true);
+      unawaited(_videoController?.play());
+      unawaited(_videoController?.setLooping(true));
     } catch (_) {
-      if (mounted) setState(() => _hasError = true);
+      if (mounted && !_cancelled) setState(() => _hasError = true);
     }
   }
 
   @override
   void dispose() {
-    if (_isInitialized) {
-      _videoController?.pause();
-      _videoController?.dispose();
-    }
+    _cancelled = true;
+    _videoController?.pause();
+    _videoController?.dispose();
     super.dispose();
   }
 
@@ -194,7 +201,7 @@ class _VideoPlayerCardState extends State<VideoPlayerCard> {
                     child: SizedBox(
                       width: 44.w,
                       height: 44.w,
-                      child: CircularProgressIndicator(
+                      child: const CircularProgressIndicator(
                         color: AppColors.primary0,
                         strokeWidth: 2.5,
                         backgroundColor: Colors.white12,

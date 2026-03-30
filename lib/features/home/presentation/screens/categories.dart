@@ -2,16 +2,16 @@ import 'package:eghtanem_app/core/theme/app_text_styles.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../widgets/categories_card.dart';
+import 'package:eghtanem_app/core/theme/app_colors.dart';
+import 'package:eghtanem_app/features/home/presentation/widgets/categories_card.dart';
 
-import '../../../dhikr/presentation/screens/duah_zikr_page.dart';
-import '../../../categories/prophets_stories.dart';
+import 'package:eghtanem_app/features/dhikr/presentation/screens/duah_zikr_page.dart';
+import 'package:eghtanem_app/features/categories/prophets_stories.dart';
 
-import '../../../tafseer/data/tafseer.dart';
-import '../../../hadith/presentation/screens/hadith.dart';
-import '../../../categories/prophetic_biography.dart';
-import '../../../quran/presentation/screens/quran.dart';
+import 'package:eghtanem_app/features/tafseer/presentation/screens/tafseer_screen.dart';
+import 'package:eghtanem_app/features/hadith/presentation/screens/hadith.dart';
+import 'package:eghtanem_app/features/categories/prophetic_biography.dart';
+import 'package:eghtanem_app/features/quran/presentation/screens/quran.dart';
 
 class CategoriesPage extends StatelessWidget {
   const CategoriesPage({super.key});
@@ -58,7 +58,7 @@ class CategoriesPage extends StatelessWidget {
           CustomCard(
             imagePath: 'assets/cards_photos/عقيده.webp',
             cardName: 'التفسير',
-            pageBuilder: () => const Tafseer(),
+            pageBuilder: () => const TafseerScreen(),
           ),
           CustomCard(
             imagePath: 'assets/cards_photos/الأخلاق الإسلامية.webp',

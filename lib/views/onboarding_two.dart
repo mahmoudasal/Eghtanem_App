@@ -1,13 +1,9 @@
-import 'package:eghtanem_app/features/auth/presentation/cubit/login_cuibit.dart';
-import 'package:eghtanem_app/features/auth/presentation/screens/login_page.dart';
-import 'package:eghtanem_app/injection.dart';
-import 'package:eghtanem_app/widgets/custom_page_transition.dart';
+import 'package:eghtanem_app/core/constants/routes.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../core/theme/app_colors.dart';
-import '../core/theme/app_text_styles.dart';
+import 'package:eghtanem_app/core/theme/app_colors.dart';
+import 'package:eghtanem_app/core/theme/app_text_styles.dart';
 
 class SecondPage extends StatelessWidget {
   const SecondPage({super.key});
@@ -63,15 +59,7 @@ class SecondPage extends StatelessWidget {
                     height: 50.h,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          createRoute(
-                            BlocProvider(
-                              create: (context) => getIt<LoginCubit>(),
-                              child: const LoginPage(),
-                            ),
-                          ),
-                        );
+                        Navigator.pushNamed(context, Routes.home);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary0,

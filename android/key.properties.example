@@ -1,0 +1,7 @@
+# Release keystore configuration.
+# This file must NEVER be committed to version control.
+# Copy this template to `key.properties` and fill in the real values.
+storePassword=
+keyPassword=
+keyAlias=upload
+storeFile=../keystore/release.jks

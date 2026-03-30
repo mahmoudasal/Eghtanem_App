@@ -6,14 +6,26 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'core/constants/routes.dart';
-import 'core/utilities/logger.dart';
-import 'injection.dart';
+import 'package:eghtanem_app/core/config/app_config.dart';
+import 'package:eghtanem_app/core/constants/routes.dart';
+import 'package:eghtanem_app/core/utilities/logger.dart';
+import 'package:eghtanem_app/injection.dart';
 
-Future<void> main() async {
+void main() {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+
+      // Global Flutter-framework error handler — inside the guarded zone.
+      FlutterError.onError = (FlutterErrorDetails details) {
+        FlutterError.dumpErrorToConsole(details);
+        AppLogger.e(
+            'Flutter framework error', details.exception, details.stack);
+      };
+
+      // Resolve environment from compile-time --dart-define=ENV=<value>.
+      AppConfig.init();
+
       await setupDependencies();
 
       SystemChrome.setSystemUIOverlayStyle(
@@ -23,7 +35,7 @@ Future<void> main() async {
         ),
       );
 
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
       runApp(const MyApp());
     },
@@ -31,10 +43,6 @@ Future<void> main() async {
       AppLogger.e('Uncaught error', error, stackTrace);
     },
   );
-
-  FlutterError.onError = (FlutterErrorDetails details) {
-    FlutterError.dumpErrorToConsole(details);
-  };
 }
 
 class MyApp extends StatelessWidget {
@@ -47,10 +55,10 @@ class MyApp extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
-        return MaterialApp(
+        return const MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Eghtanem',
-          initialRoute: Routes.pageOne,
+          initialRoute: Routes.onboardingOne,
           onGenerateRoute: onGenerateRoute,
         );
       },

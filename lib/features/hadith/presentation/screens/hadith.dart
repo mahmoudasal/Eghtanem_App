@@ -1,5 +1,6 @@
 // Hadith.dart
 import 'package:eghtanem_app/widgets/back_button.dart';
+import 'package:eghtanem_app/injection.dart';
 import 'package:eghtanem_app/features/hadith/presentation/cubit/hadith_cubit.dart';
 import 'package:eghtanem_app/features/hadith/presentation/cubit/hadith_state.dart';
 import 'package:flutter/material.dart';
@@ -7,9 +8,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import 'liked_hadith.dart';
+import 'package:eghtanem_app/core/theme/app_colors.dart';
+import 'package:eghtanem_app/core/theme/app_text_styles.dart';
+import 'package:eghtanem_app/features/hadith/presentation/screens/liked_hadith.dart';
 
 class Hadith extends StatelessWidget {
   const Hadith({super.key});
@@ -17,7 +18,7 @@ class Hadith extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => HadithCubit(),
+      create: (context) => getIt<HadithCubit>(),
       child: const _HadithView(),
     );
   }
@@ -34,10 +35,10 @@ class _HadithView extends StatelessWidget {
         context,
         MaterialPageRoute(
           builder: (context) => BlocProvider.value(
-            value: cubit, // ✅ Provide the existing HadithCubit
+            value: cubit,
             child: LikedHadiths(
               likedHadiths: state.likedHadiths,
-              allHadiths: cubit.loadAllHadiths(), // ✅ Correctly fetch hadiths
+              allHadiths: cubit.allHadiths,
             ),
           ),
         ),
@@ -65,7 +66,7 @@ class _HadithView extends StatelessWidget {
             icon: const Icon(Icons.favorite, color: Colors.red),
             onPressed: () => _navigateToLikedHadiths(context),
           ),
-          Row(children: [const CustomBackButton()]),
+          const Row(children: [CustomBackButton()]),
         ],
       ),
       body: BlocBuilder<HadithCubit, HadithState>(
@@ -110,51 +111,68 @@ class _HadithView extends StatelessWidget {
   }
 
   Widget _buildHadithList(BuildContext context, HadithLoaded state) {
-    return ListView.builder(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 130.h),
-      itemCount: state.hadiths.length,
-      itemBuilder: (context, index) {
-        final hadith = state.hadiths[index];
-        final isLiked = state.likedHadiths.contains(hadith.number);
-        return Card(
-          color: const Color(0XFF171715),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          margin: EdgeInsets.symmetric(vertical: 8.h),
-          child: Padding(
-            padding: EdgeInsets.all(16.h),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        isLiked ? Icons.favorite : Icons.favorite_border,
-                        color: isLiked ? Colors.red : Colors.grey,
-                      ),
-                      onPressed: () =>
-                          context.read<HadithCubit>().toggleLike(hadith.number),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10.h),
-                Text(
-                    textDirection: TextDirection.rtl,
-                    hadith.hadith,
-                    style: AppTextStyles.headingsH4HigherHeight),
-                SizedBox(height: 10.h),
-                Text(
-                    textDirection: TextDirection.rtl,
-                    hadith.description,
-                    style: AppTextStyles.headingsH5HigherHeight),
-              ],
-            ),
-          ),
-        );
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification is ScrollEndNotification &&
+            notification.metrics.extentAfter < 300 &&
+            state.hasMore) {
+          context.read<HadithCubit>().loadMore();
+        }
+        return false;
       },
+      child: ListView.builder(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 130.h),
+        itemCount: state.hadiths.length + (state.hasMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index >= state.hadiths.length) {
+            return const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          final hadith = state.hadiths[index];
+          final isLiked = state.likedHadiths.contains(hadith.number);
+          return Card(
+            color: const Color(0XFF171715),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            margin: EdgeInsets.symmetric(vertical: 8.h),
+            child: Padding(
+              padding: EdgeInsets.all(16.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          isLiked ? Icons.favorite : Icons.favorite_border,
+                          color: isLiked ? Colors.red : Colors.grey,
+                        ),
+                        onPressed: () => context
+                            .read<HadithCubit>()
+                            .toggleLike(hadith.number),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10.h),
+                  Text(
+                      textDirection: TextDirection.rtl,
+                      hadith.hadith,
+                      style: AppTextStyles.headingsH4HigherHeight),
+                  SizedBox(height: 10.h),
+                  Text(
+                      textDirection: TextDirection.rtl,
+                      hadith.description,
+                      style: AppTextStyles.headingsH5HigherHeight),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

@@ -3,8 +3,8 @@ import 'package:eghtanem_app/widgets/back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_text_styles.dart';
+import 'package:eghtanem_app/core/theme/app_colors.dart';
+import 'package:eghtanem_app/core/theme/app_text_styles.dart';
 
 class ProphetsStories extends StatefulWidget {
   const ProphetsStories({super.key});
@@ -218,10 +218,65 @@ class ProphetsStoriesState extends State<ProphetsStories> {
         title: Text('قصص الأنبياء', style: AppTextStyles.headingsH1),
         leading: const SizedBox(width: 0.0),
         actions: [
-          Row(
-            children: [const CustomBackButton()],
+          const Row(
+            children: [CustomBackButton()],
           ),
         ],
+      ),
+      body: Directionality(
+        textDirection: TextDirection.rtl,
+        child: ListView.separated(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+          itemCount: videos.length,
+          separatorBuilder: (_, __) => Divider(
+            color: Colors.white12,
+            height: 1.h,
+          ),
+          itemBuilder: (context, index) {
+            final video = videos[index];
+            return ListTile(
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+              leading: CircleAvatar(
+                backgroundColor: AppColors.primary0,
+                radius: 18.r,
+                child: Text(
+                  '${index + 1}',
+                  style: AppTextStyles.headingsH6,
+                ),
+              ),
+              title: Text(
+                video['title']!,
+                style: AppTextStyles.headingsH6,
+              ),
+              trailing:
+                  const Icon(Icons.play_circle_outline, color: Colors.white54),
+              onTap: () => _launchVideo(video['url']!),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  void _launchVideo(String url) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            iconTheme: const IconThemeData(color: Colors.white),
+          ),
+          body: Center(
+            child: Text(
+              'افتح الرابط في متصفحك:\n$url',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.headingsH6,
+            ),
+          ),
+        ),
       ),
     );
   }

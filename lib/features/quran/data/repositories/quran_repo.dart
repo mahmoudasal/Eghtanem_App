@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:eghtanem_app/features/quran/data/models/qra2at_model.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 final Map<String, Map<String, String>> desiredReciters = {
   "مشاري العفاسي": {
@@ -66,84 +69,103 @@ final Map<String, Map<String, String>> desiredReciters = {
   },
 };
 
-Future<List<Reciter>> fetchReciters() async {
-  final response =
-      await http.get(Uri.parse('https://mp3quran.net/api/v3/reciters'));
+final _dio = Dio(BaseOptions(
+  connectTimeout: const Duration(seconds: 10),
+  receiveTimeout: const Duration(seconds: 10),
+));
 
-  if (response.statusCode == 200) {
-    final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+const _cacheKey = 'cached_reciters';
+
+Future<List<Reciter>> fetchReciters() async {
+  final prefs = await SharedPreferences.getInstance();
+  try {
+    final response = await _dio.get('https://mp3quran.net/api/v3/reciters');
+
+    final jsonResponse = response.data as Map<String, dynamic>;
     final recitersJson = jsonResponse['reciters'] as List<dynamic>;
 
-    final List<Reciter> reciters = recitersJson
-        .map((reciterJson) => Reciter.fromJson(reciterJson))
-        .toList();
+    // Cache raw JSON for offline use (fire-and-forget)
+    unawaited(prefs.setString(_cacheKey, json.encode(recitersJson)));
 
-    // Filter reciters based on the desiredReciters map
-    final filteredReciters = reciters.where((reciter) {
-      // Check if this reciter is in the desiredReciters map
-      final desiredReciter = desiredReciters[reciter.name];
-
-      if (desiredReciter != null) {
-        // Find the desired moshaf within the reciter's moshaf list
-        final desiredMoshafList = reciter.moshaf
-            .where((moshaf) => moshaf.name == desiredReciter['moshaf'])
-            .toList();
-
-        if (desiredMoshafList.isNotEmpty) {
-          final desiredMoshaf = desiredMoshafList.first;
-          // Replace the reciter's moshaf list with only the desired moshaf
-          reciter.moshaf.clear();
-          reciter.moshaf.add(desiredMoshaf);
-          return true;
-        }
+    return _filterReciters(recitersJson);
+  } on DioException catch (e) {
+    // If network fails, try returning cached data
+    if (e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      final cached = prefs.getString(_cacheKey);
+      if (cached != null) {
+        final recitersJson = json.decode(cached) as List<dynamic>;
+        return _filterReciters(recitersJson);
       }
-      return false;
-    }).toList();
-
-    return filteredReciters;
-  } else {
-    throw Exception('Failed to load reciters');
+    }
+    rethrow;
   }
+}
+
+List<Reciter> _filterReciters(List<dynamic> recitersJson) {
+  final List<Reciter> reciters =
+      recitersJson.map((reciterJson) => Reciter.fromJson(reciterJson)).toList();
+
+  final filteredReciters = reciters.where((reciter) {
+    final desiredReciter = desiredReciters[reciter.name];
+
+    if (desiredReciter != null) {
+      final desiredMoshafList = reciter.moshaf
+          .where((moshaf) => moshaf.name == desiredReciter['moshaf'])
+          .toList();
+
+      if (desiredMoshafList.isNotEmpty) {
+        final desiredMoshaf = desiredMoshafList.first;
+        reciter.moshaf.clear();
+        reciter.moshaf.add(desiredMoshaf);
+        return true;
+      }
+    }
+    return false;
+  }).toList();
+
+  return filteredReciters;
 }
 
 Future<List<String>> fetchReciterSurahs(int reciterId) async {
   try {
-    final response = await http.get(
-      Uri.parse(
-          'https://mp3quran.net/api/v3/reciters?language=eng&rewaya=1&reciter=$reciterId'),
+    final response = await _dio.get(
+      'https://mp3quran.net/api/v3/reciters',
+      queryParameters: {
+        'language': 'eng',
+        'rewaya': '1',
+        'reciter': reciterId,
+      },
     );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+    final data = response.data;
 
-      if (data['reciters'] == null || data['reciters'].isEmpty) {
-        throw StateError("No reciters found in the API response");
-      }
-
-      final reciterData = data['reciters'].firstWhere(
-        (reciter) => reciter['id'] == reciterId,
-        orElse: () {
-          throw StateError("No reciter found with id $reciterId");
-        },
-      );
-
-      if (reciterData['moshaf'] == null || reciterData['moshaf'].isEmpty) {
-        throw StateError("No moshaf found for the reciter with id $reciterId");
-      }
-
-      final List<String> surahList =
-          (reciterData['moshaf'][0]['surah_list'] as String)
-              .split(',')
-              .map((e) => 'Surah $e')
-              .toList();
-
-      return surahList;
-    } else {
-      throw Exception('Failed to load surahs: ${response.reasonPhrase}');
+    if (data['reciters'] == null || data['reciters'].isEmpty) {
+      throw StateError("No reciters found in the API response");
     }
+
+    final reciterData = data['reciters'].firstWhere(
+      (reciter) => reciter['id'] == reciterId,
+      orElse: () {
+        throw StateError("No reciter found with id $reciterId");
+      },
+    );
+
+    if (reciterData['moshaf'] == null || reciterData['moshaf'].isEmpty) {
+      throw StateError("No moshaf found for the reciter with id $reciterId");
+    }
+
+    final List<String> surahList =
+        (reciterData['moshaf'][0]['surah_list'] as String)
+            .split(',')
+            .map((e) => 'Surah $e')
+            .toList();
+
+    return surahList;
   } catch (e) {
     if (kDebugMode) {
-      print("Error fetching reciter surahs: $e");
+      debugPrint("Error fetching reciter surahs: $e");
     }
     rethrow;
   }

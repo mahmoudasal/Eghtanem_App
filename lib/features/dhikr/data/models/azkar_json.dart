@@ -1,9 +1,5 @@
 // models/adhkar_model.dart
 
-import 'dart:convert';
-
-import 'package:flutter/services.dart';
-
 class Dhikr {
   final int id;
   final String text;
@@ -52,14 +48,5 @@ class Category {
       filename: json['filename'],
       array: arrayList,
     );
-  }
-}
-
-class AdhkarService {
-  Future<List<Category>> loadAdhkar() async {
-    final String response =
-        await rootBundle.loadString('assets/quran_metadata/adhkar.json');
-    final List<dynamic> data = json.decode(response);
-    return data.map((json) => Category.fromJson(json)).toList();
   }
 }

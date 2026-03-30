@@ -1,5 +1,6 @@
 // dhikr_cubit.dart
 import 'package:eghtanem_app/features/dhikr/data/models/azkar_json.dart';
+import 'package:eghtanem_app/features/dhikr/data/services/adhkar_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class DhikrState {}

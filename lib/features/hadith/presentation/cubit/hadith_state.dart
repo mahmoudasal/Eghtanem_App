@@ -9,7 +9,8 @@ class HadithLoading extends HadithState {}
 class HadithLoaded extends HadithState {
   final List<Hadith> hadiths;
   final Set<int> likedHadiths;
-  HadithLoaded(this.hadiths, this.likedHadiths);
+  final bool hasMore;
+  HadithLoaded(this.hadiths, this.likedHadiths, {this.hasMore = false});
 }
 
 class HadithError extends HadithState {

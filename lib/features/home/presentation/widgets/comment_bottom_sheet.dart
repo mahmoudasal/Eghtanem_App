@@ -2,8 +2,8 @@ import 'package:eghtanem_app/features/home/data/models/comment_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
+import 'package:eghtanem_app/core/theme/app_colors.dart';
+import 'package:eghtanem_app/core/theme/app_text_styles.dart';
 
 class CommentBottomSheet extends StatefulWidget {
   final String videoId;
@@ -44,8 +44,10 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
     super.dispose();
   }
 
+  static final _htmlTagRegex = RegExp(r'<[^>]*>');
+
   void _sendComment() {
-    final text = _controller.text.trim();
+    final text = _controller.text.trim().replaceAll(_htmlTagRegex, '');
     if (text.isEmpty) return;
     setState(() {
       _comments.add(Comment(
